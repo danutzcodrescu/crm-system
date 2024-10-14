@@ -8,7 +8,9 @@
     "dev": "remix vite:dev",
     "lint": "eslint --ignore-path .gitignore --cache --cache-location ./node_modules/.cache/eslint .",
     "start": "remix-serve ./build/server/index.js",
-    "typecheck": "tsc"
+    "typecheck": "tsc",
+    "db:push": "drizzle-kit push --config=drizzle-dev.config.ts ",
+    "db:seed": "npx @snaplet/seed sync && npx tsx seed.ts"
   },
   "dependencies": {
     "@clerk/backend": "^1.13.9",
@@ -35,6 +37,8 @@
     "@playwright/test": "^1.48.0",
     "@remix-run/dev": "^2.12.1",
     "@remix-run/testing": "^2.13.1",
+    "@snaplet/copycat": "^5.1.0",
+    "@snaplet/seed": "0.98.0",
     "@types/node": "^22.7.5",
     "@types/pg": "^8.11.10",
     "@types/react": "^18.2.20",
