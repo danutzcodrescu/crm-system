@@ -1,24 +1,23 @@
 import { relations } from 'drizzle-orm';
 import { pgTable, real, smallint, text, timestamp, uuid } from 'drizzle-orm/pg-core';
 
-export const status = pgTable('users', {
+export const status = pgTable('statuses', {
   id: uuid('id').primaryKey(),
-  name: text('name').notNull(),
+  name: text('name').notNull().unique(),
   createdAt: timestamp('created_at').notNull().defaultNow(),
   updatedAt: timestamp('updated_at', { mode: 'date', precision: 3 }).$onUpdate(() => new Date()),
 });
 
 export const years = pgTable('years', {
-  id: uuid('id').primaryKey(),
   inflationRate: real('inflation_rate').notNull(),
-  name: smallint('name').notNull(),
+  name: smallint('name').notNull().unique().primaryKey(),
   createdAt: timestamp('created_at').notNull().defaultNow(),
   updatedAt: timestamp('updated_at', { mode: 'date', precision: 3 }).$onUpdate(() => new Date()),
 });
 
 export const companies = pgTable('companies', {
   id: uuid('id').primaryKey(),
-  name: text('name').notNull(),
+  name: text('name').notNull().unique(),
   statusId: uuid('status_id').references(() => status.id),
 });
 
@@ -49,5 +48,7 @@ export const notesLog = pgTable('notes_log', {
   description: text('description').notNull(),
   createdAt: timestamp('created_at').notNull().defaultNow(),
   updatedAt: timestamp('updated_at', { mode: 'date', precision: 3 }).$onUpdate(() => new Date()),
-  employeeId: uuid('employee_id').references(() => employees.id, {onDelete: 'cascade'}).notNull(),
+  employeeId: uuid('employee_id')
+    .references(() => employees.id, { onDelete: 'cascade' })
+    .notNull(),
 });
