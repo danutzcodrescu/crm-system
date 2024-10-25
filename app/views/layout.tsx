@@ -1,6 +1,6 @@
 import { Box, Drawer, List, ListItem, ListItemButton, ListItemText, Stack, Toolbar } from '@mui/material';
-import { ActionFunctionArgs, LoaderFunctionArgs, redirect, json } from '@remix-run/node';
-
+import { ActionFunctionArgs, json, LoaderFunctionArgs, redirect } from '@remix-run/node';
+import { Link, Outlet } from '@remix-run/react';
 import { ClientOnly } from 'remix-utils/client-only';
 
 import { Topbar } from '~/components/Topbar.client';
@@ -21,33 +21,34 @@ export async function action({ request }: ActionFunctionArgs) {
 
 export default function AppLayout() {
   return (
-    <Stack direction="row" gap={2}>
+    <>
       <ClientOnly>{() => <Topbar />}</ClientOnly>
-      <Drawer
-        variant="permanent"
-        sx={{
-          width: '15rem',
-          flexShrink: 0,
-        }}
-      >
-        <Toolbar />
-        <Box sx={{ overflow: 'auto' }}>
-          <List>
-            {['Companies', 'Contacts', 'Statuses', 'Years'].map((text) => (
-              <ListItem key={text} disablePadding>
-                <ListItemButton>
-                  {/* <ListItemIcon>{index % 2 === 0 ? <InboxIcon /> : <MailIcon />}</ListItemIcon> */}
-                  <ListItemText primary={text} />
-                </ListItemButton>
-              </ListItem>
-            ))}
-          </List>
+      <Stack direction="row" gap={2}>
+        <Drawer
+          variant="permanent"
+          sx={{
+            width: '15rem',
+            flexShrink: 0,
+          }}
+        >
+          <Toolbar />
+          <Box sx={{ overflow: 'auto' }}>
+            <List>
+              {['Companies', 'Contacts', 'Statuses', 'Years'].map((text) => (
+                <ListItem key={text} disablePadding>
+                  <ListItemButton component={Link} to={`/${text.toLocaleLowerCase()}`}>
+                    {/* <ListItemIcon>{index % 2 === 0 ? <InboxIcon /> : <MailIcon />}</ListItemIcon> */}
+                    <ListItemText primary={text} />
+                  </ListItemButton>
+                </ListItem>
+              ))}
+            </List>
+          </Box>
+        </Drawer>
+        <Box sx={{ flex: 1, mt: '64px' }}>
+          <Outlet />
         </Box>
-      </Drawer>
-      <Box sx={{ flex: 1 }}>
-        {/* <Outlet /> */}
-        test
-      </Box>
-    </Stack>
+      </Stack>
+    </>
   );
 }
