@@ -15,7 +15,7 @@
           "isList": false,
           "isGenerated": false,
           "sequence": false,
-          "hasDefaultValue": false,
+          "hasDefaultValue": true,
           "isId": true,
           "maxLength": null
         },
@@ -112,7 +112,7 @@
           "isList": false,
           "isGenerated": false,
           "sequence": false,
-          "hasDefaultValue": false,
+          "hasDefaultValue": true,
           "isId": true,
           "maxLength": null
         },
@@ -258,7 +258,7 @@
           "isList": false,
           "isGenerated": false,
           "sequence": false,
-          "hasDefaultValue": false,
+          "hasDefaultValue": true,
           "isId": true,
           "maxLength": null
         },
@@ -376,7 +376,7 @@
           "isList": false,
           "isGenerated": false,
           "sequence": false,
-          "hasDefaultValue": false,
+          "hasDefaultValue": true,
           "isId": true,
           "maxLength": null
         },
@@ -446,7 +446,7 @@
           "nullNotDistinct": false
         },
         {
-          "name": "users_pkey",
+          "name": "statuses_pkey",
           "fields": [
             "id"
           ],
