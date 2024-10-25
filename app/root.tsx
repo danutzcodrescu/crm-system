@@ -4,19 +4,11 @@ import '@fontsource/roboto/500.css';
 import '@fontsource/roboto/700.css';
 
 import { CssBaseline, ThemeProvider } from '@mui/material';
-import { json, Links, Meta, Outlet, Scripts, ScrollRestoration, useLoaderData } from '@remix-run/react';
-import { HoneypotProvider } from 'remix-utils/honeypot/react';
+import { Links, Meta, Outlet, Scripts, ScrollRestoration } from '@remix-run/react';
 
 import { theme } from './utils/client/theme';
-import { honeypot } from './utils/server/honeypot.server';
-
-export const loader = () => {
-  return json({ honeypotInputProps: honeypot.getInputProps() });
-};
 
 export function Layout({ children }: { children: React.ReactNode }) {
-  const { honeypotInputProps } = useLoaderData<typeof loader>();
-
   return (
     <html lang="en">
       <head>
@@ -27,9 +19,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
       </head>
       <body>
         <CssBaseline />
-        <ThemeProvider theme={theme}>
-          <HoneypotProvider {...honeypotInputProps}>{children}</HoneypotProvider>
-        </ThemeProvider>
+        <ThemeProvider theme={theme}>{children}</ThemeProvider>
 
         <ScrollRestoration />
         <Scripts />

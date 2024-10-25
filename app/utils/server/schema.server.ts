@@ -1,8 +1,8 @@
-import { relations } from 'drizzle-orm';
+import { InferInsertModel, InferSelectModel, relations } from 'drizzle-orm';
 import { pgTable, real, smallint, text, timestamp, uuid } from 'drizzle-orm/pg-core';
 
 export const status = pgTable('statuses', {
-  id: uuid('id').primaryKey(),
+  id: uuid('id').primaryKey().defaultRandom(),
   name: text('name').notNull().unique(),
   createdAt: timestamp('created_at').notNull().defaultNow(),
   updatedAt: timestamp('updated_at', { mode: 'date', precision: 3 }).$onUpdate(() => new Date()),
@@ -16,9 +16,9 @@ export const years = pgTable('years', {
 });
 
 export const companies = pgTable('companies', {
-  id: uuid('id').primaryKey(),
+  id: uuid('id').primaryKey().defaultRandom(),
   name: text('name').notNull().unique(),
-  statusId: uuid('status_id').references(() => status.id),
+  statusId: uuid('status_id').references(() => status.id, { onDelete: 'set null', onUpdate: 'no action' }),
 });
 
 export const companiesRelations = relations(companies, ({ one, many }) => ({
@@ -27,7 +27,7 @@ export const companiesRelations = relations(companies, ({ one, many }) => ({
 }));
 
 export const employees = pgTable('employees', {
-  id: uuid('id').primaryKey(),
+  id: uuid('id').primaryKey().defaultRandom(),
   name: text('name').notNull(),
   createdAt: timestamp('created_at').notNull().defaultNow(),
   phoneNumber: text('phone_number'),
@@ -43,7 +43,7 @@ export const employeesRelations = relations(employees, ({ many }) => ({
 }));
 
 export const notesLog = pgTable('notes_log', {
-  id: uuid('id').primaryKey(),
+  id: uuid('id').primaryKey().defaultRandom(),
   date: timestamp('date').notNull(),
   description: text('description').notNull(),
   createdAt: timestamp('created_at').notNull().defaultNow(),
@@ -52,3 +52,6 @@ export const notesLog = pgTable('notes_log', {
     .references(() => employees.id, { onDelete: 'cascade' })
     .notNull(),
 });
+
+export type SelectStatus = InferSelectModel<typeof status>;
+export type InsertStatus = InferInsertModel<typeof status>;

@@ -16,7 +16,14 @@ export default defineConfig({
       routes(defineRoutes) {
         return defineRoutes((route) => {
           route('/signin', 'views/login/route.tsx');
-          route('/', 'views/layout.tsx', { index: true });
+          route('/', 'views/layout.tsx', () => {
+            route('', 'views/dashboard/route.tsx', { index: true });
+            route('/statuses', 'views/statuses/route.tsx');
+            route('/years', 'views/years/route.tsx');
+            route('/contacts', 'views/employees/route.tsx', () => {
+              route(':contactId', 'views/employees/contact.tsx');
+            });
+          });
         });
       },
     }),
