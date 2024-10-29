@@ -49,7 +49,7 @@ export function YearItem({ name, inflationRate, deleteYear }: Props) {
           <ClientOnly>
             {() => (
               <StatusButtons
-                name={name.toString()}
+                name={`year ${name.toString()}`}
                 onDelete={() => deleteYear(name)}
                 onEditButtonClick={() => setEditingState(true)}
               />

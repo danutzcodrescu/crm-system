@@ -1,7 +1,7 @@
 import { LoadingButton } from '@mui/lab';
 import { Button, Dialog, DialogActions, DialogContent, DialogTitle, Stack, TextField } from '@mui/material';
 import { Form, useNavigation } from '@remix-run/react';
-import { ReactNode, useEffect, useState } from 'react';
+import { Fragment, ReactNode, useEffect, useState } from 'react';
 
 import { Field } from '../EditForm';
 
@@ -33,19 +33,25 @@ export function AddItem({ title, fields, renderAddButton }: Props) {
           <DialogTitle>{title}</DialogTitle>
           <DialogContent>
             <Stack gap={1}>
-              {fields.map((field) => (
-                <TextField
-                  key={field.name}
-                  fullWidth
-                  label={field.label}
-                  name={field.name}
-                  placeholder={field.placeholder}
-                  type={field.type}
-                  required={field.required}
-                  size="small"
-                  slotProps={{ htmlInput: field.inputProps }}
-                ></TextField>
-              ))}
+              {fields.map((field) =>
+                field.render ? (
+                  <Fragment key={field.name}>{field.render()}</Fragment>
+                ) : (
+                  <TextField
+                    size="small"
+                    fullWidth
+                    sx={{ flex: 1, display: field.hidden ? 'none' : 'block' }}
+                    key={field.name}
+                    name={field.name}
+                    type={field.type}
+                    hidden={field.hidden}
+                    label={field.label}
+                    required={field.required}
+                    placeholder={field.placeholder}
+                    slotProps={{ htmlInput: field.inputProps }}
+                  />
+                ),
+              )}
             </Stack>
           </DialogContent>
           <DialogActions>

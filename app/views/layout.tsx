@@ -1,6 +1,6 @@
 import { Box, Drawer, List, ListItem, ListItemButton, ListItemText, Stack, Toolbar } from '@mui/material';
-import { ActionFunctionArgs, json, LoaderFunctionArgs, redirect } from '@remix-run/node';
-import { Link, Outlet } from '@remix-run/react';
+import { ActionFunctionArgs, json, LoaderFunctionArgs, MetaFunction, redirect } from '@remix-run/node';
+import { Link, Outlet, useLocation } from '@remix-run/react';
 import { ClientOnly } from 'remix-utils/client-only';
 
 import { Topbar } from '~/components/Topbar.client';
@@ -19,7 +19,12 @@ export async function action({ request }: ActionFunctionArgs) {
   return redirect('/signin');
 }
 
+export const meta: MetaFunction = () => {
+  return [{ title: 'CRM System - Years' }];
+};
+
 export default function AppLayout() {
+  const location = useLocation();
   return (
     <>
       <ClientOnly>{() => <Topbar />}</ClientOnly>
@@ -35,10 +40,10 @@ export default function AppLayout() {
           <Box sx={{ overflow: 'auto' }}>
             <List>
               {['Companies', 'Contacts', 'Statuses', 'Years'].map((text) => (
-                <ListItem key={text} disablePadding>
-                  <ListItemButton component={Link} to={`/${text.toLocaleLowerCase()}`}>
+                <ListItem key={text} disablePadding component={Link} to={`/${text.toLowerCase()}`} rel="prefetch">
+                  <ListItemButton selected={location.pathname.startsWith(`/${text.toLowerCase()}`)}>
                     {/* <ListItemIcon>{index % 2 === 0 ? <InboxIcon /> : <MailIcon />}</ListItemIcon> */}
-                    <ListItemText primary={text} />
+                    <ListItemText primary={text} sx={{ color: (theme) => theme.palette.common.black }} />
                   </ListItemButton>
                 </ListItem>
               ))}

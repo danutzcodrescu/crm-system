@@ -6,6 +6,9 @@ export default defineConfig({
   server: {
     port: 4200,
   },
+  ssr: {
+    noExternal: process.env.NODE_ENV === 'production' ? [/^@mui\//] : ['@mui/icons-material', /^@mui\/x-.{1,}/],
+  },
   plugins: [
     remix({
       future: {
@@ -20,8 +23,14 @@ export default defineConfig({
             route('', 'views/dashboard/route.tsx', { index: true });
             route('/statuses', 'views/statuses/route.tsx');
             route('/years', 'views/years/route.tsx');
-            route('/contacts', 'views/employees/route.tsx', () => {
+            route('/contacts', 'views/employees/layout.tsx', () => {
+              route('', 'views/employees/route.tsx', { index: true });
               route(':contactId', 'views/employees/contact.tsx');
+            });
+            route('/api/companies', 'api/companies/route.tsx');
+            route('/api/notes-log', 'api/notes-log/layout.tsx', () => {
+              // route('', 'api/notes-log/route.tsx', { index: true });
+              route(':logId', 'api/notes-log/route.tsx');
             });
           });
         });
