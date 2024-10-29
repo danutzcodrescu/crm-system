@@ -1,6 +1,6 @@
 import { Box } from '@mui/material';
 import { ActionFunctionArgs, json, LoaderFunctionArgs } from '@remix-run/node';
-import { redirect, useLoaderData, useSubmit } from '@remix-run/react';
+import { redirect, useActionData, useLoaderData, useSubmit } from '@remix-run/react';
 import { useCallback } from 'react';
 import { ClientOnly } from 'remix-utils/client-only';
 
@@ -25,15 +25,15 @@ export async function action({ request }: ActionFunctionArgs) {
     const formData = await request.formData();
     const id = formData.get('name') as string;
     if (!id) {
-      return json({ message: 'Missing parameters', severity: 'error' }, { status: 400 });
+      return json({ message: 'Missing parameters', severity: 'error', timeStamp: Date.now() }, { status: 400 });
     }
 
     const error = await deleteYear(parseFloat(id));
     if (error) {
-      return json({ message: 'Cold not delete the year', severity: 'error' }, { status: 500 });
+      return json({ message: 'Cold not delete the year', severity: 'error', timeStamp: Date.now() }, { status: 500 });
     }
 
-    return json({ message: 'Status deleted successfully.', severity: 'success' });
+    return json({ message: 'Status deleted successfully.', severity: 'success', timeStamp: Date.now() });
   }
 
   if (request.method === 'PATCH') {
@@ -42,14 +42,14 @@ export async function action({ request }: ActionFunctionArgs) {
     const inflationRate = formData.get('inflationRate') as string;
 
     if (!id || !inflationRate) {
-      return json({ message: 'Missing parameters', severity: 'error' }, { status: 400 });
+      return json({ message: 'Missing parameters', severity: 'error', timeStamp: Date.now() }, { status: 400 });
     }
 
     const error = await updateYear(parseInt(id, 10), parseFloat(inflationRate));
     if (error) {
-      return json({ message: 'Could not update the year', severity: 'error' }, { status: 500 });
+      return json({ message: 'Could not update the year', severity: 'error', timeStamp: Date.now() }, { status: 500 });
     }
-    return json({ message: 'Year updated successfully.', severity: 'success' });
+    return json({ message: 'Year updated successfully.', severity: 'success', timeStamp: Date.now() });
   }
 
   if (request.method === 'POST') {
@@ -57,21 +57,22 @@ export async function action({ request }: ActionFunctionArgs) {
     const name = formData.get('name') as string;
     const inflationRate = formData.get('inflationRate') as string;
     if (!name || !inflationRate) {
-      return json({ message: 'Missing parameters', severity: 'error' }, { status: 400 });
+      return json({ message: 'Missing parameters', severity: 'error', timeStamp: Date.now() }, { status: 400 });
     }
 
     const error = await createYear(parseInt(name, 10), parseFloat(inflationRate));
     if (error) {
-      return json({ message: 'Could not create year', severity: 'error' }, { status: 500 });
+      return json({ message: 'Could not create year', severity: 'error', timeStamp: Date.now() }, { status: 500 });
     }
 
-    return json({ message: 'Year created successfully.', severity: 'success' });
+    return json({ message: 'Year created successfully.', severity: 'success', timeStamp: Date.now() });
   }
-  return json({ message: '', severity: 'error' }, { status: 405 });
+  return json({ message: '', severity: 'error', timeStamp: Date.now() }, { status: 405 });
 }
 
 export default function YearsPage() {
   const data = useLoaderData<typeof loader>();
+  const actionData = useActionData<typeof action>();
   const submit = useSubmit();
 
   const deleteYear = useCallback((name: number) => {
@@ -81,7 +82,11 @@ export default function YearsPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
   return (
-    <PageContainer title="Years" additionalTitleElement={<ClientOnly>{() => <AddYear />}</ClientOnly>}>
+    <PageContainer
+      actionData={actionData}
+      title="Years"
+      additionalTitleElement={<ClientOnly>{() => <AddYear />}</ClientOnly>}
+    >
       <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 2 }}>
         {data.years.map((year) => (
           <YearItem key={year.name} name={year.name} inflationRate={year.inflationRate} deleteYear={deleteYear} />

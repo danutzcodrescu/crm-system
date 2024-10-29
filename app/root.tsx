@@ -4,6 +4,8 @@ import '@fontsource/roboto/500.css';
 import '@fontsource/roboto/700.css';
 
 import { CssBaseline, ThemeProvider } from '@mui/material';
+import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
+import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider/LocalizationProvider';
 import { Links, Meta, Outlet, Scripts, ScrollRestoration } from '@remix-run/react';
 
 import { theme } from './utils/client/theme';
@@ -19,8 +21,9 @@ export function Layout({ children }: { children: React.ReactNode }) {
       </head>
       <body>
         <CssBaseline />
-        <ThemeProvider theme={theme}>{children}</ThemeProvider>
-
+        <LocalizationProvider dateAdapter={AdapterDayjs}>
+          <ThemeProvider theme={theme}>{children}</ThemeProvider>
+        </LocalizationProvider>
         <ScrollRestoration />
         <Scripts />
       </body>

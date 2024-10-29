@@ -44,7 +44,7 @@ export function StatusItem({ id, name, deleteStatus }: Props) {
             <>
               <Typography sx={{ fontWeight: 'bold', flex: 1 }}>{name}</Typography>
               <StatusButtons
-                name={name}
+                name={`status ${name}`}
                 onDelete={() => deleteStatus(id)}
                 onEditButtonClick={() => setEditingState(true)}
               />

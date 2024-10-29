@@ -1,6 +1,7 @@
 import { LoadingButton } from '@mui/lab';
 import { Box, Button, Stack, TextField, TextFieldProps } from '@mui/material';
 import { Form, FormProps, useNavigation } from '@remix-run/react';
+import { ReactNode } from 'react';
 
 export interface Field {
   name: string;
@@ -16,6 +17,7 @@ export interface Field {
     max?: string;
     pattern?: string;
   };
+  render?: () => ReactNode;
 }
 
 interface Props extends FormProps {
@@ -28,20 +30,24 @@ export function EditForm({ fields, onCancel, method }: Props) {
 
   return (
     <Stack direction="row" alignItems="center" sx={{ gap: 1, width: '100%' }} component={Form} method={method}>
-      {fields.map((field) => (
-        <TextField
-          size="small"
-          fullWidth
-          sx={{ flex: 1, display: field.hidden ? 'none' : 'block' }}
-          key={field.name}
-          name={field.name}
-          type={field.type}
-          defaultValue={field.defaultValue}
-          hidden={field.hidden}
-          placeholder={field.placeholder}
-          slotProps={{ htmlInput: field.inputProps }}
-        />
-      ))}
+      {fields.map((field) =>
+        field.render ? (
+          field.render()
+        ) : (
+          <TextField
+            size="small"
+            fullWidth
+            sx={{ flex: 1, display: field.hidden ? 'none' : 'block' }}
+            key={field.name}
+            name={field.name}
+            type={field.type}
+            defaultValue={field.defaultValue}
+            hidden={field.hidden}
+            placeholder={field.placeholder}
+            slotProps={{ htmlInput: field.inputProps }}
+          />
+        ),
+      )}
       <Box>
         <Button color="secondary" onClick={onCancel}>
           Close
