@@ -1,11 +1,10 @@
 import { Box } from '@mui/material';
 import { ActionFunctionArgs, json, LoaderFunctionArgs } from '@remix-run/node';
-import { redirect, useActionData, useLoaderData, useSubmit } from '@remix-run/react';
+import { redirect, useFetcher, useLoaderData } from '@remix-run/react';
 import { useCallback } from 'react';
-import { ClientOnly } from 'remix-utils/client-only';
 
 import { PageContainer } from '~/components/shared/PageContainer';
-import { AddYear } from '~/components/year/AddYear.client';
+import { AddYear } from '~/components/year/AddYear';
 import { YearItem } from '~/components/year/YearItem';
 import { auth } from '~/utils/server/auth.server';
 import { createYear, deleteYear, getAllYears, updateYear } from '~/utils/server/repositories/years.server';
@@ -72,21 +71,14 @@ export async function action({ request }: ActionFunctionArgs) {
 
 export default function YearsPage() {
   const data = useLoaderData<typeof loader>();
-  const actionData = useActionData<typeof action>();
-  const submit = useSubmit();
+  const fetcher = useFetcher<typeof action>();
 
   const deleteYear = useCallback((name: number) => {
-    const formData = new FormData();
-    formData.append('name', name.toString());
-    submit(formData, { method: 'DELETE' });
+    fetcher.submit({ name: name.toString() }, { method: 'DELETE', action: '/years', relative: 'path' });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
   return (
-    <PageContainer
-      actionData={actionData}
-      title="Years"
-      additionalTitleElement={<ClientOnly>{() => <AddYear />}</ClientOnly>}
-    >
+    <PageContainer actionData={fetcher.data} title="Years" additionalTitleElement={<AddYear fetcher={fetcher} />}>
       <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 2 }}>
         {data.years.map((year) => (
           <YearItem key={year.name} name={year.name} inflationRate={year.inflationRate} deleteYear={deleteYear} />

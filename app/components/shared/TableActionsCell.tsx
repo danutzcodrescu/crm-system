@@ -1,11 +1,14 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { Close, Edit, Preview, Save } from '@mui/icons-material';
+import Close from '@mui/icons-material/Close';
+import Edit from '@mui/icons-material/Edit';
+import Preview from '@mui/icons-material/Preview';
+import Save from '@mui/icons-material/Save';
 import { IconButton, Stack, Tooltip } from '@mui/material';
 import { Link } from '@remix-run/react';
 import { Row, Table } from '@tanstack/react-table';
 
 import { DeleteButton } from './DeleteButton';
-import { MetaType } from './PaginatedTable.client';
+import { MetaType } from './PaginatedTable';
 
 type Props = (EditableProps | ViewProps) & {
   name: string;

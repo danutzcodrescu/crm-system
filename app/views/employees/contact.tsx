@@ -1,4 +1,5 @@
-import { Edit, Email } from '@mui/icons-material';
+import Edit from '@mui/icons-material/Edit';
+import Email from '@mui/icons-material/Email';
 import { Box, IconButton, Tooltip } from '@mui/material';
 import { ActionFunctionArgs, json, LoaderFunctionArgs, MetaFunction, redirect } from '@remix-run/node';
 import { useFetcher, useLoaderData, useNavigation } from '@remix-run/react';
@@ -9,8 +10,8 @@ import { ClientOnly } from 'remix-utils/client-only';
 import { action as deleteLogAction } from '~/api/notes-log/route';
 import { ContactDetails } from '~/components/contacts/ContactDetailts';
 import { PageContainer } from '~/components/shared/PageContainer';
-import { MetaType, PaginatedTable } from '~/components/shared/PaginatedTable.client';
-import { TableActionsCell } from '~/components/shared/TableActionsCell.client';
+import { MetaType, PaginatedTable } from '~/components/shared/PaginatedTable';
+import { TableActionsCell } from '~/components/shared/TableActionsCell';
 import { auth } from '~/utils/server/auth.server';
 import {
   deleteEmployee,

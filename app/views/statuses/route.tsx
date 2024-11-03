@@ -1,20 +1,19 @@
 import { Box } from '@mui/material';
 import { ActionFunctionArgs, json, LoaderFunctionArgs, redirect } from '@remix-run/node';
-import { MetaFunction, useActionData, useLoaderData, useSubmit } from '@remix-run/react';
+import { MetaFunction, useFetcher, useLoaderData } from '@remix-run/react';
 import { useCallback } from 'react';
-import { ClientOnly } from 'remix-utils/client-only';
 
 import { PageContainer } from '~/components/shared/PageContainer';
-import { AddStatus } from '~/components/status/AddStatus.client';
+import { AddStatus } from '~/components/status/AddStatus';
 import { StatusItem } from '~/components/status/StatusItem';
 import { auth } from '~/utils/server/auth.server';
-import { createStatus, deleteStatus, getAllStatuse, updateStatus } from '~/utils/server/repositories/status.server';
+import { createStatus, deleteStatus, getAllStatuses, updateStatus } from '~/utils/server/repositories/status.server';
 
 export async function loader({ request }: LoaderFunctionArgs) {
   const isLoggedIn = await auth.isLoggedIn(request);
   if (!isLoggedIn) return redirect('/signin');
 
-  const statuses = await getAllStatuse();
+  const statuses = await getAllStatuses();
   return json({ statuses });
 }
 
@@ -86,22 +85,15 @@ export const meta: MetaFunction = () => {
 
 export default function StatusPage() {
   const data = useLoaderData<typeof loader>();
-  const actionData = useActionData<typeof action>();
-  const submit = useSubmit();
+  const fetcher = useFetcher<typeof action>();
 
   const deleteStatus = useCallback((id: string) => {
-    const formData = new FormData();
-    formData.append('id', id);
-    submit(formData, { method: 'DELETE' });
+    fetcher.submit({ id }, { method: 'DELETE', action: '/statuses', relative: 'path' });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return (
-    <PageContainer
-      title="Statuses"
-      additionalTitleElement={<ClientOnly>{() => <AddStatus />}</ClientOnly>}
-      actionData={actionData}
-    >
+    <PageContainer title="Statuses" additionalTitleElement={<AddStatus fetcher={fetcher} />} actionData={fetcher.data}>
       <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: 2 }}>
         {data.statuses.map((status) => (
           <StatusItem id={status.id} name={status.name} key={status.id} deleteStatus={deleteStatus} />

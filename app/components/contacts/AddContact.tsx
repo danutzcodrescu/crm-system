@@ -1,15 +1,20 @@
-import { PersonAddAlt } from '@mui/icons-material';
+import PersonAddAlt from '@mui/icons-material/PersonAddAlt';
 import { Autocomplete, IconButton, TextField } from '@mui/material';
-import { useFetcher } from '@remix-run/react';
+import { FetcherWithComponents, useFetcher } from '@remix-run/react';
 
-import { loader } from '~/api/companies/route';
+import { loader } from '~/api/companies/layout';
 
 import { AddItem } from '../shared/AddItem';
 
-export function AddContact() {
-  const fetcher = useFetcher<typeof loader>();
+interface Props {
+  fetcher: FetcherWithComponents<any>;
+}
+
+export function AddContact({ fetcher }: Props) {
+  const itemsFetcher = useFetcher<typeof loader>();
   return (
     <AddItem
+      fetcher={fetcher}
       title="Add new contact"
       fields={[
         {
@@ -25,8 +30,7 @@ export function AddContact() {
           type: 'text',
           render: () => (
             <Autocomplete
-              // @ts-expect-error let's see
-              options={fetcher.data?.message || []}
+              options={(itemsFetcher.data?.message as { id: string; name: string }[]) || []}
               getOptionLabel={(option) => option.name}
               isOptionEqualToValue={(option, value) => option.id === value.id}
               size="small"
@@ -38,7 +42,7 @@ export function AddContact() {
                       type="hidden"
                       name="companyId"
                       value={
-                        (fetcher?.data?.message as { id: string; name: string }[])?.find(
+                        (itemsFetcher?.data?.message as { id: string; name: string }[])?.find(
                           (company) => company.name === params.inputProps.value,
                         )?.id
                       }
@@ -67,7 +71,7 @@ export function AddContact() {
           aria-label="Create new contact"
           title="Create new contact"
           onClick={() => {
-            fetcher.submit({}, { method: 'GET', action: '/api/companies', relative: 'path' });
+            itemsFetcher.load('/api/companies');
             onClick();
           }}
         >

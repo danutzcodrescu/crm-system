@@ -1,4 +1,5 @@
-import { ArrowDownward, ArrowUpward } from '@mui/icons-material';
+import ArrowDownward from '@mui/icons-material/ArrowDownward';
+import ArrowUpward from '@mui/icons-material/ArrowUpward';
 import {
   Box,
   Paper,
@@ -11,7 +12,6 @@ import {
   TablePagination,
   TableRow,
 } from '@mui/material';
-import TablePaginationActions from '@mui/material/TablePagination/TablePaginationActions';
 import { useFetcher } from '@remix-run/react';
 import {
   ColumnDef,
@@ -26,7 +26,7 @@ import {
 import { ReactNode, useCallback, useEffect, useState } from 'react';
 
 import { EditableTableCell } from './EditableTableCell';
-import { FilterColumn } from './FilterColumn.client';
+import { Filter } from './Filter';
 
 interface Props<T> {
   columns: ColumnDef<T>[];
@@ -144,7 +144,7 @@ export function PaginatedTable<T>({
                           ) : header.column.getIsSorted() === 'desc' ? (
                             <ArrowDownward />
                           ) : null}
-                          {header.column.getCanFilter() ? <FilterColumn column={header.column} /> : null}
+                          {header.column.getCanFilter() ? <Filter column={header.column} /> : null}
                         </Stack>
                       </Stack>
                     </TableCell>
@@ -189,7 +189,7 @@ export function PaginatedTable<T>({
           const size = e.target.value ? Number(e.target.value) : 10;
           table.setPageSize(size);
         }}
-        ActionsComponent={TablePaginationActions}
+        // ActionsComponent={TablePaginationActions}
       />
     </Box>
   );

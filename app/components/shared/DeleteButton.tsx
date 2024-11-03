@@ -1,4 +1,4 @@
-import { Delete } from '@mui/icons-material';
+import Delete from '@mui/icons-material/Delete';
 import { Box, Button, Dialog, DialogActions, DialogContent, DialogTitle, IconButton, Tooltip } from '@mui/material';
 import { useState } from 'react';
 

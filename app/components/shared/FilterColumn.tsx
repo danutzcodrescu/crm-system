@@ -1,4 +1,4 @@
-import { FilterAlt } from '@mui/icons-material';
+import FilterAlt from '@mui/icons-material/FilterAlt';
 import { Collapse, Input, Stack } from '@mui/material';
 import { useDebouncedCallback } from '@react-hookz/web';
 import { Column } from '@tanstack/react-table';

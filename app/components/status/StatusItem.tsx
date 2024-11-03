@@ -1,10 +1,9 @@
 import { Stack, Typography } from '@mui/material';
-import { ClientOnly } from 'remix-utils/client-only';
 
 import { useEditItem } from '~/hooks/edit';
 
 import { EditForm } from '../EditForm';
-import { StatusButtons } from './StatusButtons.client';
+import { StatusButtons } from './StatusButtons';
 
 interface Props {
   id: string;
@@ -39,18 +38,14 @@ export function StatusItem({ id, name, deleteStatus }: Props) {
           method="PATCH"
         />
       ) : (
-        <ClientOnly>
-          {() => (
-            <>
-              <Typography sx={{ fontWeight: 'bold', flex: 1 }}>{name}</Typography>
-              <StatusButtons
-                name={`status ${name}`}
-                onDelete={() => deleteStatus(id)}
-                onEditButtonClick={() => setEditingState(true)}
-              />
-            </>
-          )}
-        </ClientOnly>
+        <>
+          <Typography sx={{ fontWeight: 'bold', flex: 1 }}>{name}</Typography>
+          <StatusButtons
+            name={`status ${name}`}
+            onDelete={() => deleteStatus(id)}
+            onEditButtonClick={() => setEditingState(true)}
+          />
+        </>
       )}
     </Stack>
   );
