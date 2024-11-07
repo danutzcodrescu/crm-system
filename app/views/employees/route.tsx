@@ -1,6 +1,6 @@
-import { Box } from '@mui/material';
+import { Box, Link } from '@mui/material';
 import { ActionFunctionArgs, json, LoaderFunctionArgs, MetaFunction, redirect } from '@remix-run/node';
-import { useFetcher, useLoaderData } from '@remix-run/react';
+import { Link as RLink, useFetcher, useLoaderData } from '@remix-run/react';
 import { ColumnDef } from '@tanstack/react-table';
 import { useMemo } from 'react';
 
@@ -69,11 +69,21 @@ export default function EmployeesPage() {
         header: 'Name',
         accessorKey: 'name',
         filterFn: 'includesString',
+        cell: ({ getValue, row }) => (
+          <Link component={RLink} to={`/contacts/${row.original.id}`}>
+            {getValue() as string}
+          </Link>
+        ),
       },
       {
         header: 'Company',
         accessorKey: 'companyName',
         filterFn: 'includesString',
+        cell: ({ getValue, row }) => (
+          <Link component={RLink} to={`/communes/${row.original.companyId}`}>
+            {getValue() as string}
+          </Link>
+        ),
       },
       {
         header: 'Email',

@@ -46,6 +46,9 @@ export default defineConfig({
               // route('', 'api/notes-log/route.tsx', { index: true });
               route(':logId', 'api/notes-log/route.tsx');
             });
+            route('/api/reminders', 'api/reminders/layout.tsx', () => {
+              route(':reminderId', 'api/reminders/route.tsx');
+            });
           });
         });
       },

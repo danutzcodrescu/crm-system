@@ -1,5 +1,5 @@
 import PersonAddAlt from '@mui/icons-material/PersonAddAlt';
-import { Autocomplete, IconButton, TextField } from '@mui/material';
+import { Autocomplete, IconButton, TextField, Tooltip } from '@mui/material';
 import { FetcherWithComponents, useFetcher } from '@remix-run/react';
 
 import { loader } from '~/api/companies/layout';
@@ -7,6 +7,7 @@ import { loader } from '~/api/companies/layout';
 import { AddItem } from '../shared/AddItem';
 
 interface Props {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   fetcher: FetcherWithComponents<any>;
 }
 
@@ -67,16 +68,17 @@ export function AddContact({ fetcher }: Props) {
         },
       ]}
       renderAddButton={({ onClick }) => (
-        <IconButton
-          aria-label="Create new contact"
-          title="Create new contact"
-          onClick={() => {
-            itemsFetcher.load('/api/companies');
-            onClick();
-          }}
-        >
-          <PersonAddAlt />
-        </IconButton>
+        <Tooltip title="Create new contact">
+          <IconButton
+            aria-label="Create new contact"
+            onClick={() => {
+              itemsFetcher.load('/api/companies');
+              onClick();
+            }}
+          >
+            <PersonAddAlt />
+          </IconButton>
+        </Tooltip>
       )}
     />
   );

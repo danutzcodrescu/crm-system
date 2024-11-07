@@ -1,5 +1,5 @@
 import Add from '@mui/icons-material/Add';
-import { IconButton } from '@mui/material';
+import { IconButton, Tooltip } from '@mui/material';
 import { FetcherWithComponents } from '@remix-run/react';
 
 import { AddItem } from '../shared/AddItem';
@@ -35,9 +35,11 @@ export function AddYear({ fetcher }: Props) {
         },
       ]}
       renderAddButton={({ onClick }) => (
-        <IconButton aria-label="Create new year" title="Create new year" onClick={onClick}>
-          <Add />
-        </IconButton>
+        <Tooltip title="Create new year">
+          <IconButton aria-label="Create new year" onClick={onClick}>
+            <Add />
+          </IconButton>
+        </Tooltip>
       )}
     />
   );

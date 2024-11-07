@@ -1,7 +1,8 @@
 import { LoadingButton } from '@mui/lab';
 import { Box, Button, Stack, TextField, TextFieldProps } from '@mui/material';
+import { useKeyboardEvent } from '@react-hookz/web';
 import { Form, FormProps, useNavigation } from '@remix-run/react';
-import { ReactNode } from 'react';
+import { cloneElement, ReactNode } from 'react';
 
 export interface Field {
   name: string;
@@ -27,12 +28,14 @@ interface Props extends FormProps {
 
 export function EditForm({ fields, onCancel, method }: Props) {
   const navigation = useNavigation();
+  useKeyboardEvent('Escape', onCancel, [], { eventOptions: { passive: true } });
 
   return (
     <Stack direction="row" alignItems="center" sx={{ gap: 1, width: '100%' }} component={Form} method={method}>
       {fields.map((field) =>
         field.render ? (
-          field.render()
+          // @ts-expect-error passing a key is not an issue
+          cloneElement(field.render(), { key: field.name })
         ) : (
           <TextField
             size="small"
@@ -45,6 +48,7 @@ export function EditForm({ fields, onCancel, method }: Props) {
             hidden={field.hidden}
             placeholder={field.placeholder}
             slotProps={{ htmlInput: field.inputProps }}
+            label={field.label}
           />
         ),
       )}

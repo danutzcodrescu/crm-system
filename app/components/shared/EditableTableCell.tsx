@@ -20,6 +20,10 @@ export function EditableTableCell({ row, cell, editedRow }: Props) {
     return flexRender(cell.column.columnDef.cell, cell.getContext());
   }
 
+  if (cell.column.columnDef.meta?.editField) {
+    return cell.column.columnDef.meta.editField({ row, cell });
+  }
+
   if (cell.id.endsWith('_date')) {
     return (
       // TODO find a better way to import DatePicker
@@ -41,16 +45,30 @@ export function EditableTableCell({ row, cell, editedRow }: Props) {
     );
   }
 
+  if (cell.column.columnDef.meta?.editFieldType === 'textarea') {
+    return (
+      <TextField
+        multiline
+        rows={5}
+        label={cell.column.columnDef.header as string}
+        name={cell.column.columnDef.id as string}
+        size="small"
+        fullWidth
+        defaultValue={cell.getValue()}
+        slotProps={{ htmlInput: { form: 'table_form', name: cell.column.columnDef.id as string } }}
+      />
+    );
+  }
+
   return (
     <TextField
-      multiline
-      rows={5}
       label={cell.column.columnDef.header as string}
       name={cell.column.columnDef.id as string}
+      defaultValue={cell.getValue()}
       size="small"
       fullWidth
-      defaultValue={cell.getValue()}
-      slotProps={{ htmlInput: { form: 'table_form', name: cell.column.columnDef.id as string } }}
+      type={cell.column.columnDef.meta?.editFieldType || 'text'}
+      slotProps={{ htmlInput: { form: 'table_form' } }}
     />
   );
 }

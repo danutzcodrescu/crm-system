@@ -1,5 +1,6 @@
 import ArrowDownward from '@mui/icons-material/ArrowDownward';
 import ArrowUpward from '@mui/icons-material/ArrowUpward';
+import ErrorOutline from '@mui/icons-material/ErrorOutline';
 import {
   Box,
   Paper,
@@ -11,9 +12,11 @@ import {
   TableHead,
   TablePagination,
   TableRow,
+  Tooltip,
 } from '@mui/material';
 import { useFetcher } from '@remix-run/react';
 import {
+  CellContext,
   ColumnDef,
   ColumnFiltersState,
   flexRender,
@@ -21,12 +24,47 @@ import {
   getFilteredRowModel,
   getPaginationRowModel,
   getSortedRowModel,
+  RowData,
+  SortingFn,
   useReactTable,
 } from '@tanstack/react-table';
 import { ReactNode, useCallback, useEffect, useState } from 'react';
 
 import { EditableTableCell } from './EditableTableCell';
 import { Filter } from './Filter';
+
+declare module '@tanstack/react-table' {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  interface TableMeta<TData extends RowData> {
+    editedRow: string | null;
+    setEditedRow: (val: string | null) => void;
+  }
+
+  interface ColumnMeta<TData extends RowData, TValue> {
+    editField?: (params: Pick<CellContext<TData, TValue>, 'row' | 'cell'>) => ReactNode;
+    filterOptions?: string[];
+    editFieldType?: 'textarea' | 'date' | 'email' | 'text' | 'phone';
+  }
+}
+
+type TData = Record<string, unknown> & { id: string };
+
+const sortByNewRowFirst: SortingFn<TData> = (rowA, rowB, columnId) => {
+  if (rowA.original.id === '') {
+    return -1;
+  }
+  if (rowB.original.id === '') {
+    return 1;
+  }
+
+  // @ts-expect-error type mismatch
+  return rowA.original[columnId] > rowB.original[columnId]
+    ? 1
+    : // @ts-expect-error type mismatch
+      rowA.original[columnId] < rowB.original[columnId]
+      ? -1
+      : 0;
+};
 
 interface Props<T> {
   columns: ColumnDef<T>[];
@@ -36,14 +74,10 @@ interface Props<T> {
   updateFetcher?: ReturnType<typeof useFetcher>;
   newRowObject?: T;
   createNewRow?: (triggerNewRow: () => void) => ReactNode;
+  warningMessage?: string;
 }
 
-export type MetaType = {
-  editedRow: string | null;
-  setEditedRow: (id: string | null) => void;
-};
-
-export function PaginatedTable<T>({
+export function PaginatedTable<T extends { id: string; warning?: boolean }>({
   data,
   columns,
   action,
@@ -51,6 +85,7 @@ export function PaginatedTable<T>({
   updateFetcher,
   newRowObject,
   createNewRow: newRow,
+  warningMessage,
 }: Props<T>) {
   // TODO refactor to useReducer
   const [dt, setDt] = useState(data);
@@ -78,9 +113,17 @@ export function PaginatedTable<T>({
     state: {
       columnFilters,
     },
+    sortingFns: {
+      sortByNewRowFirst: sortByNewRowFirst,
+    },
     meta: {
       editedRow,
-      setEditedRow,
+      setEditedRow: (value: string | null) => {
+        if (value === null && editedRow === '0' && dt[0]?.id === undefined) {
+          setDt((prev) => prev.slice(1));
+        }
+        setEditedRow(value);
+      },
     },
   });
 
@@ -112,14 +155,17 @@ export function PaginatedTable<T>({
       method={formMethod}
       {...(editedRow
         ? {
-            // @ts-expect-error type mismatch
-            action: formMethod === 'POST' ? action : `${action}/${data[parseInt(editedRow)][actionAccessor]}`,
+            action:
+              formMethod === 'POST'
+                ? action
+                : // @ts-expect-error type mismatch
+                  `${action?.replace('?index', '')}/${data[parseInt(editedRow)][actionAccessor]}`,
             navigate: false,
           }
         : {})}
     >
       <Box sx={{ display: 'flex', flexDirection: 'row-reverse' }}>{newRow ? newRow(createNewRow) : null}</Box>
-      <TableContainer component={Paper}>
+      <TableContainer component={Paper} sx={{ overflow: 'auto' }}>
         <Table sx={{ minWidth: 650 }} aria-label="simple table">
           <TableHead>
             {table.getHeaderGroups().map((headerGroup) => (
@@ -131,6 +177,8 @@ export function PaginatedTable<T>({
                       colSpan={header.colSpan}
                       sx={{
                         cursor: header.column.getCanSort() ? 'pointer' : 'default',
+                        // @ts-expect-error type mismatch
+                        ...(header.column.columnDef.width ? { width: header.column.columnDef.width } : {}),
                       }}
                       onClick={header.column.getToggleSortingHandler()}
                     >
@@ -157,10 +205,25 @@ export function PaginatedTable<T>({
             {table.getRowModel().rows.map((row) => {
               return (
                 <TableRow key={row.id}>
-                  {row.getVisibleCells().map((cell) => {
+                  {row.getVisibleCells().map((cell, index) => {
                     return (
-                      <TableCell key={cell.id}>
-                        <EditableTableCell cell={cell} row={row} editedRow={editedRow} />
+                      <TableCell
+                        key={cell.id}
+                        sx={{
+                          color: (theme) =>
+                            row.original?.warning ? theme.palette.error.main : theme.palette.text.primary,
+                          // @ts-expect-error type mismatch
+                          ...(cell.column.columnDef.width ? { width: cell.column.columnDef.width } : {}),
+                        }}
+                      >
+                        <Stack direction="row" gap={1} alignItems="center">
+                          {index === 0 && row.original?.warning ? (
+                            <Tooltip title={warningMessage}>
+                              <ErrorOutline sx={{ fontSize: '0.75rem' }} />
+                            </Tooltip>
+                          ) : null}
+                          <EditableTableCell cell={cell} row={row} editedRow={editedRow} />
+                        </Stack>
                       </TableCell>
                     );
                   })}

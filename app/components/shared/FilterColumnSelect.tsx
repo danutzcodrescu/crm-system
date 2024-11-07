@@ -37,28 +37,36 @@ export function FilterColumnSelect<T>({ column }: { column: Column<T, unknown> }
       >
         <Select
           multiple
+          // @ts-expect-error mui type issue
           value={columnFilterValue || []}
           onChange={handleChange}
+          displayEmpty
           input={<OutlinedInput />}
           sx={{ width: '15rem' }}
-          renderValue={(selected) => (
-            <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
-              {selected.map((value) => (
-                <Chip
-                  key={value}
-                  label={value}
-                  // onDelete={(e) => {
-                  //   console.log('test');
-                  //   e.stopPropagation();
-                  //   column.setFilterValue((prev: string[]) => prev.filter((item) => item !== value));
-                  // }}
-                />
-              ))}
-            </Box>
-          )}
+          renderValue={(selected) =>
+            selected.length === 0 ? (
+              'Status'
+            ) : (
+              <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
+                {(selected as unknown as string[]).map((value) => (
+                  <Chip
+                    key={value}
+                    label={value}
+                    // onDelete={(e) => {
+                    //   console.log('test');
+                    //   e.stopPropagation();
+                    //   column.setFilterValue((prev: string[]) => prev.filter((item) => item !== value));
+                    // }}
+                  />
+                ))}
+              </Box>
+            )
+          }
         >
-          {/* @ts-expect-error no meta type */}
-          {column.columnDef.meta.filterOptions.map((option) => (
+          <MenuItem value="" disabled>
+            Filter
+          </MenuItem>
+          {(column.columnDef.meta?.filterOptions || []).map((option) => (
             <MenuItem key={option} value={option} selected={columnFilterValue?.includes(option)}>
               {option}
             </MenuItem>

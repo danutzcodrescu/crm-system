@@ -2,7 +2,7 @@ import { Alert, AlertColor, Box, Snackbar, Stack, Typography } from '@mui/materi
 import { PropsWithChildren, useEffect, useState } from 'react';
 
 interface Props extends PropsWithChildren {
-  title: string;
+  title: string | React.ReactNode;
   additionalTitleElement: React.ReactNode;
   actionData?: { message: string; severity: string; timeStamp?: number };
 }
@@ -23,9 +23,13 @@ export function PageContainer({ children, title, additionalTitleElement, actionD
   return (
     <Box sx={{ width: '100%', height: '100%', p: 1.5 }}>
       <Stack direction="row" alignItems="center" sx={{ mb: 2 }}>
-        <Typography variant="h5" component="h1" fontWeight="bold" sx={{ flex: 1 }}>
-          {title}
-        </Typography>
+        {typeof title === 'string' ? (
+          <Typography variant="h5" component="h1" fontWeight="bold" sx={{ flex: 1 }}>
+            {title}
+          </Typography>
+        ) : (
+          title
+        )}
         {additionalTitleElement}
       </Stack>
       {children}
