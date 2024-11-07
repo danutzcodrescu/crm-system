@@ -3,14 +3,14 @@ import '@fontsource/roboto/400.css';
 import '@fontsource/roboto/500.css';
 import '@fontsource/roboto/700.css';
 
-import { CssBaseline, ThemeProvider } from '@mui/material';
-import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
-import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider/LocalizationProvider';
+import { withEmotionCache } from '@emotion/react';
 import { Links, Meta, Outlet, Scripts, ScrollRestoration } from '@remix-run/react';
+import { PropsWithChildren } from 'react';
 
-import { theme } from './utils/client/theme';
+import { useInjectStyles } from './emotion/emotion-client';
 
-export function Layout({ children }: { children: React.ReactNode }) {
+export const Layout = withEmotionCache(({ children }: PropsWithChildren, cache) => {
+  useInjectStyles(cache);
   return (
     <html lang="en">
       <head>
@@ -20,16 +20,13 @@ export function Layout({ children }: { children: React.ReactNode }) {
         <Links />
       </head>
       <body>
-        <CssBaseline />
-        <LocalizationProvider dateAdapter={AdapterDayjs}>
-          <ThemeProvider theme={theme}>{children}</ThemeProvider>
-        </LocalizationProvider>
+        {children}
         <ScrollRestoration />
         <Scripts />
       </body>
     </html>
   );
-}
+});
 
 export default function App() {
   return <Outlet />;

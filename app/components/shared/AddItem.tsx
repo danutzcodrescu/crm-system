@@ -1,4 +1,4 @@
-import LoadingButton from '@mui/lab/LoadingButton';
+import { LoadingButton } from '@mui/lab';
 import { Button, Dialog, DialogActions, DialogContent, DialogTitle, Stack, TextField } from '@mui/material';
 import { FetcherWithComponents } from '@remix-run/react';
 import { Fragment, ReactNode, useEffect, useState } from 'react';
