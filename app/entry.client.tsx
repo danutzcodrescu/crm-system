@@ -4,15 +4,28 @@
  * For more information, see https://remix.run/file-conventions/entry.client
  */
 
+import { CssBaseline, ThemeProvider } from '@mui/material';
+import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
+import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider/LocalizationProvider';
 import { RemixBrowser } from '@remix-run/react';
 import { startTransition, StrictMode } from 'react';
 import { hydrateRoot } from 'react-dom/client';
+
+import { ClientCacheProvider } from './emotion/emotion-client';
+import { theme } from './utils/client/theme';
 
 startTransition(() => {
   hydrateRoot(
     document,
     <StrictMode>
-      <RemixBrowser />
+      <ClientCacheProvider>
+        <ThemeProvider theme={theme}>
+          <CssBaseline />
+          <LocalizationProvider dateAdapter={AdapterDayjs}>
+            <RemixBrowser />
+          </LocalizationProvider>
+        </ThemeProvider>
+      </ClientCacheProvider>
     </StrictMode>,
   );
 });

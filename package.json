@@ -15,7 +15,9 @@
   "dependencies": {
     "@clerk/backend": "^1.15.5",
     "@clerk/remix": "^4.2.45",
+    "@emotion/cache": "^11.13.1",
     "@emotion/react": "^11.13.3",
+    "@emotion/server": "^11.11.0",
     "@emotion/styled": "^11.13.0",
     "@fontsource/roboto": "^5.1.0",
     "@mui/icons-material": "^6.1.6",
