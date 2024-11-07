@@ -1,8 +1,13 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { TextField } from '@mui/material';
-import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { Cell, flexRender, Row } from '@tanstack/react-table';
 import dayjs from 'dayjs';
+import { lazy, Suspense } from 'react';
+import { ClientOnly } from 'remix-utils/client-only';
+
+const DatePicker = lazy(() =>
+  import('@mui/x-date-pickers/DatePicker').then((module) => ({ default: module.DatePicker })),
+);
 
 interface Props {
   cell: Cell<any, any>;
@@ -15,28 +20,55 @@ export function EditableTableCell({ row, cell, editedRow }: Props) {
     return flexRender(cell.column.columnDef.cell, cell.getContext());
   }
 
+  if (cell.column.columnDef.meta?.editField) {
+    return cell.column.columnDef.meta.editField({ row, cell });
+  }
+
   if (cell.id.endsWith('_date')) {
     return (
-      <DatePicker
+      // TODO find a better way to import DatePicker
+      <ClientOnly>
+        {() => {
+          return (
+            <Suspense fallback={null}>
+              <DatePicker
+                label={cell.column.columnDef.header as string}
+                name={cell.column.columnDef.id as string}
+                defaultValue={dayjs(cell.getValue())}
+                sx={{ minWidth: 150 }}
+                slotProps={{ textField: { slotProps: { htmlInput: { form: 'table_form' } } } }}
+              />
+            </Suspense>
+          );
+        }}
+      </ClientOnly>
+    );
+  }
+
+  if (cell.column.columnDef.meta?.editFieldType === 'textarea') {
+    return (
+      <TextField
+        multiline
+        rows={5}
         label={cell.column.columnDef.header as string}
         name={cell.column.columnDef.id as string}
-        defaultValue={dayjs(cell.getValue())}
-        sx={{ minWidth: 150 }}
-        slotProps={{ textField: { slotProps: { htmlInput: { form: 'table_form' } } } }}
+        size="small"
+        fullWidth
+        defaultValue={cell.getValue()}
+        slotProps={{ htmlInput: { form: 'table_form', name: cell.column.columnDef.id as string } }}
       />
     );
   }
 
   return (
     <TextField
-      multiline
-      rows={5}
       label={cell.column.columnDef.header as string}
       name={cell.column.columnDef.id as string}
+      defaultValue={cell.getValue()}
       size="small"
       fullWidth
-      defaultValue={cell.getValue()}
-      slotProps={{ htmlInput: { form: 'table_form', name: cell.column.columnDef.id as string } }}
+      type={cell.column.columnDef.meta?.editFieldType || 'text'}
+      slotProps={{ htmlInput: { form: 'table_form' } }}
     />
   );
 }

@@ -54,7 +54,7 @@ module.exports = {
         'simple-import-sort/imports': 'error',
         'simple-import-sort/exports': 'error',
         'unused-imports/no-unused-imports': 'error',
-        'no-unused-vars': 'error',
+        '@typescript-eslint/no-unused-vars': ['error'],
       },
     },
 
@@ -83,8 +83,8 @@ module.exports = {
       rules: {
         'simple-import-sort/imports': 'error',
         'simple-import-sort/exports': 'error',
-        'no-unused-vars': 'error',
         'unused-imports/no-unused-imports': 'error',
+        '@typescript-eslint/no-unused-vars': ['error'],
       },
     },
 

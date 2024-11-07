@@ -1,11 +1,18 @@
-import { Add } from '@mui/icons-material';
-import { IconButton } from '@mui/material';
+import Add from '@mui/icons-material/Add';
+import { IconButton, Tooltip } from '@mui/material';
+import { FetcherWithComponents } from '@remix-run/react';
 
 import { AddItem } from '../shared/AddItem';
 
-export function AddYear() {
+interface Props {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  fetcher: FetcherWithComponents<any>;
+}
+
+export function AddYear({ fetcher }: Props) {
   return (
     <AddItem
+      fetcher={fetcher}
       title="Create new year"
       fields={[
         {
@@ -28,9 +35,11 @@ export function AddYear() {
         },
       ]}
       renderAddButton={({ onClick }) => (
-        <IconButton aria-label="Create new year" title="Create new year" onClick={onClick}>
-          <Add />
-        </IconButton>
+        <Tooltip title="Create new year">
+          <IconButton aria-label="Create new year" onClick={onClick}>
+            <Add />
+          </IconButton>
+        </Tooltip>
       )}
     />
   );

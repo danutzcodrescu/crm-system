@@ -39,7 +39,7 @@ export default function AppLayout() {
           <Toolbar />
           <Box sx={{ overflow: 'auto' }}>
             <List>
-              {['Companies', 'Contacts', 'Statuses', 'Years'].map((text) => (
+              {['Communes', 'Contacts', 'Statuses', 'Years'].map((text) => (
                 <ListItem key={text} disablePadding component={Link} to={`/${text.toLowerCase()}`} rel="prefetch">
                   <ListItemButton selected={location.pathname.startsWith(`/${text.toLowerCase()}`)}>
                     {/* <ListItemIcon>{index % 2 === 0 ? <InboxIcon /> : <MailIcon />}</ListItemIcon> */}

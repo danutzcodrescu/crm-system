@@ -1,16 +1,17 @@
-import { Edit, Email } from '@mui/icons-material';
+import Edit from '@mui/icons-material/Edit';
+import Email from '@mui/icons-material/Email';
 import { Box, IconButton, Tooltip } from '@mui/material';
 import { ActionFunctionArgs, json, LoaderFunctionArgs, MetaFunction, redirect } from '@remix-run/node';
 import { useFetcher, useLoaderData, useNavigation } from '@remix-run/react';
 import { ColumnDef } from '@tanstack/react-table';
+import dayjs from 'dayjs';
 import { useEffect, useMemo, useState } from 'react';
-import { ClientOnly } from 'remix-utils/client-only';
 
 import { action as deleteLogAction } from '~/api/notes-log/route';
 import { ContactDetails } from '~/components/contacts/ContactDetailts';
 import { PageContainer } from '~/components/shared/PageContainer';
-import { MetaType, PaginatedTable } from '~/components/shared/PaginatedTable.client';
-import { TableActionsCell } from '~/components/shared/TableActionsCell.client';
+import { PaginatedTable } from '~/components/shared/PaginatedTable';
+import { TableActionsCell } from '~/components/shared/TableActionsCell';
 import { auth } from '~/utils/server/auth.server';
 import {
   deleteEmployee,
@@ -92,19 +93,17 @@ export default function Contact() {
         id: 'date',
         accessorKey: 'logDate',
         enableColumnFilter: false,
-        cell: ({ getValue }) => (
-          <>
-            {Intl.DateTimeFormat(navigator.language, { day: '2-digit', month: 'numeric', year: 'numeric' }).format(
-              new Date(getValue() as string),
-            )}
-          </>
-        ),
+        cell: ({ getValue }) => <>{dayjs(new Date(getValue() as string)).format('L')}</>,
+        width: 150,
       },
       {
         header: 'Description',
         id: 'description',
         accessorKey: 'logDescription',
         enableSorting: false,
+        meta: {
+          editFieldType: 'textarea',
+        },
       },
       {
         id: 'actions',
@@ -119,7 +118,7 @@ export default function Contact() {
               isEditable
               tableApi={table}
               row={row}
-              isEditing={(table.options.meta as MetaType).editedRow == row.id}
+              isEditing={table.options.meta?.editedRow == row.id}
               onDelete={(id) => {
                 logsFetcher.submit({}, { method: 'DELETE', action: `/api/notes-log/${id}`, relative: 'path' });
               }}
@@ -148,15 +147,11 @@ export default function Contact() {
     <PageContainer
       title={(data.message as EmployeeWithLogs[])[0].name}
       additionalTitleElement={
-        <ClientOnly>
-          {() => (
-            <Tooltip title={`Edit contact ${(data.message as EmployeeWithLogs[])[0].name}`}>
-              <IconButton onClick={() => setEditingMode(true)}>
-                <Edit />
-              </IconButton>
-            </Tooltip>
-          )}
-        </ClientOnly>
+        <Tooltip title={`Edit contact ${(data.message as EmployeeWithLogs[])[0].name}`}>
+          <IconButton onClick={() => setEditingMode(true)}>
+            <Edit />
+          </IconButton>
+        </Tooltip>
       }
       actionData={logsFetcher.data}
     >
@@ -169,28 +164,24 @@ export default function Contact() {
         phone={(data.message as EmployeeWithLogs[])[0].phone || ''}
       />
       <Box sx={{ mt: 2, width: '100%' }}>
-        <ClientOnly>
-          {() => (
-            <PaginatedTable
-              columns={columns}
-              data={data.message as EmployeeWithLogs[]}
-              action="/api/notes-log"
-              actionAccessor="logId"
-              updateFetcher={logsFetcher}
-              newRowObject={{ date: new Date(), description: '' } as unknown as EmployeeWithLogs}
-              createNewRow={(newRow) => (
-                <>
-                  <Tooltip title="New log">
-                    <IconButton aria-label="New log" title="New log" onClick={newRow}>
-                      <Email />
-                    </IconButton>
-                  </Tooltip>
-                  <input type="hidden" name="employeeId" value={(data.message as EmployeeWithLogs[])[0].id} />
-                </>
-              )}
-            />
+        <PaginatedTable
+          columns={columns}
+          data={data.message as EmployeeWithLogs[]}
+          action="/api/notes-log"
+          actionAccessor="logId"
+          updateFetcher={logsFetcher}
+          newRowObject={{ date: new Date(), description: '' } as unknown as EmployeeWithLogs}
+          createNewRow={(newRow) => (
+            <>
+              <Tooltip title="New log">
+                <IconButton aria-label="New log" onClick={newRow}>
+                  <Email />
+                </IconButton>
+              </Tooltip>
+              <input type="hidden" name="employeeId" value={(data.message as EmployeeWithLogs[])[0].id} />
+            </>
           )}
-        </ClientOnly>
+        />
       </Box>
     </PageContainer>
   );

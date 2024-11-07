@@ -7,7 +7,15 @@ export default defineConfig({
     port: 4200,
   },
   ssr: {
-    noExternal: process.env.NODE_ENV === 'production' ? [/^@mui\//] : ['@mui/icons-material', /^@mui\/x-.{1,}/],
+    noExternal: process.env.NODE_ENV === 'production' ? [/^@mui\//] : [/^@mui\/x-.{1,}/],
+  },
+  resolve: {
+    alias: [
+      {
+        find: /^@mui\/icons-material\/(.*)/,
+        replacement: '@mui/icons-material/esm/$1',
+      },
+    ],
   },
   plugins: [
     remix({
@@ -27,10 +35,19 @@ export default defineConfig({
               route('', 'views/employees/route.tsx', { index: true });
               route(':contactId', 'views/employees/contact.tsx');
             });
-            route('/api/companies', 'api/companies/route.tsx');
+            route('/communes', 'views/companies/layout.tsx', () => {
+              route('', 'views/companies/route.tsx', { index: true });
+              route(':companyId', 'views/companies/company.tsx');
+            });
+            route('/api/companies', 'api/companies/layout.tsx', () => {
+              route(':companyId', 'api/companies/route.tsx');
+            });
             route('/api/notes-log', 'api/notes-log/layout.tsx', () => {
               // route('', 'api/notes-log/route.tsx', { index: true });
               route(':logId', 'api/notes-log/route.tsx');
+            });
+            route('/api/reminders', 'api/reminders/layout.tsx', () => {
+              route(':reminderId', 'api/reminders/route.tsx');
             });
           });
         });

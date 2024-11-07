@@ -120,3 +120,26 @@ export async function getEmployeeWithLogs(id: string): Promise<[string | null, E
     return [(e as DatabaseError).detail as string, null];
   }
 }
+
+export async function getEmployeesForCompany(
+  companyId: string,
+): Promise<[string | null, Omit<Employee, 'companyName' | 'companyId'>[] | null]> {
+  try {
+    return [
+      null,
+      await db
+        .select({
+          id: employees.id,
+          name: employees.name,
+          email: employees.email,
+          phone: employees.phoneNumber,
+        })
+        .from(employees)
+        .leftJoin(companies, eq(employees.companyId, companies.id))
+        .where(eq(employees.companyId, companyId))
+        .orderBy(employees.name),
+    ];
+  } catch (e) {
+    return [(e as DatabaseError).detail as string, null];
+  }
+}

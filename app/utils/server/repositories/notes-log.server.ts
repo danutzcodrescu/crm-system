@@ -1,8 +1,16 @@
-import { eq } from 'drizzle-orm';
+import { desc, eq } from 'drizzle-orm';
 import { DatabaseError } from 'pg';
 
-import { notesLog } from '../schema.server';
+import { employees, notesLog } from '../schema.server';
 import { db } from './db.server';
+
+export interface LogForCompany {
+  id: string;
+  description: string;
+  date: Date;
+  employeeId: string | null;
+  employeeName: string | null;
+}
 
 export async function deleteLog(id: string): Promise<string | null> {
   try {
@@ -28,5 +36,27 @@ export async function createLog(employeeId: string, description: string, date: D
     return null;
   } catch (e) {
     return (e as DatabaseError).detail as string;
+  }
+}
+
+export async function getLogsForCompany(companyId: string): Promise<[string | undefined, LogForCompany[] | undefined]> {
+  try {
+    return [
+      undefined,
+      await db
+        .select({
+          id: notesLog.id,
+          description: notesLog.description,
+          date: notesLog.date,
+          employeeId: employees.id,
+          employeeName: employees.name,
+        })
+        .from(notesLog)
+        .leftJoin(employees, eq(notesLog.employeeId, employees.id))
+        .where(eq(employees.companyId, companyId))
+        .orderBy(desc(notesLog.date)),
+    ];
+  } catch (e) {
+    return [(e as DatabaseError).detail, undefined];
   }
 }

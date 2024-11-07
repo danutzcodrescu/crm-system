@@ -1,10 +1,9 @@
 import { Stack, Typography } from '@mui/material';
-import { ClientOnly } from 'remix-utils/client-only';
 
 import { useEditItem } from '~/hooks/edit';
 
 import { EditForm } from '../EditForm';
-import { StatusButtons } from '../status/StatusButtons.client';
+import { StatusButtons } from '../status/StatusButtons';
 
 interface Props {
   name: number;
@@ -46,15 +45,11 @@ export function YearItem({ name, inflationRate, deleteYear }: Props) {
         <>
           <Typography sx={{ fontWeight: 'bold', flex: 1 }}>{name}</Typography>
           <Typography>inflation rate {inflationRate}%</Typography>
-          <ClientOnly>
-            {() => (
-              <StatusButtons
-                name={`year ${name.toString()}`}
-                onDelete={() => deleteYear(name)}
-                onEditButtonClick={() => setEditingState(true)}
-              />
-            )}
-          </ClientOnly>
+          <StatusButtons
+            name={`year ${name.toString()}`}
+            onDelete={() => deleteYear(name)}
+            onEditButtonClick={() => setEditingState(true)}
+          />
         </>
       )}
     </Stack>

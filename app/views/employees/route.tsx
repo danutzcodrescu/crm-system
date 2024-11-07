@@ -1,18 +1,15 @@
-import { Box } from '@mui/material';
+import { Box, Link } from '@mui/material';
 import { ActionFunctionArgs, json, LoaderFunctionArgs, MetaFunction, redirect } from '@remix-run/node';
-import { useFetcher, useLoaderData } from '@remix-run/react';
+import { Link as RLink, useFetcher, useLoaderData } from '@remix-run/react';
 import { ColumnDef } from '@tanstack/react-table';
 import { useMemo } from 'react';
-import { ClientOnly } from 'remix-utils/client-only';
 
-import { AddContact } from '~/components/contacts/AddContact.client';
+import { AddContact } from '~/components/contacts/AddContact';
 import { PageContainer } from '~/components/shared/PageContainer';
-import { PaginatedTable } from '~/components/shared/PaginatedTable.client';
-import { TableActionsCell } from '~/components/shared/TableActionsCell.client';
+import { PaginatedTable } from '~/components/shared/PaginatedTable';
+import { TableActionsCell } from '~/components/shared/TableActionsCell';
 import { auth } from '~/utils/server/auth.server';
 import { createEmployee, Employee, getAllEmployees } from '~/utils/server/repositories/employees.server';
-
-import { action as SingleContactAction } from './contact';
 
 export const meta: MetaFunction = () => {
   return [
@@ -32,7 +29,7 @@ export async function loader({ request }: LoaderFunctionArgs) {
   const [error, data] = await getAllEmployees();
 
   if (error) {
-    return json({ message: 'Could not fetch employees' }, { status: 500 });
+    return json({ message: 'Could not fetch employees', severity: 'error' }, { status: 500 });
   }
 
   return json({ employees: data as Employee[] });
@@ -64,8 +61,7 @@ export async function action({ request }: ActionFunctionArgs) {
 
 export default function EmployeesPage() {
   const data = useLoaderData<typeof loader>();
-  const fetcher = useFetcher<typeof SingleContactAction>();
-  const fetcherCreation = useFetcher<typeof action>();
+  const fetcher = useFetcher<typeof action>();
 
   const columns = useMemo<ColumnDef<Employee>[]>(
     () => [
@@ -73,11 +69,21 @@ export default function EmployeesPage() {
         header: 'Name',
         accessorKey: 'name',
         filterFn: 'includesString',
+        cell: ({ getValue, row }) => (
+          <Link component={RLink} to={`/contacts/${row.original.id}`}>
+            {getValue() as string}
+          </Link>
+        ),
       },
       {
         header: 'Company',
         accessorKey: 'companyName',
         filterFn: 'includesString',
+        cell: ({ getValue, row }) => (
+          <Link component={RLink} to={`/communes/${row.original.companyId}`}>
+            {getValue() as string}
+          </Link>
+        ),
       },
       {
         header: 'Email',
@@ -108,19 +114,17 @@ export default function EmployeesPage() {
       },
     ],
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [],
+    [data],
   );
 
   return (
     <PageContainer
       title="Employees"
-      additionalTitleElement={<ClientOnly>{() => <AddContact />}</ClientOnly>}
-      actionData={fetcherCreation.data || fetcher.data}
+      additionalTitleElement={<AddContact fetcher={fetcher} />}
+      actionData={fetcher.data}
     >
       <Box sx={{ mt: 2 }}>
-        <ClientOnly>
-          {() => <PaginatedTable data={(data as unknown as { employees: Employee[] }).employees} columns={columns} />}
-        </ClientOnly>
+        <PaginatedTable data={(data as unknown as { employees: Employee[] }).employees} columns={columns} />
       </Box>
     </PageContainer>
   );

@@ -24,11 +24,10 @@ const main = async () => {
     }),
   );
 
-  await seed.companies(
+  const { companies, employees } = await seed.companies(
     (x) =>
       x(300, {
         name: (ctx) => copycat.streetName(ctx.seed),
-        // status_id: () => statuses[0].id,
         employees: (x) =>
           x(
             { min: 1, max: 10 },
@@ -49,6 +48,21 @@ const main = async () => {
     {
       connect: { statuses },
     },
+  );
+
+  await seed.reminders(
+    (x) =>
+      x(40, {
+        date: (ctx) => copycat.dateString(ctx.seed, { minYear: 2024, maxYear: 2026 }),
+        // @ts-expect-error enum type not supported yet
+        type: (ctx) => copycat.oneOf(ctx.seed, ['reminder', 'meeting']),
+        completed: false,
+        description: (ctx) =>
+          ctx.data.type === 'reminder'
+            ? copycat.paragraph(ctx.seed, { minSentences: 1, maxSentences: 3 })
+            : copycat.streetAddress(ctx.seed),
+      }),
+    { connect: { companies, employees } },
   );
 
   // Type completion not working? You might want to reload your TypeScript Server to pick up the changes

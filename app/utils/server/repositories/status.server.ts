@@ -4,7 +4,7 @@ import { DatabaseError } from 'pg';
 import { status } from '../schema.server';
 import { db } from './db.server';
 
-export async function getAllStatuse() {
+export async function getAllStatuses() {
   return db.select({ id: status.id, name: status.name }).from(status).orderBy(status.name);
 }
 
