@@ -2,7 +2,7 @@ import { vitePlugin as remix } from '@remix-run/dev';
 import { defineConfig } from 'vite';
 import tsconfigPaths from 'vite-tsconfig-paths';
 
-export default defineConfig({
+export default defineConfig(({ isSsrBuild }) => ({
   server: {
     port: 4200,
   },
@@ -56,4 +56,5 @@ export default defineConfig({
     }),
     tsconfigPaths(),
   ],
-});
+  build: isSsrBuild ? { target: 'ESNext' } : {},
+}));
