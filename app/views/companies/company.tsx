@@ -67,7 +67,8 @@ export default function Company() {
           fontWeight="bold"
           sx={{ flex: 1, display: 'flex', gap: 1, alignItems: 'center' }}
         >
-          {(data.message as any).company.name} <Chip color="primary" label={(data.message as any).company.statusName} />
+          {(data.message as any).company.name} ({(data.message as any).company.code}){' '}
+          <Chip color="primary" label={(data.message as any).company.statusName} />
         </Typography>
       }
       additionalTitleElement={

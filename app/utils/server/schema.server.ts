@@ -20,6 +20,7 @@ export const years = pgTable('years', {
 export const companies = pgTable('companies', {
   id: uuid('id').primaryKey().defaultRandom(),
   name: text('name').notNull().unique(),
+  code: text().notNull().unique(),
   statusId: uuid('status_id').references(() => status.id, { onDelete: 'set null', onUpdate: 'no action' }),
   createdAt: timestamp('created_at').notNull().defaultNow(),
   updatedAt: timestamp('updated_at', { mode: 'date', precision: 3 }).$onUpdate(() => new Date()),

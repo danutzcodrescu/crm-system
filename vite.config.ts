@@ -49,6 +49,7 @@ export default defineConfig({
             route('/api/reminders', 'api/reminders/layout.tsx', () => {
               route(':reminderId', 'api/reminders/route.tsx');
             });
+            route('/api/import/communes', 'api/import/communes.ts');
           });
         });
       },
