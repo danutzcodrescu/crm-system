@@ -28,6 +28,7 @@ const main = async () => {
     (x) =>
       x(300, {
         name: (ctx) => copycat.streetName(ctx.seed),
+        code: (ctx) => copycat.unique(ctx.seed, (seed) => copycat.int(seed).toString(), new Set()),
         employees: (x) =>
           x(
             { min: 1, max: 10 },

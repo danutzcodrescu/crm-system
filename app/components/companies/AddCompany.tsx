@@ -23,6 +23,13 @@ export function AddCompany({ statuses, fetcher }: Props) {
           label: 'Commune name',
           placeholder: 'Commune name',
         },
+        {
+          name: 'code',
+          type: 'text',
+          required: true,
+          label: 'Commune code',
+          placeholder: 'Commune code',
+        },
 
         {
           name: 'status',

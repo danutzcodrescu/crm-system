@@ -34,6 +34,20 @@
           "maxLength": null
         },
         {
+          "id": "public.companies.code",
+          "name": "code",
+          "columnName": "code",
+          "type": "text",
+          "isRequired": true,
+          "kind": "scalar",
+          "isList": false,
+          "isGenerated": false,
+          "sequence": false,
+          "hasDefaultValue": false,
+          "isId": false,
+          "maxLength": null
+        },
+        {
           "id": "public.companies.status_id",
           "name": "status_id",
           "columnName": "status_id",
@@ -123,6 +137,13 @@
         }
       ],
       "uniqueConstraints": [
+        {
+          "name": "companies_code_unique",
+          "fields": [
+            "code"
+          ],
+          "nullNotDistinct": false
+        },
         {
           "name": "companies_name_unique",
           "fields": [

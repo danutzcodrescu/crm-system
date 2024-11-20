@@ -1,10 +1,11 @@
-import { Box, Link } from '@mui/material';
+import { Box, Link, Stack } from '@mui/material';
 import { ActionFunctionArgs, json, LoaderFunctionArgs, redirect } from '@remix-run/node';
 import { Link as RLink, useFetcher, useLoaderData } from '@remix-run/react';
 import { ColumnDef } from '@tanstack/react-table';
 import { useMemo } from 'react';
 
 import { AddCompany } from '~/components/companies/AddCompany';
+import { UploadCompaniesData } from '~/components/companies/UploadCompaniesData';
 import { PageContainer } from '~/components/shared/PageContainer';
 import { PaginatedTable } from '~/components/shared/PaginatedTable';
 import { TableActionsCell } from '~/components/shared/TableActionsCell';
@@ -20,12 +21,13 @@ export async function action({ request }: ActionFunctionArgs) {
     const formData = await request.formData();
     const name = formData.get('name') as string;
     const status = formData.get('status') as string;
+    const code = formData.get('code') as string;
 
-    if (!name || !status) {
+    if (!name || !status || !code) {
       return json({ message: 'Missing parameters', severity: 'error', timeStamp: Date.now() }, { status: 400 });
     }
 
-    const error = await createCompany({ name, statusId: status });
+    const error = await createCompany({ name, statusId: status, code });
     if (error) {
       return json({ message: 'Could not create commune', severity: 'error', timeStamp: Date.now() }, { status: 500 });
     }
@@ -62,6 +64,10 @@ export default function Companies() {
         ),
       },
       {
+        header: 'Code',
+        accessorKey: 'code',
+      },
+      {
         header: 'Status',
         accessorKey: 'statusName',
         meta: {
@@ -93,10 +99,13 @@ export default function Companies() {
     <PageContainer
       title="Communes"
       additionalTitleElement={
-        <AddCompany
-          statuses={(data as unknown as { statuses: { id: string; name: string }[] }).statuses}
-          fetcher={fetcher}
-        />
+        <Stack direction="row" gap={2}>
+          <UploadCompaniesData fetcher={fetcher} />
+          <AddCompany
+            statuses={(data as unknown as { statuses: { id: string; name: string }[] }).statuses}
+            fetcher={fetcher}
+          />
+        </Stack>
       }
       actionData={fetcher.data as { message: string; severity: 'string' }}
     >

@@ -34,7 +34,13 @@ export async function getCompaniesTable(): Promise<[string | undefined, CompanyT
     return [
       undefined,
       await db
-        .select({ id: companies.id, name: companies.name, statusId: companies.id, statusName: status.name })
+        .select({
+          id: companies.id,
+          name: companies.name,
+          statusId: companies.id,
+          statusName: status.name,
+          code: companies.code,
+        })
         .from(companies)
         .leftJoin(status, eq(companies.statusId, status.id))
         .orderBy(asc(companies.name)),
@@ -53,9 +59,17 @@ export async function deleteCompany(id: string): Promise<string | null> {
   }
 }
 
-export async function createCompany({ name, statusId }: { name: string; statusId: string }) {
+export async function createCompany({
+  name,
+  statusId,
+  code,
+}: {
+  name: string;
+  statusId: string;
+  code: string;
+}): Promise<string | null> {
   try {
-    await db.insert(companies).values({ name, statusId });
+    await db.insert(companies).values({ name, statusId, code });
     return null;
   } catch (e) {
     return (e as DatabaseError).detail as string;
@@ -65,7 +79,13 @@ export async function createCompany({ name, statusId }: { name: string; statusId
 export async function getCompany(id: string): Promise<[string | undefined, CompanyTable | undefined]> {
   try {
     const result = await db
-      .select({ id: companies.id, name: companies.name, statusId: status.id, statusName: status.name })
+      .select({
+        id: companies.id,
+        name: companies.name,
+        statusId: status.id,
+        statusName: status.name,
+        code: companies.code,
+      })
       .from(companies)
       .leftJoin(status, eq(companies.statusId, status.id))
       .where(eq(companies.id, id));
