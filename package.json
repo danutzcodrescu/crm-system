@@ -14,8 +14,6 @@
     "db:seed": "npx @snaplet/seed sync && npx tsx seed.ts"
   },
   "dependencies": {
-    "@clerk/backend": "^1.15.5",
-    "@clerk/remix": "^4.2.45",
     "@emotion/cache": "^11.13.1",
     "@emotion/react": "^11.13.3",
     "@emotion/server": "^11.11.0",
@@ -25,6 +23,9 @@
     "@mui/lab": "6.0.0-beta.14",
     "@mui/material": "^6.1.6",
     "@mui/x-date-pickers": "^7.22.1",
+    "@node-rs/argon2": "^2.0.0",
+    "@oslojs/crypto": "^1.0.1",
+    "@oslojs/encoding": "^1.1.0",
     "@react-hookz/web": "^24.0.4",
     "@remix-run/node": "^2.13.1",
     "@remix-run/react": "^2.13.1",

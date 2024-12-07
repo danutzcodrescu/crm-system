@@ -1,5 +1,17 @@
 import { InferInsertModel, InferSelectModel, relations } from 'drizzle-orm';
-import { boolean, pgEnum, pgTable, real, smallint, text, timestamp, uuid } from 'drizzle-orm/pg-core';
+import {
+  boolean,
+  integer,
+  pgEnum,
+  pgSchema,
+  pgTable,
+  real,
+  serial,
+  smallint,
+  text,
+  timestamp,
+  uuid,
+} from 'drizzle-orm/pg-core';
 
 export const reminderType = pgEnum('reminder_type', ['reminder', 'meeting']);
 
@@ -76,3 +88,27 @@ export const reminders = pgTable('reminders', {
 
 export type SelectStatus = InferSelectModel<typeof status>;
 export type InsertStatus = InferInsertModel<typeof status>;
+
+export const authSchema = pgSchema('authentication');
+
+export const users = authSchema.table('users', {
+  id: serial().primaryKey(),
+  username: text().notNull().unique(),
+  password: text().notNull(),
+  createdAt: timestamp('created_at').notNull().defaultNow(),
+  updatedAt: timestamp('updated_at', { mode: 'date', precision: 3 }).$onUpdate(() => new Date()),
+});
+
+export const sessions = authSchema.table('sessions', {
+  id: text().primaryKey(),
+  userId: integer('user_id')
+    .notNull()
+    .references(() => users.id),
+  expiresAt: timestamp('expires_at', {
+    withTimezone: true,
+    mode: 'date',
+  }).notNull(),
+});
+
+export type User = InferSelectModel<typeof users>;
+export type Session = InferSelectModel<typeof sessions>;

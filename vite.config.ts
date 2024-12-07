@@ -17,6 +17,9 @@ export default defineConfig(({ isSsrBuild }) => ({
       },
     ],
   },
+  optimizeDeps: {
+    exclude: ['@node-rs/argon2', '@node-rs/bcrypt'],
+  },
   plugins: [
     remix({
       future: {
@@ -27,6 +30,7 @@ export default defineConfig(({ isSsrBuild }) => ({
       routes(defineRoutes) {
         return defineRoutes((route) => {
           route('/signin', 'views/login/route.tsx');
+          route('/signup', 'views/signup/route.tsx');
           route('/', 'views/layout.tsx', () => {
             route('', 'views/dashboard/route.tsx', { index: true });
             route('/statuses', 'views/statuses/route.tsx');

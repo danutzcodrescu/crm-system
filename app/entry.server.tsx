@@ -14,13 +14,11 @@ import type { AppLoadContext, EntryContext } from '@remix-run/node';
 import { createReadableStreamFromReadable } from '@remix-run/node';
 import { RemixServer } from '@remix-run/react';
 import { isbot } from 'isbot';
-import { pino } from 'pino';
 import { renderToPipeableStream, renderToString } from 'react-dom/server';
 
 import { createEmotion } from './emotion/emotion-server';
 import { theme } from './utils/client/theme';
-
-const logger = pino({ transport: { target: 'pino-pretty' } });
+import { logger } from './utils/server/logger.server';
 
 const ABORT_DELAY = 5_000;
 
