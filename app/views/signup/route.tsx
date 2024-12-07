@@ -12,7 +12,7 @@ export const loader = () => {
 };
 
 export const meta: MetaFunction = () => {
-  return [{ title: 'CRM System - Sign in' }, { name: 'description', content: 'Login page for the CRM System' }];
+  return [{ title: 'CRM System - Sign up' }, { name: 'description', content: 'Sign up page for the CRM System' }];
 };
 
 export async function action({ request }: ActionFunctionArgs) {
@@ -27,18 +27,20 @@ export async function action({ request }: ActionFunctionArgs) {
 
   const username = formData.get('username');
   const password = formData.get('password');
+  const repeatPassword = formData.get('repeat_password');
+
+  if (password !== repeatPassword) {
+    return json({ error: 'Passwords do not match' }, { status: 400 });
+  }
 
   if (!username || !password) {
     return json({ error: 'Username or password field cannot be empty' }, { status: 400 });
   }
 
-  const [error, cookie] = await auth.login(username as string, password as string, request);
+  const [error, cookie] = await auth.signUp(username as string, password as string, request);
 
   if (error) {
-    return json(
-      { error: error.startsWith('Username/password ') ? error : 'There was an issue when trying to login' },
-      { status: 500 },
-    );
+    return json({ error: 'There was an issue when trying to sign up' }, { status: 500 });
   }
   return redirect('/', {
     headers: {
@@ -76,8 +78,15 @@ export default function LoginPage() {
                   label="Password"
                   {...(data?.error ? { helperText: data.error, error: true } : {})}
                 />
+                <TextField
+                  size="small"
+                  name="repeat_password"
+                  type="password"
+                  label="Confirm Password"
+                  {...(data?.error ? { helperText: data.error, error: true } : {})}
+                />
                 <Button fullWidth variant="contained" type="submit">
-                  Sign in
+                  Sign up
                 </Button>
               </Stack>
             </Form>

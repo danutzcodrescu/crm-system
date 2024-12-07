@@ -3,7 +3,7 @@ import { createCookieSessionStorage } from '@remix-run/node';
 import { maxAge } from './constants.server';
 
 type SessionData = {
-  userId: string;
+  session: string;
 };
 
 type SessionFlashData = {
@@ -16,8 +16,8 @@ const { getSession, commitSession, destroySession } = createCookieSessionStorage
     httpOnly: true,
     maxAge,
     path: '/',
-    sameSite: 'strict',
-    secure: true,
+    sameSite: process.env.NODE_ENV === 'production' ? 'strict' : 'lax',
+    secure: process.env.NODE_ENV === 'production',
     // TODO add secret
     // secrets: []
   },
