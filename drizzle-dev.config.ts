@@ -8,6 +8,7 @@ export default defineConfig({
   breakpoints: true,
   strict: true,
   verbose: true,
+  casing: 'snake_case',
   dbCredentials: {
     database: 'test_db',
     host: 'localhost',

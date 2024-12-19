@@ -55,14 +55,24 @@ export const auth = {
     return false;
   },
 
-  signUp: async function (username: string, password: string, req: Request): Promise<[string, null] | [null, string]> {
+  signUp: async function (
+    username: string,
+    password: string,
+    req: Request,
+    shouldCreateSessions = true,
+  ): Promise<[string, null] | [null, string]> {
     const hashedPassword = await hashPassword(password);
 
     try {
       const data = await db.insert(users).values({ username, password: hashedPassword }).returning({ id: users.id });
-      const sessionString = await setSession(req, data[0].id);
       logger.info(`User created: ${username}`);
-      return [null, sessionString];
+      if (!shouldCreateSessions) {
+        return [null, ''];
+      } else {
+        const sessionString = await setSession(req, data[0].id);
+
+        return [null, sessionString];
+      }
     } catch (e) {
       logger.error(e);
       return ['User already exists', null];

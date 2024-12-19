@@ -1,10 +1,11 @@
-import { InferInsertModel, InferSelectModel, relations } from 'drizzle-orm';
+import { InferSelectModel } from 'drizzle-orm';
 import {
   boolean,
   integer,
   pgEnum,
   pgSchema,
   pgTable,
+  primaryKey,
   real,
   serial,
   smallint,
@@ -13,81 +14,125 @@ import {
   uuid,
 } from 'drizzle-orm/pg-core';
 
-export const reminderType = pgEnum('reminder_type', ['reminder', 'meeting']);
+export const agreementTypeEnum = pgEnum('agreement_type', ['old', 'new']);
 
 export const status = pgTable('statuses', {
-  id: uuid('id').primaryKey().defaultRandom(),
-  name: text('name').notNull().unique(),
-  createdAt: timestamp('created_at').notNull().defaultNow(),
-  updatedAt: timestamp('updated_at', { mode: 'date', precision: 3 }).$onUpdate(() => new Date()),
+  id: serial().primaryKey(),
+  name: text().notNull().unique(),
+  createdAt: timestamp().notNull().defaultNow(),
+  updatedAt: timestamp({ mode: 'date', precision: 3 }).$onUpdate(() => new Date()),
 });
 
 export const years = pgTable('years', {
-  inflationRate: real('inflation_rate').notNull(),
-  name: smallint('name').notNull().unique().primaryKey(),
-  createdAt: timestamp('created_at').notNull().defaultNow(),
-  updatedAt: timestamp('updated_at', { mode: 'date', precision: 3 }).$onUpdate(() => new Date()),
+  name: smallint().notNull().unique().primaryKey(),
+  createdAt: timestamp().notNull().defaultNow(),
+  updatedAt: timestamp({ mode: 'date', precision: 3 }).$onUpdate(() => new Date()),
 });
 
 export const companies = pgTable('companies', {
-  id: uuid('id').primaryKey().defaultRandom(),
-  name: text('name').notNull().unique(),
+  id: uuid().primaryKey().defaultRandom(),
+  name: text().notNull().unique(),
   code: text().notNull().unique(),
-  statusId: uuid('status_id').references(() => status.id, { onDelete: 'set null', onUpdate: 'no action' }),
-  createdAt: timestamp('created_at').notNull().defaultNow(),
-  updatedAt: timestamp('updated_at', { mode: 'date', precision: 3 }).$onUpdate(() => new Date()),
+  statusId: serial().references(() => status.id, { onDelete: 'set null', onUpdate: 'no action' }),
+  email: text().notNull().unique(),
+  createdAt: timestamp().notNull().defaultNow(),
+  updatedAt: timestamp({ mode: 'date', precision: 3 }).$onUpdate(() => new Date()),
 });
 
-export const companiesRelations = relations(companies, ({ one, many }) => ({
-  status: one(status),
-  employees: many(employees),
-  reminders: many(reminders),
-}));
+export const logs = pgTable('logs', {
+  id: uuid().primaryKey().defaultRandom(),
+  description: text().notNull(),
+  companyId: uuid().references(() => companies.id, { onDelete: 'cascade', onUpdate: 'no action' }),
+  date: timestamp({ mode: 'date' }).notNull(),
+  createdAt: timestamp().notNull().defaultNow(),
+  updatedAt: timestamp({ mode: 'date', precision: 3 }).$onUpdate(() => new Date()),
+});
 
-export const employees = pgTable('employees', {
+export const responsibles = pgTable('responsibles', {
+  id: uuid().primaryKey().defaultRandom(),
+  name: text(),
+  email: text(),
+  phoneNumber: text(),
+  title: text(),
+  companyId: uuid().references(() => companies.id, { onDelete: 'cascade', onUpdate: 'no action' }),
+});
+
+export const initialConsultation = pgTable('initial_consultations', {
   id: uuid('id').primaryKey().defaultRandom(),
-  name: text('name').notNull(),
-  createdAt: timestamp('created_at').notNull().defaultNow(),
-  phoneNumber: text('phone_number'),
-  email: text('email'),
-  companyId: uuid('company_id')
-    .references(() => companies.id, { onDelete: 'cascade' })
-    .notNull(),
-  updatedAt: timestamp('updated_at', { mode: 'date', precision: 3 }).$onUpdate(() => new Date()),
+  companyId: uuid()
+    .notNull()
+    .references(() => companies.id, { onDelete: 'cascade', onUpdate: 'no action' }),
+  documentSent: boolean().default(false),
+  dateSigned: timestamp({ mode: 'date' }),
+  dateShared: timestamp({ mode: 'date' }),
+  link: text(),
+  createdAt: timestamp().notNull().defaultNow(),
+  updatedAt: timestamp({ mode: 'date', precision: 3 }).$onUpdate(() => new Date()),
 });
 
-export const employeesRelations = relations(employees, ({ many }) => ({
-  notes: many(notesLog),
-  reminders: many(reminders),
-}));
-
-export const notesLog = pgTable('notes_log', {
-  id: uuid('id').primaryKey().defaultRandom(),
-  date: timestamp('date').notNull(),
-  description: text('description').notNull(),
-  createdAt: timestamp('created_at').notNull().defaultNow(),
-  updatedAt: timestamp('updated_at', { mode: 'date', precision: 3 }).$onUpdate(() => new Date()),
-  employeeId: uuid('employee_id')
-    .references(() => employees.id, { onDelete: 'cascade' })
-    .notNull(),
+export const agreement = pgTable('agreements', {
+  id: uuid().primaryKey().defaultRandom(),
+  companyId: uuid()
+    .notNull()
+    .references(() => companies.id, { onDelete: 'cascade', onUpdate: 'no action' }),
+  typeOfAgreement: agreementTypeEnum().notNull(),
+  oldAgreementSent: boolean().default(false),
+  oldAgreementDateSigned: timestamp({ mode: 'date' }),
+  oldAgreementDateShared: timestamp({ mode: 'date' }),
+  oldAgreementLinkToAgreement: text(),
+  oldAgreementLinkToAppendix: text(),
+  newAgreementSent: boolean().default(false),
+  newAgreementDateSigned: timestamp({ mode: 'date' }),
+  newAgreementDateShared: timestamp({ mode: 'date' }),
+  newAgreementLinkToAgreement: text(),
+  createdAt: timestamp().notNull().defaultNow(),
+  updatedAt: timestamp({ mode: 'date', precision: 3 }).$onUpdate(() => new Date()),
 });
 
-export const reminders = pgTable('reminders', {
-  id: uuid('id').primaryKey().defaultRandom(),
-  date: timestamp().notNull(),
-  description: text(),
-  type: reminderType('type').notNull().default('reminder'),
-  employeeId: uuid('employee_id').references(() => employees.id),
-  companyId: uuid('company_id')
-    .references(() => companies.id, { onDelete: 'cascade' })
-    .notNull(),
-  completed: boolean().default(false).notNull(),
-  createdAt: timestamp('created_at').notNull().defaultNow(),
-  updatedAt: timestamp('updated_at', { mode: 'date', precision: 3 }).$onUpdate(() => new Date()),
-});
+export const recurringConsultation = pgTable(
+  'recurring_consultations',
+  {
+    companyId: uuid(),
+    year: smallint(),
+    sentDate: timestamp({ mode: 'date' }),
+    meetingDate: timestamp({ mode: 'date' }),
+    consultationFormCompleted: boolean(),
+    meetingHeld: boolean(),
+    dateSharedWithAuthority: timestamp({ mode: 'date' }),
+  },
+  (table) => {
+    return [
+      {
+        pk: primaryKey({ columns: [table.companyId, table.year] }),
+        pkWithCustomName: primaryKey({ name: 'recurringConsultationPK', columns: [table.companyId, table.year] }),
+      },
+    ];
+  },
+);
 
-export type SelectStatus = InferSelectModel<typeof status>;
-export type InsertStatus = InferInsertModel<typeof status>;
+export const reporting = pgTable(
+  'reporting',
+  {
+    companyId: uuid()
+      .notNull()
+      .references(() => companies.id, { onDelete: 'cascade', onUpdate: 'no action' }),
+    year: smallint().notNull(),
+    reportingDate: timestamp({ mode: 'date' }),
+    cigaretteButts: real(),
+    motivationForData: boolean(),
+    motivation: text(),
+    createdAt: timestamp().notNull().defaultNow(),
+    updatedAt: timestamp({ mode: 'date', precision: 3 }).$onUpdate(() => new Date()),
+  },
+  (table) => {
+    return [
+      {
+        pk: primaryKey({ columns: [table.companyId, table.year] }),
+        pkWithCustomName: primaryKey({ name: 'reportingPK', columns: [table.companyId, table.year] }),
+      },
+    ];
+  },
+);
 
 export const authSchema = pgSchema('authentication');
 
@@ -95,16 +140,16 @@ export const users = authSchema.table('users', {
   id: serial().primaryKey(),
   username: text().notNull().unique(),
   password: text().notNull(),
-  createdAt: timestamp('created_at').notNull().defaultNow(),
-  updatedAt: timestamp('updated_at', { mode: 'date', precision: 3 }).$onUpdate(() => new Date()),
+  createdAt: timestamp().notNull().defaultNow(),
+  updatedAt: timestamp({ mode: 'date', precision: 3 }).$onUpdate(() => new Date()),
 });
 
 export const sessions = authSchema.table('sessions', {
   id: text().primaryKey(),
-  userId: integer('user_id')
+  userId: integer()
     .notNull()
     .references(() => users.id),
-  expiresAt: timestamp('expires_at', {
+  expiresAt: timestamp({
     withTimezone: true,
     mode: 'date',
   }).notNull(),
