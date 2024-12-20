@@ -18,7 +18,7 @@ export function PageContainer({ children, title, additionalTitleElement, actionD
       setAlertStatus(false);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [parentActionData?.timeStamp, parentActionData?.timeStamp]);
+  }, [parentActionData?.timeStamp]);
 
   return (
     <Box sx={{ width: '100%', height: '100%', p: 1.5 }}>

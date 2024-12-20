@@ -5,14 +5,15 @@
  */
 
 import { CssBaseline, ThemeProvider } from '@mui/material';
-import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
-import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider/LocalizationProvider';
+import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFnsV3';
+import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { RemixBrowser } from '@remix-run/react';
+import { sv } from 'date-fns/locale';
 import { startTransition, StrictMode } from 'react';
 import { hydrateRoot } from 'react-dom/client';
 
 import { ClientCacheProvider } from './emotion/emotion-client';
-import { theme } from './utils/client/theme';
+import { theme } from './utils/theme';
 
 startTransition(() => {
   hydrateRoot(
@@ -21,7 +22,7 @@ startTransition(() => {
       <ClientCacheProvider>
         <ThemeProvider theme={theme}>
           <CssBaseline />
-          <LocalizationProvider dateAdapter={AdapterDayjs}>
+          <LocalizationProvider dateAdapter={AdapterDateFns} adapterLocale={sv}>
             <RemixBrowser />
           </LocalizationProvider>
         </ThemeProvider>

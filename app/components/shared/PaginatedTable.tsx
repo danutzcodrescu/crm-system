@@ -14,36 +14,33 @@ import {
   TableRow,
   Tooltip,
 } from '@mui/material';
-import { useFetcher } from '@remix-run/react';
 import {
-  CellContext,
   ColumnDef,
   ColumnFiltersState,
+  FilterFn,
   flexRender,
   getCoreRowModel,
   getFilteredRowModel,
   getPaginationRowModel,
   getSortedRowModel,
+  Row,
   RowData,
   SortingFn,
   useReactTable,
 } from '@tanstack/react-table';
-import { ReactNode, useCallback, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 
-import { EditableTableCell } from './EditableTableCell';
 import { Filter } from './Filter';
 
 declare module '@tanstack/react-table' {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  interface TableMeta<TData extends RowData> {
-    editedRow: string | null;
-    setEditedRow: (val: string | null) => void;
+  interface ColumnMeta<TData extends RowData, TValue> {
+    filterOptions?: { label: string; value: unknown }[];
+    filterOptionsLabel?: string;
   }
 
-  interface ColumnMeta<TData extends RowData, TValue> {
-    editField?: (params: Pick<CellContext<TData, TValue>, 'row' | 'cell'>) => ReactNode;
-    filterOptions?: string[];
-    editFieldType?: 'textarea' | 'date' | 'email' | 'text' | 'phone';
+  interface FilterFns {
+    boolean: FilterFn<unknown>;
   }
 }
 
@@ -66,32 +63,26 @@ const sortByNewRowFirst: SortingFn<TData> = (rowA, rowB, columnId) => {
       : 0;
 };
 
+const booleanFilterFn: FilterFn<TData> = (row: Row<TData>, columnId: string, filterValue: boolean[]) => {
+  if (filterValue.length === 0) return true;
+  const value = row.original[columnId] as boolean;
+  return filterValue.includes(value);
+};
+
 interface Props<T> {
   columns: ColumnDef<T>[];
   data: T[];
   action?: string;
-  actionAccessor?: string;
-  updateFetcher?: ReturnType<typeof useFetcher>;
-  newRowObject?: T;
-  createNewRow?: (triggerNewRow: () => void) => ReactNode;
   warningMessage?: string;
 }
 
 export function PaginatedTable<T extends { id: string; warning?: boolean }>({
   data,
   columns,
-  action,
-  actionAccessor,
-  updateFetcher,
-  newRowObject,
-  createNewRow: newRow,
   warningMessage,
 }: Props<T>) {
-  // TODO refactor to useReducer
   const [dt, setDt] = useState(data);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
-  const [editedRow, setEditedRow] = useState<string | null>(null);
-  const [formMethod, setFormMethod] = useState<'PATCH' | 'POST'>('PATCH');
 
   const table = useReactTable({
     data: dt,
@@ -107,6 +98,11 @@ export function PaginatedTable<T extends { id: string; warning?: boolean }>({
         pageSize: 50,
       },
     },
+    defaultColumn: {
+      size: 100,
+      minSize: 75,
+      maxSize: Number.MAX_SAFE_INTEGER,
+    },
     maxMultiSortColCount: 1,
     //
     // debugTable: process.env.NODE_ENV === 'development' ? true : false,
@@ -116,30 +112,10 @@ export function PaginatedTable<T extends { id: string; warning?: boolean }>({
     sortingFns: {
       sortByNewRowFirst: sortByNewRowFirst,
     },
-    meta: {
-      editedRow,
-      setEditedRow: (value: string | null) => {
-        if (value === null && editedRow === '0' && dt[0]?.id === undefined) {
-          setDt((prev) => prev.slice(1));
-        }
-        setEditedRow(value);
-      },
+    filterFns: {
+      boolean: booleanFilterFn,
     },
   });
-
-  useEffect(() => {
-    if (updateFetcher?.state === 'idle' && editedRow) {
-      setEditedRow(null);
-      setFormMethod('PATCH');
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [updateFetcher?.state]);
-
-  const createNewRow = useCallback(() => {
-    setDt((prev) => [newRowObject as T, ...prev]);
-    setEditedRow('0');
-    setFormMethod('POST');
-  }, [newRowObject]);
 
   useEffect(() => {
     setDt(data);
@@ -148,23 +124,7 @@ export function PaginatedTable<T extends { id: string; warning?: boolean }>({
   const { pageSize, pageIndex } = table.getState().pagination;
 
   return (
-    <Box
-      sx={{ width: '100%' }}
-      component={updateFetcher?.Form || Box}
-      id="table_form"
-      method={formMethod}
-      {...(editedRow
-        ? {
-            action:
-              formMethod === 'POST'
-                ? action
-                : // @ts-expect-error type mismatch
-                  `${action?.replace('?index', '')}/${data[parseInt(editedRow)][actionAccessor]}`,
-            navigate: false,
-          }
-        : {})}
-    >
-      <Box sx={{ display: 'flex', flexDirection: 'row-reverse' }}>{newRow ? newRow(createNewRow) : null}</Box>
+    <Box sx={{ width: '100%' }}>
       <TableContainer component={Paper} sx={{ overflow: 'auto' }}>
         <Table sx={{ minWidth: 650 }} aria-label="simple table">
           <TableHead>
@@ -177,8 +137,7 @@ export function PaginatedTable<T extends { id: string; warning?: boolean }>({
                       colSpan={header.colSpan}
                       sx={{
                         cursor: header.column.getCanSort() ? 'pointer' : 'default',
-                        // @ts-expect-error type mismatch
-                        ...(header.column.columnDef.width ? { width: header.column.columnDef.width } : {}),
+                        minWidth: header.getSize(),
                       }}
                       onClick={header.column.getToggleSortingHandler()}
                     >
@@ -212,8 +171,7 @@ export function PaginatedTable<T extends { id: string; warning?: boolean }>({
                         sx={{
                           color: (theme) =>
                             row.original?.warning ? theme.palette.error.main : theme.palette.text.primary,
-                          // @ts-expect-error type mismatch
-                          ...(cell.column.columnDef.width ? { width: cell.column.columnDef.width } : {}),
+                          minWidth: cell.column.getSize(),
                         }}
                       >
                         <Stack direction="row" gap={1} alignItems="center">
@@ -222,7 +180,7 @@ export function PaginatedTable<T extends { id: string; warning?: boolean }>({
                               <ErrorOutline sx={{ fontSize: '0.75rem' }} />
                             </Tooltip>
                           ) : null}
-                          <EditableTableCell cell={cell} row={row} editedRow={editedRow} />
+                          {flexRender(cell.column.columnDef.cell, cell.getContext())}
                         </Stack>
                       </TableCell>
                     );
@@ -252,7 +210,6 @@ export function PaginatedTable<T extends { id: string; warning?: boolean }>({
           const size = e.target.value ? Number(e.target.value) : 10;
           table.setPageSize(size);
         }}
-        // ActionsComponent={TablePaginationActions}
       />
     </Box>
   );

@@ -34,7 +34,8 @@ export const auth = {
   logout: async function (req: Request) {
     const session = await getRequestSession(req);
     try {
-      await invalidateSession(session.get('session') as string);
+      const sessionId = fromSessionTokenToSessionId(session.get('session') as string);
+      await invalidateSession(sessionId);
       logger.info(`logout -> Session destroyed for ${session.get('session')}`);
     } catch (e) {
       logger.error(e);
@@ -104,7 +105,7 @@ async function createSession(token: string, userId: number): Promise<Session> {
   try {
     await db.insert(sessions).values(session);
   } catch (e) {
-    console.log(e);
+    logger.error(e);
   }
   return session;
 }
