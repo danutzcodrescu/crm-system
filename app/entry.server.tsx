@@ -8,17 +8,18 @@ import { PassThrough } from 'node:stream';
 
 import { CacheProvider } from '@emotion/react';
 import { CssBaseline, ThemeProvider } from '@mui/material';
-import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
-import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider/LocalizationProvider';
+import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFnsV3';
+import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import type { AppLoadContext, EntryContext } from '@remix-run/node';
 import { createReadableStreamFromReadable } from '@remix-run/node';
 import { RemixServer } from '@remix-run/react';
+import { sv } from 'date-fns/locale';
 import { isbot } from 'isbot';
 import { renderToPipeableStream, renderToString } from 'react-dom/server';
 
 import { createEmotion } from './emotion/emotion-server';
-import { theme } from './utils/client/theme';
 import { logger } from './utils/server/logger.server';
+import { theme } from './utils/theme';
 
 const ABORT_DELAY = 5_000;
 
@@ -96,7 +97,7 @@ function handleBrowserRequest(
     <CacheProvider value={cache}>
       <ThemeProvider theme={theme}>
         <CssBaseline />
-        <LocalizationProvider dateAdapter={AdapterDayjs}>
+        <LocalizationProvider dateAdapter={AdapterDateFns} adapterLocale={sv}>
           <RemixServer context={remixContext} url={request.url} abortDelay={ABORT_DELAY} />
         </LocalizationProvider>
       </ThemeProvider>
