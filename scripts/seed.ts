@@ -207,6 +207,8 @@ async function main() {
           oldAgreementSent: row.agreementSent === 'Yes',
           oldAgreementDateSigned: formatDate(row.agreementDate),
           oldAgreementDateShared: formatDate(row.sharedWithAuthorityDate),
+          oldAgreementLinkToAgreement: row.link,
+          oldAgreementLinkToAppendix: row.appendixLink,
         };
       }),
     );

@@ -99,8 +99,8 @@ export function PaginatedTable<T extends { id: string; warning?: boolean }>({
       },
     },
     defaultColumn: {
-      size: 100,
-      minSize: 75,
+      size: 150,
+      minSize: 100,
       maxSize: Number.MAX_SAFE_INTEGER,
     },
     maxMultiSortColCount: 1,
@@ -125,7 +125,7 @@ export function PaginatedTable<T extends { id: string; warning?: boolean }>({
 
   return (
     <Box sx={{ width: '100%' }}>
-      <TableContainer component={Paper} sx={{ overflow: 'auto' }}>
+      <TableContainer component={Paper} sx={{ overflow: 'auto', maxWidth: '100%' }}>
         <Table sx={{ minWidth: 650 }} aria-label="simple table">
           <TableHead>
             {table.getHeaderGroups().map((headerGroup) => (
