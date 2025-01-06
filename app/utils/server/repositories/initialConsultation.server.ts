@@ -52,7 +52,6 @@ interface EditInitialConsultationArgs {
 }
 
 export async function editInitialConsultationRecord(args: EditInitialConsultationArgs) {
-  console.log(args);
   try {
     logger.info('Trying to update initial consultation data for id: ', args.id);
     await db

@@ -2,7 +2,7 @@ import { TZDate } from '@date-fns/tz';
 import { Checkbox, FormControlLabel, Stack, TextField, TextFieldProps } from '@mui/material';
 import { DatePicker } from '@mui/x-date-pickers';
 import { FormProps } from '@remix-run/react';
-import { cloneElement, Fragment, ReactNode, useRef } from 'react';
+import { cloneElement, Fragment, ReactNode, useRef, useState } from 'react';
 
 export interface Field {
   name: string;
@@ -18,6 +18,8 @@ export interface Field {
     max?: string;
     pattern?: string;
   };
+  condition?: [string, unknown];
+  watchable?: boolean;
   render?: () => ReactNode;
 }
 
@@ -27,22 +29,49 @@ interface Props extends FormProps {
 
 export function EditForm({ fields }: Props) {
   const inputRef = useRef<HTMLInputElement>(null);
+  const [watchableFields, setWatchableFields] = useState<Record<string, unknown>>({});
   return (
     <Stack sx={{ gap: 2, width: '100%' }}>
       {fields.map((field) => {
-        // @ts-expect-error passing a key is not an issue
-        if (field.render) return cloneElement(field.render(), { key: field.name });
+        if (
+          field.condition &&
+          ((watchableFields[field.condition[0]] && watchableFields[field.condition[0]] !== field.condition[1]) ||
+            (watchableFields[field.condition[0]] === undefined &&
+              fields.find((f) => f.name === field.condition?.[0])?.defaultValue !== field.condition[1]))
+        )
+          return null;
+        if (field.render)
+          // @ts-expect-error passing a key is not an issue
+          return cloneElement(field.render(), {
+            key: field.name,
+            label: field.label,
+            defaultValue: field.defaultValue as string,
+            name: field.name,
+            required: !!field.required,
+            ...(field.watchable
+              ? {
+                  onChange: (e: React.ChangeEvent<HTMLInputElement>) =>
+                    setWatchableFields((prev) => ({ ...prev, [field.name]: e.target.value })),
+                }
+              : {}),
+          });
         if (field.type === 'checkbox') {
           return (
             <Fragment key={field.name}>
+              {/* make sure the checkbox is in sync */}
               <input type="hidden" name={field.name} defaultValue={field.defaultValue as string} ref={inputRef} />
               <FormControlLabel
                 // name={field.name}
                 control={
                   <Checkbox
                     defaultChecked={field.defaultValue as boolean}
-                    // @ts-expect-error - we know that the inputRef is an input element
-                    onChange={(val) => (inputRef.current.value = val.target.checked)}
+                    onChange={(val) => {
+                      // @ts-expect-error - we know that the inputRef is an input element
+                      inputRef.current.value = val.target.checked;
+                      if (field.watchable)
+                        setWatchableFields((prev) => ({ ...prev, [field.name]: val.target.checked }));
+                    }}
+                    required={!!field.required}
                   />
                 }
                 label={field.label as string}
@@ -76,6 +105,13 @@ export function EditForm({ fields }: Props) {
             slotProps={{ htmlInput: field.inputProps }}
             label={field.label}
             hidden={!!field.hidden}
+            required={!!field.required}
+            {...(field.watchable
+              ? {
+                  onChange: (e: React.ChangeEvent<HTMLInputElement>) =>
+                    setWatchableFields((prev) => ({ ...prev, [field.name]: e.target.value })),
+                }
+              : {})}
           />
         );
       })}

@@ -56,6 +56,11 @@ export function Topbar() {
           </Link>
         </MenuItem>
         <MenuItem onClick={handleClose}>
+          <Link component={RLink} to="/agreement" prefetch="intent">
+            Agreement
+          </Link>
+        </MenuItem>
+        <MenuItem onClick={handleClose}>
           <Link component={RLink} to="/years/" prefetch="intent">
             Years
           </Link>

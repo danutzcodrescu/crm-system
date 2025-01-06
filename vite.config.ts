@@ -36,6 +36,7 @@ export default defineConfig(({ isSsrBuild }) => ({
           route('/', 'views/layout.tsx', () => {
             route('', 'views/dashboard/route.tsx', { index: true });
             route('/initialConsultation', 'views/initialConsultation/route.tsx');
+            route('/agreement', 'views/agreement/route.tsx');
             // route('/statuses', 'views/statuses/route.tsx');
             // route('/years', 'views/years/route.tsx');
             // route('/contacts', 'views/employees/layout.tsx', () => {
