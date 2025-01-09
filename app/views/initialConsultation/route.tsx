@@ -118,6 +118,8 @@ export default function InitialConsultation() {
       {
         header: 'Municipality',
         accessorKey: 'companyName',
+        id: 'companyName',
+        enableHiding: false,
         filterFn: 'includesString',
         size: 370,
         //  cell: ({ getValue, row }) => (
@@ -130,6 +132,7 @@ export default function InitialConsultation() {
         header: 'Initial consultation document sent',
         accessorKey: 'documentSent',
         filterFn: 'boolean',
+        id: 'documentSent',
         meta: {
           filterOptions: [
             { label: 'Yes', value: true },
@@ -147,6 +150,7 @@ export default function InitialConsultation() {
       {
         header: 'Initial consultation document signed',
         accessorKey: 'isSigned',
+        id: 'isSigned',
         filterFn: 'boolean',
         cell: ({ getValue }) =>
           getValue() ? (
@@ -166,6 +170,7 @@ export default function InitialConsultation() {
       {
         header: 'Time for signing initial consultation document',
         accessorKey: 'dateSigned',
+        id: 'dateSigned',
         cell: ({ getValue }) => (getValue() ? formatDate(getValue() as string) : ''),
         enableColumnFilter: false,
         enableSorting: false,
@@ -174,6 +179,7 @@ export default function InitialConsultation() {
       {
         header: 'Shared with EPA',
         accessorKey: 'isShared',
+        id: 'isShared',
         filterFn: 'boolean',
         meta: {
           filterOptions: [
@@ -192,6 +198,7 @@ export default function InitialConsultation() {
       {
         header: 'Date shared with EPA',
         accessorKey: 'dateShared',
+        id: 'dateShared',
         cell: ({ getValue }) => (getValue() ? formatDate(getValue() as string) : ''),
         enableColumnFilter: false,
         enableSorting: false,
@@ -202,6 +209,7 @@ export default function InitialConsultation() {
         header: 'Actions',
         enableSorting: false,
         enableColumnFilter: false,
+        enableHiding: false,
         cell: ({ row }) => {
           return (
             <TableActionsCell

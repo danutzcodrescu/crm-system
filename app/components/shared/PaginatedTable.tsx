@@ -1,9 +1,15 @@
 import ArrowDownward from '@mui/icons-material/ArrowDownward';
 import ArrowUpward from '@mui/icons-material/ArrowUpward';
 import ErrorOutline from '@mui/icons-material/ErrorOutline';
+import ViewWeek from '@mui/icons-material/ViewWeek';
 import {
   Box,
+  Checkbox,
+  FormControlLabel,
+  FormGroup,
+  IconButton,
   Paper,
+  Popover,
   Stack,
   Table,
   TableBody,
@@ -13,6 +19,7 @@ import {
   TablePagination,
   TableRow,
   Tooltip,
+  Typography,
 } from '@mui/material';
 import {
   ColumnDef,
@@ -83,6 +90,17 @@ export function PaginatedTable<T extends { id: string; warning?: boolean }>({
 }: Props<T>) {
   const [dt, setDt] = useState(data);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
+  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+  const [columnVisibility, setColumnVisibility] = useState(
+    columns.reduce(
+      (acc, col) => {
+        if (col.id === 'actions') return acc;
+        acc[col.id as string] = true;
+        return acc;
+      },
+      {} as Record<string, boolean>,
+    ),
+  );
 
   const table = useReactTable({
     data: dt,
@@ -93,6 +111,7 @@ export function PaginatedTable<T extends { id: string; warning?: boolean }>({
     getPaginationRowModel: getPaginationRowModel(),
     getSortedRowModel: getSortedRowModel(),
     onColumnFiltersChange: setColumnFilters,
+    onColumnVisibilityChange: setColumnVisibility,
     initialState: {
       pagination: {
         pageSize: 50,
@@ -108,6 +127,7 @@ export function PaginatedTable<T extends { id: string; warning?: boolean }>({
     // debugTable: process.env.NODE_ENV === 'development' ? true : false,
     state: {
       columnFilters,
+      columnVisibility,
     },
     sortingFns: {
       sortByNewRowFirst: sortByNewRowFirst,
@@ -125,6 +145,38 @@ export function PaginatedTable<T extends { id: string; warning?: boolean }>({
 
   return (
     <Box sx={{ width: '100%' }}>
+      <Tooltip title="Column visibility">
+        <IconButton onClick={(event) => setAnchorEl(event.currentTarget)}>
+          <ViewWeek />
+        </IconButton>
+      </Tooltip>
+
+      <Popover
+        anchorOrigin={{
+          vertical: 'bottom',
+          horizontal: 'left',
+        }}
+        transformOrigin={{
+          vertical: 'top',
+          horizontal: 'left',
+        }}
+        onClose={() => setAnchorEl(null)}
+        open={!!anchorEl}
+      >
+        <Typography component="p" fontWeight="bold">
+          Toggle columns
+        </Typography>
+        <FormGroup>
+          {table.getAllLeafColumns().map((column) => (
+            <FormControlLabel
+              control={<Checkbox checked={column.getIsVisible()} onChange={column.getToggleVisibilityHandler()} />}
+              label={column.columnDef.header as string}
+              key={column.id}
+              disabled={!column.getCanHide()}
+            />
+          ))}
+        </FormGroup>
+      </Popover>
       <TableContainer component={Paper} sx={{ overflow: 'auto', maxWidth: '100%' }}>
         <Table sx={{ minWidth: 650 }} aria-label="simple table">
           <TableHead>

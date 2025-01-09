@@ -169,7 +169,9 @@ export default function RecurringConsultation() {
     () => [
       {
         header: 'Municipality',
+        enableHiding: false,
         accessorFn: (row) => row.companyName,
+        id: 'companyName',
         size: 370,
         //  cell: ({ getValue, row }) => (
         //    <Link component={RLink} to={`/communes/${row.original.id}`}>
@@ -179,6 +181,7 @@ export default function RecurringConsultation() {
       },
       {
         header: 'Type of agreement',
+        id: 'agreementType',
         accessorKey: 'agreementType',
         filterFn: 'arrIncludesSome',
         meta: {
@@ -192,6 +195,7 @@ export default function RecurringConsultation() {
       },
       {
         header: 'Recurring consultation',
+        id: 'recurringConsultation',
         accessorKey: 'recurringConsultation',
         filterFn: 'boolean',
         meta: {
@@ -211,6 +215,7 @@ export default function RecurringConsultation() {
       {
         header: 'Initial consultation signed',
         accessorKey: 'initialConsultationSignedDate',
+        id: 'initialConsultationSignedDate',
         enableColumnFilter: false,
         enableSorting: false,
         cell: ({ getValue }) => (getValue() ? formatDate(getValue() as string) : ''),
@@ -250,6 +255,7 @@ export default function RecurringConsultation() {
       {
         header: 'Date for sending info + form',
         accessorKey: 'sentDate',
+        id: 'sentDate',
         enableColumnFilter: false,
         enableSorting: false,
         cell: ({ getValue }) => (getValue() ? formatDate(getValue() as string) : ''),
@@ -257,6 +263,7 @@ export default function RecurringConsultation() {
       {
         header: 'Meeting scheduled',
         accessorKey: 'meetingDate',
+        id: 'meetingDate',
         enableColumnFilter: false,
         enableSorting: false,
         cell: ({ getValue }) => (getValue() ? formatDate(getValue() as string, 'Pp') : ''),
@@ -265,6 +272,7 @@ export default function RecurringConsultation() {
         header: 'Consultation form completed',
         accessorKey: 'consultationFormCompleted',
         filterFn: 'boolean',
+        id: 'consultationFormCompleted',
         meta: {
           filterOptions: [
             { label: 'Yes', value: true },
@@ -283,6 +291,7 @@ export default function RecurringConsultation() {
         header: 'Meeting held',
         accessorKey: 'meetingHeld',
         filterFn: 'boolean',
+        id: 'meetingHeld',
         meta: {
           filterOptions: [
             { label: 'Yes', value: true },
@@ -300,6 +309,7 @@ export default function RecurringConsultation() {
       {
         header: 'Information shared with NPA',
         accessorKey: 'infoSharedWithAuthority',
+        id: 'infoSharedWithAuthority',
         filterFn: 'boolean',
         meta: {
           filterOptions: [
@@ -318,6 +328,7 @@ export default function RecurringConsultation() {
       {
         header: 'Date shared with NPA',
         accessorKey: 'dateSharedWithAuthority',
+        id: 'dateSharedWithAuthority',
         enableColumnFilter: false,
         enableSorting: false,
         cell: ({ getValue }) => (getValue() ? formatDate(getValue() as string) : ''),
@@ -327,6 +338,7 @@ export default function RecurringConsultation() {
         header: 'Actions',
         enableSorting: false,
         enableColumnFilter: false,
+        enableHiding: false,
         cell: ({ row }) => {
           return (
             <TableActionsCell

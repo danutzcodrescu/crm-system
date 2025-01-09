@@ -174,6 +174,8 @@ export default function Agreement() {
     () => [
       {
         header: 'Municipality',
+        id: 'companyName',
+        enableHiding: false,
         accessorKey: 'companyName',
         filterFn: 'includesString',
         size: 370,
@@ -186,6 +188,7 @@ export default function Agreement() {
       {
         header: 'Type of agreement',
         accessorKey: 'typeOfAgreement',
+        id: 'typeOfAgreement',
         filterFn: 'arrIncludesSome',
         meta: {
           filterOptions: [
@@ -199,6 +202,7 @@ export default function Agreement() {
       {
         header: 'Old agreement sent',
         accessorKey: 'oldAgreementSent',
+        id: 'oldAgreementSent',
         filterFn: 'boolean',
         meta: {
           filterOptions: [
@@ -217,6 +221,7 @@ export default function Agreement() {
       {
         header: 'Old agreement agreement signed',
         accessorKey: 'isOldAgreementSigned',
+        id: 'isOldAgreementSigned',
         filterFn: 'boolean',
         cell: ({ getValue }) =>
           getValue() ? (
@@ -236,6 +241,7 @@ export default function Agreement() {
       {
         header: 'Old agreement agreement signed date',
         accessorKey: 'oldAgreementSigned',
+        id: 'oldAgreementSigned',
         enableColumnFilter: false,
         enableSorting: false,
         cell: ({ getValue }) => (getValue() ? formatDate(getValue() as string) : ''),
@@ -243,6 +249,7 @@ export default function Agreement() {
       {
         header: 'Old agreement agreement shared',
         accessorKey: 'isOldAgreementShared',
+        id: 'isOldAgreementShared',
         filterFn: 'boolean',
         cell: ({ getValue }) =>
           getValue() ? (
@@ -262,6 +269,7 @@ export default function Agreement() {
       {
         header: 'Old agreement shared date',
         accessorKey: 'oldAgreementShared',
+        id: 'oldAgreementShared',
         enableColumnFilter: false,
         enableSorting: false,
         cell: ({ getValue }) => (getValue() ? formatDate(getValue() as string) : ''),
@@ -269,6 +277,7 @@ export default function Agreement() {
       {
         header: 'New agreement sent',
         accessorKey: 'newAgreementSent',
+        id: 'newAgreementSent',
         filterFn: 'boolean',
         meta: {
           filterOptions: [
@@ -287,6 +296,7 @@ export default function Agreement() {
       {
         header: 'New agreement agreement signed',
         accessorKey: 'isNewAgreementSigned',
+        id: 'isNewAgreementSigned',
         filterFn: 'boolean',
         cell: ({ getValue }) =>
           getValue() ? (
@@ -306,6 +316,7 @@ export default function Agreement() {
       {
         header: 'New agreement agreement signed date',
         accessorKey: 'newAgreementSigned',
+        id: 'newAgreementSigned',
         enableColumnFilter: false,
         enableSorting: false,
         cell: ({ getValue }) => (getValue() ? formatDate(getValue() as string) : ''),
@@ -313,6 +324,7 @@ export default function Agreement() {
       {
         header: 'New agreement agreement shared',
         accessorKey: 'isNewAgreementShared',
+        id: 'isNewAgreementShared',
         filterFn: 'boolean',
         cell: ({ getValue }) =>
           getValue() ? (
@@ -332,6 +344,7 @@ export default function Agreement() {
       {
         header: 'New agreement shared date',
         accessorKey: 'newAgreementShared',
+        id: 'newAgreementShared',
         enableColumnFilter: false,
         enableSorting: false,
         cell: ({ getValue }) => (getValue() ? formatDate(getValue() as string) : ''),
@@ -342,6 +355,7 @@ export default function Agreement() {
         header: 'Actions',
         enableSorting: false,
         enableColumnFilter: false,
+        enableHiding: false,
         cell: ({ row }) => {
           return (
             <TableActionsCell
