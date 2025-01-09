@@ -1,4 +1,4 @@
-import { InferSelectModel } from 'drizzle-orm';
+import { InferSelectModel, sql } from 'drizzle-orm';
 import {
   boolean,
   integer,
@@ -34,6 +34,9 @@ export const companies = pgTable('companies', {
   name: text().notNull().unique(),
   code: text().notNull().unique(),
   statusId: serial().references(() => status.id, { onDelete: 'set null', onUpdate: 'no action' }),
+  consultations: smallint()
+    .array()
+    .default(sql`ARRAY[]::smallint[]`),
   email: text().notNull().unique(),
   createdAt: timestamp().notNull().defaultNow(),
   updatedAt: timestamp({ mode: 'date', precision: 3 }).$onUpdate(() => new Date()),
@@ -99,6 +102,8 @@ export const recurringConsultation = pgTable(
     consultationFormCompleted: boolean(),
     meetingHeld: boolean(),
     dateSharedWithAuthority: timestamp({ mode: 'date' }),
+    createdAt: timestamp().notNull().defaultNow(),
+    updatedAt: timestamp({ mode: 'date', precision: 3 }).$onUpdate(() => new Date()),
   },
   (table) => {
     return [

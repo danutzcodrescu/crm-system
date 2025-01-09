@@ -34,7 +34,7 @@ export async function action({ request }: ActionFunctionArgs) {
     const typeOfAgreement = body.get('typeOfAgreement');
     if (!id || !typeOfAgreement) {
       return json(
-        { message: 'Missing required fields: id or type of agreement', type: 'error', timeStamp: new Date() },
+        { message: 'Missing required fields: id or type of agreement', severity: 'error', timeStamp: new Date() },
         { status: 400 },
       );
     }
@@ -53,9 +53,12 @@ export async function action({ request }: ActionFunctionArgs) {
     });
 
     if (error) {
-      return json({ message: 'Could not update the record', type: 'error', timeStamp: new Date() }, { status: 500 });
+      return json(
+        { message: 'Could not update the record', severity: 'error', timeStamp: new Date() },
+        { status: 500 },
+      );
     }
-    return json({ message: 'Record updated successfully', type: 'success', timeStamp: new Date() });
+    return json({ message: 'Record updated successfully', severity: 'success', timeStamp: new Date() });
   }
 
   return json({ status: 405 });

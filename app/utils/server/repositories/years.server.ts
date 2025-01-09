@@ -1,36 +1,19 @@
-import { desc, eq } from 'drizzle-orm';
-import { DatabaseError } from 'pg';
+import { asc, gte } from 'drizzle-orm';
 
+import { logger } from '../logger.server';
 import { years } from '../schema.server';
 import { db } from './db.server';
 
-export async function getAllYears() {
-  return db.select({ name: years.name, inflationRate: years.inflationRate }).from(years).orderBy(desc(years.name));
-}
-
-export async function deleteYear(name: number): Promise<string | null> {
+export async function getAllYears(startYear = 2022): Promise<[string, null] | [null, number[]]> {
   try {
-    await db.delete(years).where(eq(years.name, name));
-    return null;
+    const data = await db
+      .select({ name: years.name })
+      .from(years)
+      .where(gte(years.name, startYear))
+      .orderBy(asc(years.name));
+    return [null, data.map((year) => year.name)];
   } catch (e) {
-    return (e as DatabaseError).detail as string;
-  }
-}
-
-export async function updateYear(name: number, inflationRate: number): Promise<string | null> {
-  try {
-    await db.update(years).set({ inflationRate }).where(eq(years.name, name));
-    return null;
-  } catch (e) {
-    return (e as DatabaseError).detail as string;
-  }
-}
-
-export async function createYear(name: number, inflationRate: number): Promise<string | null> {
-  try {
-    await db.insert(years).values({ name, inflationRate });
-    return null;
-  } catch (e) {
-    return (e as DatabaseError).detail as string;
+    logger.error(e);
+    return ['could not fetch data about the years', null];
   }
 }

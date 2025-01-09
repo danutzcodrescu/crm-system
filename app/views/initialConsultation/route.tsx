@@ -36,7 +36,7 @@ export async function action({ request }: ActionFunctionArgs) {
     const body = await request.formData();
     const id = body.get('id');
     if (!id) {
-      return json({ message: 'Id is required', type: 'error', timeStamp: new Date() }, { status: 400 });
+      return json({ message: 'Id is required', severity: 'error', timeStamp: new Date() }, { status: 400 });
     }
     const [error] = await editInitialConsultationRecord({
       id: id as string,
@@ -49,9 +49,12 @@ export async function action({ request }: ActionFunctionArgs) {
     });
 
     if (error) {
-      return json({ message: 'Could not update the record', type: 'error', timeStamp: new Date() }, { status: 500 });
+      return json(
+        { message: 'Could not update the record', severity: 'error', timeStamp: new Date() },
+        { status: 500 },
+      );
     }
-    return json({ message: 'Record updated successfully', type: 'success', timeStamp: new Date() });
+    return json({ message: 'Record updated successfully', severity: 'success', timeStamp: new Date() });
   }
 
   return json({ status: 405 });

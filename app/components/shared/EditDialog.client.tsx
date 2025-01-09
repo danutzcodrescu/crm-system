@@ -19,7 +19,7 @@ export function EditDialog({ title, fetcher, fields, url, isOpen, handleClose }:
     <Dialog maxWidth="lg" fullWidth open={isOpen} onClose={handleClose}>
       <fetcher.Form method="PATCH" action={url}>
         <DialogTitle>{title}</DialogTitle>
-        <DialogContent>
+        <DialogContent sx={{ paddingTop: (theme) => theme.spacing(1) + '!important' }}>
           <EditForm fields={fields} />
         </DialogContent>
         <DialogActions>

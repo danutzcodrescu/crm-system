@@ -1,6 +1,6 @@
 import { TZDate } from '@date-fns/tz';
 import { Checkbox, FormControlLabel, Stack, TextField, TextFieldProps } from '@mui/material';
-import { DatePicker } from '@mui/x-date-pickers';
+import { DatePicker, DateTimePicker } from '@mui/x-date-pickers';
 import { FormProps } from '@remix-run/react';
 import { cloneElement, Fragment, ReactNode, useRef, useState } from 'react';
 
@@ -77,6 +77,19 @@ export function EditForm({ fields }: Props) {
                 label={field.label as string}
               />
             </Fragment>
+          );
+        }
+        if (field.type === 'datetime') {
+          return (
+            <DateTimePicker
+              key={field.name}
+              label={field.label}
+              name={field.name}
+              defaultValue={
+                (field.defaultValue as string) ? new TZDate(field.defaultValue as unknown as string) : undefined
+              }
+              sx={{ minWidth: 150 }}
+            />
           );
         }
         if (field.type === 'date') {

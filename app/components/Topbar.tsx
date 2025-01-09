@@ -2,6 +2,7 @@ import ExitToApp from '@mui/icons-material/ExitToApp';
 import MenuIcon from '@mui/icons-material/Menu';
 import { AppBar, Box, IconButton, Link, Menu, MenuItem, Toolbar, Typography } from '@mui/material';
 import { Form, Link as RLink } from '@remix-run/react';
+import { getYear } from 'date-fns';
 import { useCallback, useState } from 'react';
 
 export function Topbar() {
@@ -51,13 +52,18 @@ export function Topbar() {
           </Link>
         </MenuItem>
         <MenuItem onClick={handleClose}>
-          <Link component={RLink} to="/initialConsultation" prefetch="intent">
+          <Link component={RLink} to="/initial-consultation" prefetch="intent">
             Initial Consultation
           </Link>
         </MenuItem>
         <MenuItem onClick={handleClose}>
           <Link component={RLink} to="/agreement" prefetch="intent">
             Agreement
+          </Link>
+        </MenuItem>
+        <MenuItem onClick={handleClose}>
+          <Link component={RLink} to={`/recurring-consultation?year=${getYear(new Date())}`} prefetch="intent">
+            Recurring consultation
           </Link>
         </MenuItem>
         <MenuItem onClick={handleClose}>

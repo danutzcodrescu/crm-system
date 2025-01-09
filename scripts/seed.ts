@@ -1,3 +1,4 @@
+import { eq } from 'drizzle-orm';
 import path, { dirname } from 'path';
 import { fileURLToPath } from 'url';
 import xlsx from 'xlsx';
@@ -178,11 +179,16 @@ async function main() {
     console.error(e);
   }
   try {
+    const consultationSigned = {} as Record<string, number>;
     const consultationData = readInitialConsultation();
     // eslint-disable-next-line drizzle/enforce-delete-with-where
     await drizzle.delete(initialConsultation);
     await drizzle.insert(initialConsultation).values(
       consultationData.map((row) => {
+        if (row.dateSigned) {
+          const [_, __, year] = row.dateSigned.split('/');
+          consultationSigned[data[row.code]] = parseInt(20 + year);
+        }
         return {
           companyId: data[row.code],
           documentSent: row.documentSent === 'Yes',
@@ -191,6 +197,14 @@ async function main() {
           link: row.link,
         };
       }),
+    );
+    await Promise.all(
+      Object.entries(consultationSigned).map(([code, year]) =>
+        drizzle
+          .update(companies)
+          .set({ consultations: [year + 1, year + 3, year + 5, year + 7] })
+          .where(eq(companies.id, code)),
+      ),
     );
   } catch (e) {
     console.error(e);
