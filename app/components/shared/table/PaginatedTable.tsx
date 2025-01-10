@@ -1,15 +1,9 @@
 import ArrowDownward from '@mui/icons-material/ArrowDownward';
 import ArrowUpward from '@mui/icons-material/ArrowUpward';
 import ErrorOutline from '@mui/icons-material/ErrorOutline';
-import ViewWeek from '@mui/icons-material/ViewWeek';
 import {
   Box,
-  Checkbox,
-  FormControlLabel,
-  FormGroup,
-  IconButton,
   Paper,
-  Popover,
   Stack,
   Table,
   TableBody,
@@ -19,7 +13,6 @@ import {
   TablePagination,
   TableRow,
   Tooltip,
-  Typography,
 } from '@mui/material';
 import {
   ColumnDef,
@@ -30,51 +23,28 @@ import {
   getFilteredRowModel,
   getPaginationRowModel,
   getSortedRowModel,
-  Row,
   RowData,
-  SortingFn,
   useReactTable,
 } from '@tanstack/react-table';
 import { useEffect, useState } from 'react';
 
+import { ColumnVisibility } from './ColumnVisibility';
 import { Filter } from './Filter';
+import { booleanFilterFn, dateFilterFn } from './filters';
 
 declare module '@tanstack/react-table' {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   interface ColumnMeta<TData extends RowData, TValue> {
     filterOptions?: { label: string; value: unknown }[];
     filterOptionsLabel?: string;
+    filterByDate?: true;
   }
 
   interface FilterFns {
     boolean: FilterFn<unknown>;
+    dateRange: FilterFn<unknown>;
   }
 }
-
-type TData = Record<string, unknown> & { id: string };
-
-const sortByNewRowFirst: SortingFn<TData> = (rowA, rowB, columnId) => {
-  if (rowA.original.id === '') {
-    return -1;
-  }
-  if (rowB.original.id === '') {
-    return 1;
-  }
-
-  // @ts-expect-error type mismatch
-  return rowA.original[columnId] > rowB.original[columnId]
-    ? 1
-    : // @ts-expect-error type mismatch
-      rowA.original[columnId] < rowB.original[columnId]
-      ? -1
-      : 0;
-};
-
-const booleanFilterFn: FilterFn<TData> = (row: Row<TData>, columnId: string, filterValue: boolean[]) => {
-  if (filterValue.length === 0) return true;
-  const value = row.original[columnId] as boolean;
-  return filterValue.includes(value);
-};
 
 interface Props<T> {
   columns: ColumnDef<T>[];
@@ -90,7 +60,7 @@ export function PaginatedTable<T extends { id: string; warning?: boolean }>({
 }: Props<T>) {
   const [dt, setDt] = useState(data);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
-  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+
   const [columnVisibility, setColumnVisibility] = useState(
     columns.reduce(
       (acc, col) => {
@@ -129,11 +99,9 @@ export function PaginatedTable<T extends { id: string; warning?: boolean }>({
       columnFilters,
       columnVisibility,
     },
-    sortingFns: {
-      sortByNewRowFirst: sortByNewRowFirst,
-    },
     filterFns: {
       boolean: booleanFilterFn,
+      dateRange: dateFilterFn,
     },
   });
 
@@ -145,38 +113,7 @@ export function PaginatedTable<T extends { id: string; warning?: boolean }>({
 
   return (
     <Box sx={{ width: '100%' }}>
-      <Tooltip title="Column visibility">
-        <IconButton onClick={(event) => setAnchorEl(event.currentTarget)}>
-          <ViewWeek />
-        </IconButton>
-      </Tooltip>
-
-      <Popover
-        anchorOrigin={{
-          vertical: 'bottom',
-          horizontal: 'left',
-        }}
-        transformOrigin={{
-          vertical: 'top',
-          horizontal: 'left',
-        }}
-        onClose={() => setAnchorEl(null)}
-        open={!!anchorEl}
-      >
-        <Typography component="p" fontWeight="bold">
-          Toggle columns
-        </Typography>
-        <FormGroup>
-          {table.getAllLeafColumns().map((column) => (
-            <FormControlLabel
-              control={<Checkbox checked={column.getIsVisible()} onChange={column.getToggleVisibilityHandler()} />}
-              label={column.columnDef.header as string}
-              key={column.id}
-              disabled={!column.getCanHide()}
-            />
-          ))}
-        </FormGroup>
-      </Popover>
+      <ColumnVisibility table={table} />
       <TableContainer component={Paper} sx={{ overflow: 'auto', maxWidth: '100%' }}>
         <Table sx={{ minWidth: 650 }} aria-label="simple table">
           <TableHead>

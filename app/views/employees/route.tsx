@@ -6,8 +6,8 @@ import { useMemo } from 'react';
 
 import { AddContact } from '~/components/contacts/AddContact';
 import { PageContainer } from '~/components/shared/PageContainer';
-import { PaginatedTable } from '~/components/shared/PaginatedTable';
-import { TableActionsCell } from '~/components/shared/TableActionsCell';
+import { PaginatedTable } from '~/components/shared/table/PaginatedTable';
+import { TableActionsCell } from '~/components/shared/table/TableActionsCell';
 import { auth } from '~/utils/server/auth.server';
 import { createEmployee, Employee, getAllEmployees } from '~/utils/server/repositories/employees.server';
 

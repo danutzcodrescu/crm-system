@@ -10,8 +10,8 @@ import { ClientOnly } from 'remix-utils/client-only';
 
 import { EditDialog } from '~/components/shared/EditDialog.client';
 import { PageContainer } from '~/components/shared/PageContainer';
-import { PaginatedTable } from '~/components/shared/PaginatedTable';
-import { TableActionsCell } from '~/components/shared/TableActionsCell';
+import { PaginatedTable } from '~/components/shared/table/PaginatedTable';
+import { TableActionsCell } from '~/components/shared/table/TableActionsCell';
 import { useEditFields } from '~/hooks/editFields';
 import { formatDate } from '~/utils/client/dates';
 import { auth } from '~/utils/server/auth.server';
@@ -32,6 +32,11 @@ export const meta: MetaFunction = () => {
     { name: 'description', content: 'Recurring consultation stage with all the municipalities' },
   ];
 };
+
+interface LoaderResponse {
+  yearsData: number[];
+  recurringData: RecurringConsultationPerMunicipality[];
+}
 
 export async function loader({ request }: LoaderFunctionArgs) {
   if (!auth.isLoggedIn(request)) {
@@ -82,6 +87,7 @@ export async function action({ request }: ActionFunctionArgs) {
     ];
     if (body.get('firstRecurringConsultation')) {
       const newYear = parseInt(body.get('firstRecurringConsultation') as string);
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const [_, consultationYear] = await getFistRecurringConsultationYearFormCompany(id as string);
       if (consultationYear !== newYear) {
         promises.push(updateRecurringConsultations(id as string, [newYear, newYear + 2, newYear + 4, newYear + 6]));
@@ -224,48 +230,80 @@ export default function RecurringConsultation() {
         header: 'Meeting 1',
         id: 'meeting1',
         accessorKey: 'consultations',
-        enableColumnFilter: false,
-        enableSorting: false,
+        filterFn: 'arrIncludesSome',
+        meta: {
+          filterOptionsLabel: 'Meeting 1 year',
+          filterOptions: (data as LoaderResponse).yearsData.map((year) => ({
+            label: year as unknown as string,
+            value: year,
+          })),
+        },
         cell: ({ getValue }) => ((getValue() as number[]).length ? (getValue() as number[])[0] : ''),
       },
       {
         header: 'Meeting 2',
         id: 'meeting2',
         accessorKey: 'consultations',
-        enableColumnFilter: false,
-        enableSorting: false,
+        filterFn: 'arrIncludesSome',
+        meta: {
+          filterOptionsLabel: 'Meeting 2 year',
+          filterOptions: (data as LoaderResponse).yearsData.map((year) => ({
+            label: year as unknown as string,
+            value: year,
+          })),
+        },
         cell: ({ getValue }) => ((getValue() as number[]).length ? (getValue() as number[])[1] : ''),
       },
       {
         header: 'Meeting 3',
         id: 'meeting3',
         accessorKey: 'consultations',
-        enableColumnFilter: false,
-        enableSorting: false,
+        filterFn: 'arrIncludesSome',
+        meta: {
+          filterOptionsLabel: 'Meeting 3 year',
+          filterOptions: (data as LoaderResponse).yearsData.map((year) => ({
+            label: year as unknown as string,
+            value: year,
+          })),
+        },
         cell: ({ getValue }) => ((getValue() as number[]).length ? (getValue() as number[])[2] : ''),
       },
       {
         header: 'Meeting 4',
         id: 'meeting4',
         accessorKey: 'consultations',
-        enableColumnFilter: false,
-        enableSorting: false,
+        filterFn: 'arrIncludesSome',
+        meta: {
+          filterOptionsLabel: 'Meeting 4 year',
+          filterOptions: (data as LoaderResponse).yearsData.map((year) => ({
+            label: year as unknown as string,
+            value: year,
+          })),
+        },
         cell: ({ getValue }) => ((getValue() as number[]).length ? (getValue() as number[])[3] : ''),
       },
       {
         header: 'Date for sending info + form',
         accessorKey: 'sentDate',
+        meta: {
+          filterByDate: true,
+          filterOptionsLabel: 'Filter Date for sending info + form',
+        },
         id: 'sentDate',
-        enableColumnFilter: false,
         enableSorting: false,
+        filterFn: 'dateRange',
         cell: ({ getValue }) => (getValue() ? formatDate(getValue() as string) : ''),
       },
       {
         header: 'Meeting scheduled',
         accessorKey: 'meetingDate',
         id: 'meetingDate',
-        enableColumnFilter: false,
         enableSorting: false,
+        filterFn: 'dateRange',
+        meta: {
+          filterByDate: true,
+          filterOptionsLabel: 'Filter Meeting scheduled',
+        },
         cell: ({ getValue }) => (getValue() ? formatDate(getValue() as string, 'Pp') : ''),
       },
       {
@@ -316,7 +354,7 @@ export default function RecurringConsultation() {
             { label: 'Yes', value: true },
             { label: 'No', value: false },
           ],
-          filterOptionsLabel: 'Meeting held',
+          filterOptionsLabel: 'Information shared with NPA',
         },
         cell: ({ getValue }) =>
           getValue() ? (
@@ -329,8 +367,12 @@ export default function RecurringConsultation() {
         header: 'Date shared with NPA',
         accessorKey: 'dateSharedWithAuthority',
         id: 'dateSharedWithAuthority',
-        enableColumnFilter: false,
         enableSorting: false,
+        filterFn: 'dateRange',
+        meta: {
+          filterByDate: true,
+          filterOptionsLabel: 'Filter Date shared with NPA',
+        },
         cell: ({ getValue }) => (getValue() ? formatDate(getValue() as string) : ''),
       },
       {
@@ -352,7 +394,8 @@ export default function RecurringConsultation() {
         },
       },
     ],
-    [],
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [(data as LoaderResponse).yearsData],
   );
   return (
     <PageContainer
@@ -378,17 +421,14 @@ export default function RecurringConsultation() {
       }
       actionData={fetcher.data as { message: string; severity: string } | undefined}
     >
-      <PaginatedTable
-        data={(data as { yearsData: number[]; recurringData: RecurringConsultationPerMunicipality[] }).recurringData}
-        columns={columns}
-      />
+      <PaginatedTable data={(data as LoaderResponse).recurringData} columns={columns} />
       <ClientOnly>
         {() => (
           <EditDialog
             isOpen={!!fields.length}
             handleClose={() => setFields([])}
             fields={fields}
-            title={`Edit recurring consultation for ${(data as { yearsData: number[]; recurringData: RecurringConsultationPerMunicipality[] }).recurringData?.find((d) => d.id === fields[0]?.defaultValue)?.companyName}`}
+            title={`Edit recurring consultation for ${(data as LoaderResponse).recurringData?.find((d) => d.id === fields[0]?.defaultValue)?.companyName}`}
             fetcher={fetcher}
             url="/recurring-consultation"
           />

@@ -10,8 +10,8 @@ import { useEffect, useMemo, useState } from 'react';
 import { action as deleteLogAction } from '~/api/notes-log/route';
 import { ContactDetails } from '~/components/contacts/ContactDetailts';
 import { PageContainer } from '~/components/shared/PageContainer';
-import { PaginatedTable } from '~/components/shared/PaginatedTable';
-import { TableActionsCell } from '~/components/shared/TableActionsCell';
+import { PaginatedTable } from '~/components/shared/table/PaginatedTable';
+import { TableActionsCell } from '~/components/shared/table/TableActionsCell';
 import { auth } from '~/utils/server/auth.server';
 import {
   deleteEmployee,

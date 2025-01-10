@@ -11,8 +11,8 @@ import { ClientOnly } from 'remix-utils/client-only';
 import { Field } from '~/components/EditForm';
 import { EditDialog } from '~/components/shared/EditDialog.client';
 import { PageContainer } from '~/components/shared/PageContainer';
-import { PaginatedTable } from '~/components/shared/PaginatedTable';
-import { TableActionsCell } from '~/components/shared/TableActionsCell';
+import { PaginatedTable } from '~/components/shared/table/PaginatedTable';
+import { TableActionsCell } from '~/components/shared/table/TableActionsCell';
 import { formatDate } from '~/utils/client/dates';
 import { auth } from '~/utils/server/auth.server';
 import { AgreementData, editAgreementRecord, getAgreementData } from '~/utils/server/repositories/agreement.server';
@@ -242,7 +242,11 @@ export default function Agreement() {
         header: 'Old agreement agreement signed date',
         accessorKey: 'oldAgreementSigned',
         id: 'oldAgreementSigned',
-        enableColumnFilter: false,
+        filterFn: 'dateRange',
+        meta: {
+          filterOptionsLabel: 'Filter Old agreement agreement signed date',
+          filterByDate: true,
+        },
         enableSorting: false,
         cell: ({ getValue }) => (getValue() ? formatDate(getValue() as string) : ''),
       },
@@ -270,8 +274,12 @@ export default function Agreement() {
         header: 'Old agreement shared date',
         accessorKey: 'oldAgreementShared',
         id: 'oldAgreementShared',
-        enableColumnFilter: false,
         enableSorting: false,
+        filterFn: 'dateRange',
+        meta: {
+          filterOptionsLabel: 'Filter Old agreement shared date',
+          filterByDate: true,
+        },
         cell: ({ getValue }) => (getValue() ? formatDate(getValue() as string) : ''),
       },
       {
@@ -317,8 +325,12 @@ export default function Agreement() {
         header: 'New agreement agreement signed date',
         accessorKey: 'newAgreementSigned',
         id: 'newAgreementSigned',
-        enableColumnFilter: false,
         enableSorting: false,
+        filterFn: 'dateRange',
+        meta: {
+          filterOptionsLabel: 'Filter New agreement agreement signed date',
+          filterByDate: true,
+        },
         cell: ({ getValue }) => (getValue() ? formatDate(getValue() as string) : ''),
       },
       {
@@ -345,8 +357,12 @@ export default function Agreement() {
         header: 'New agreement shared date',
         accessorKey: 'newAgreementShared',
         id: 'newAgreementShared',
-        enableColumnFilter: false,
         enableSorting: false,
+        filterFn: 'dateRange',
+        meta: {
+          filterOptionsLabel: 'Filter New agreement shared date',
+          filterByDate: true,
+        },
         cell: ({ getValue }) => (getValue() ? formatDate(getValue() as string) : ''),
       },
 

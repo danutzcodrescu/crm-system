@@ -11,8 +11,8 @@ import { ClientOnly } from 'remix-utils/client-only';
 import { Field } from '~/components/EditForm';
 import { EditDialog } from '~/components/shared/EditDialog.client';
 import { PageContainer } from '~/components/shared/PageContainer';
-import { PaginatedTable } from '~/components/shared/PaginatedTable';
-import { TableActionsCell } from '~/components/shared/TableActionsCell';
+import { PaginatedTable } from '~/components/shared/table/PaginatedTable';
+import { TableActionsCell } from '~/components/shared/table/TableActionsCell';
 import { formatDate } from '~/utils/client/dates';
 import { auth } from '~/utils/server/auth.server';
 import {
@@ -172,9 +172,13 @@ export default function InitialConsultation() {
         accessorKey: 'dateSigned',
         id: 'dateSigned',
         cell: ({ getValue }) => (getValue() ? formatDate(getValue() as string) : ''),
-        enableColumnFilter: false,
         enableSorting: false,
         size: 150,
+        filterFn: 'dateRange',
+        meta: {
+          filterOptionsLabel: 'Filter Time for signing initial consultation document',
+          filterByDate: true,
+        },
       },
       {
         header: 'Shared with EPA',
@@ -200,8 +204,12 @@ export default function InitialConsultation() {
         accessorKey: 'dateShared',
         id: 'dateShared',
         cell: ({ getValue }) => (getValue() ? formatDate(getValue() as string) : ''),
-        enableColumnFilter: false,
         enableSorting: false,
+        filterFn: 'dateRange',
+        meta: {
+          filterOptionsLabel: 'Filter Date shared with EPA',
+          filterByDate: true,
+        },
         size: 150,
       },
       {
