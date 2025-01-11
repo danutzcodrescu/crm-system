@@ -67,6 +67,11 @@ export function Topbar() {
           </Link>
         </MenuItem>
         <MenuItem onClick={handleClose}>
+          <Link component={RLink} to={`/reporting?year=${getYear(new Date())}`} prefetch="intent">
+            Reporting
+          </Link>
+        </MenuItem>
+        <MenuItem onClick={handleClose}>
           <Link component={RLink} to="/years/" prefetch="intent">
             Years
           </Link>

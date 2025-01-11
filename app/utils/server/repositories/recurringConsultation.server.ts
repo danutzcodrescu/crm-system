@@ -62,7 +62,7 @@ export async function editRecurringConsultationRecord(
   args: EditRecurringConsultationArgs,
 ): Promise<[string, null] | [null, string]> {
   try {
-    logger.info('Trying to update initial consultation data for id: ', args.companyId, ' and year: ', args.year);
+    logger.info('Trying to update recurring consultation data for id: ', args.companyId, ' and year: ', args.year);
     await db
       .update(recurringConsultation)
       .set({

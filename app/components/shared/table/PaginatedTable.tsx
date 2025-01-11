@@ -13,6 +13,7 @@ import {
   TablePagination,
   TableRow,
   Tooltip,
+  Typography,
 } from '@mui/material';
 import {
   ColumnDef,
@@ -113,9 +114,12 @@ export function PaginatedTable<T extends { id: string; warning?: boolean }>({
 
   return (
     <Box sx={{ width: '100%' }}>
-      <ColumnVisibility table={table} />
-      <TableContainer component={Paper} sx={{ overflow: 'auto', maxWidth: '100%' }}>
-        <Table sx={{ minWidth: 650 }} aria-label="simple table">
+      <Stack direction="row" gap={3} alignItems="center">
+        <ColumnVisibility table={table} />
+        <Typography component="p">Columns: {table.getFilteredRowModel().rows.length}</Typography>
+      </Stack>
+      <TableContainer component={Paper} sx={{ maxWidth: '100%', height: 'calc(100vh - 170px)' }}>
+        <Table sx={{ minWidth: 650 }} stickyHeader>
           <TableHead>
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow key={headerGroup.id}>

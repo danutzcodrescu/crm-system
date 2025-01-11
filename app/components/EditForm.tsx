@@ -12,6 +12,8 @@ export interface Field {
   placeholder?: TextFieldProps['placeholder'];
   hidden?: TextFieldProps['hidden'];
   defaultValue?: string | number | boolean;
+  multiline?: TextFieldProps['multiline'];
+  maxRows?: TextFieldProps['maxRows'];
   inputProps?: {
     step?: string;
     min?: string;
@@ -119,6 +121,8 @@ export function EditForm({ fields }: Props) {
             label={field.label}
             hidden={!!field.hidden}
             required={!!field.required}
+            multiline={!!field.multiline}
+            maxRows={field.maxRows}
             {...(field.watchable
               ? {
                   onChange: (e: React.ChangeEvent<HTMLInputElement>) =>

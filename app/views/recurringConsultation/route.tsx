@@ -229,8 +229,11 @@ export default function RecurringConsultation() {
       {
         header: 'Meeting 1',
         id: 'meeting1',
-        accessorKey: 'consultations',
-        filterFn: 'arrIncludesSome',
+        accessorFn: (row) => row.consultations?.[0],
+        filterFn: (row, _, filterValue) => {
+          const value = row.original.consultations?.[0];
+          return filterValue.includes(value);
+        },
         meta: {
           filterOptionsLabel: 'Meeting 1 year',
           filterOptions: (data as LoaderResponse).yearsData.map((year) => ({
@@ -238,13 +241,16 @@ export default function RecurringConsultation() {
             value: year,
           })),
         },
-        cell: ({ getValue }) => ((getValue() as number[]).length ? (getValue() as number[])[0] : ''),
+        cell: ({ getValue }) => getValue() || '',
       },
       {
         header: 'Meeting 2',
         id: 'meeting2',
-        accessorKey: 'consultations',
-        filterFn: 'arrIncludesSome',
+        accessorFn: (row) => row.consultations?.[1],
+        filterFn: (row, _, filterValue) => {
+          const value = row.original.consultations?.[1];
+          return filterValue.includes(value);
+        },
         meta: {
           filterOptionsLabel: 'Meeting 2 year',
           filterOptions: (data as LoaderResponse).yearsData.map((year) => ({
@@ -252,13 +258,16 @@ export default function RecurringConsultation() {
             value: year,
           })),
         },
-        cell: ({ getValue }) => ((getValue() as number[]).length ? (getValue() as number[])[1] : ''),
+        cell: ({ getValue }) => getValue() || '',
       },
       {
         header: 'Meeting 3',
         id: 'meeting3',
-        accessorKey: 'consultations',
-        filterFn: 'arrIncludesSome',
+        accessorFn: (row) => row.consultations?.[2],
+        filterFn: (row, _, filterValue) => {
+          const value = row.original.consultations?.[2];
+          return filterValue.includes(value);
+        },
         meta: {
           filterOptionsLabel: 'Meeting 3 year',
           filterOptions: (data as LoaderResponse).yearsData.map((year) => ({
@@ -266,13 +275,16 @@ export default function RecurringConsultation() {
             value: year,
           })),
         },
-        cell: ({ getValue }) => ((getValue() as number[]).length ? (getValue() as number[])[2] : ''),
+        cell: ({ getValue }) => getValue() || '',
       },
       {
         header: 'Meeting 4',
         id: 'meeting4',
-        accessorKey: 'consultations',
-        filterFn: 'arrIncludesSome',
+        accessorFn: (row) => row.consultations?.[3],
+        filterFn: (row, _, filterValue) => {
+          const value = row.original.consultations?.[3];
+          return filterValue.includes(value);
+        },
         meta: {
           filterOptionsLabel: 'Meeting 4 year',
           filterOptions: (data as LoaderResponse).yearsData.map((year) => ({
@@ -280,7 +292,7 @@ export default function RecurringConsultation() {
             value: year,
           })),
         },
-        cell: ({ getValue }) => ((getValue() as number[]).length ? (getValue() as number[])[3] : ''),
+        cell: ({ getValue }) => getValue() || '',
       },
       {
         header: 'Date for sending info + form',

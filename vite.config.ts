@@ -38,6 +38,7 @@ export default defineConfig(({ isSsrBuild }) => ({
             route('/initial-consultation', 'views/initialConsultation/route.tsx');
             route('/agreement', 'views/agreement/route.tsx');
             route('/recurring-consultation', 'views/recurringConsultation/route.tsx');
+            route('/reporting', 'views/reporting/route.tsx');
             // route('/statuses', 'views/statuses/route.tsx');
             // route('/years', 'views/years/route.tsx');
             // route('/contacts', 'views/employees/layout.tsx', () => {
