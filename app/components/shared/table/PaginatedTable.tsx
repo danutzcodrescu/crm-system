@@ -3,6 +3,7 @@ import ArrowUpward from '@mui/icons-material/ArrowUpward';
 import ErrorOutline from '@mui/icons-material/ErrorOutline';
 import {
   Box,
+  BoxProps,
   Paper,
   Stack,
   Table,
@@ -16,6 +17,7 @@ import {
   Typography,
 } from '@mui/material';
 import {
+  Column,
   ColumnDef,
   ColumnFiltersState,
   FilterFn,
@@ -52,6 +54,26 @@ interface Props<T> {
   data: T[];
   action?: string;
   warningMessage?: string;
+}
+
+function cellPinning<T>(column: Column<T>): BoxProps['sx'] {
+  const isPinned = column.getIsPinned();
+  const isLastLeftPinnedColumn = isPinned === 'left' && column.getIsLastColumn('left');
+  const isFirstRightPinnedColumn = isPinned === 'right' && column.getIsFirstColumn('right');
+
+  return {
+    boxShadow: isLastLeftPinnedColumn
+      ? '-4px 0 4px -4px gray inset'
+      : isFirstRightPinnedColumn
+        ? '4px 0 4px -4px gray inset'
+        : undefined,
+    left: isPinned === 'left' ? `${column.getStart('left')}px` : undefined,
+    right: isPinned === 'right' ? `${column.getAfter('right')}px` : undefined,
+    position: isPinned ? 'sticky' : 'relative',
+    backgroundColor: (theme) => theme.palette.background.paper,
+    width: column.getSize(),
+    zIndex: isPinned ? 1 : 0,
+  };
 }
 
 export function PaginatedTable<T extends { id: string; warning?: boolean }>({
@@ -99,6 +121,9 @@ export function PaginatedTable<T extends { id: string; warning?: boolean }>({
     state: {
       columnFilters,
       columnVisibility,
+      columnPinning: {
+        left: ['companyName'],
+      },
     },
     filterFns: {
       boolean: booleanFilterFn,
@@ -131,6 +156,7 @@ export function PaginatedTable<T extends { id: string; warning?: boolean }>({
                       sx={{
                         cursor: header.column.getCanSort() ? 'pointer' : 'default',
                         minWidth: header.getSize(),
+                        ...cellPinning(header.column),
                       }}
                       onClick={header.column.getToggleSortingHandler()}
                     >
@@ -165,6 +191,7 @@ export function PaginatedTable<T extends { id: string; warning?: boolean }>({
                           color: (theme) =>
                             row.original?.warning ? theme.palette.error.main : theme.palette.text.primary,
                           minWidth: cell.column.getSize(),
+                          ...cellPinning(cell.column),
                         }}
                       >
                         <Stack direction="row" gap={1} alignItems="center">

@@ -1,4 +1,3 @@
-import { UTCDate } from '@date-fns/utc';
 import { and, asc, eq, sql } from 'drizzle-orm';
 
 import { logger } from '../logger.server';
@@ -67,9 +66,9 @@ export async function editRecurringConsultationRecord(
       .update(recurringConsultation)
       .set({
         ...args,
-        dateSharedWithAuthority: args.dateSharedWithAuthority ? new UTCDate(args.dateSharedWithAuthority) : undefined,
-        sentDate: args.sentDate ? new UTCDate(args.sentDate) : undefined,
-        meetingDate: args.meetingDate ? new UTCDate(args.meetingDate) : undefined,
+        dateSharedWithAuthority: args.dateSharedWithAuthority ? new Date(args.dateSharedWithAuthority) : undefined,
+        sentDate: args.sentDate ? new Date(args.sentDate) : undefined,
+        meetingDate: args.meetingDate ? new Date(args.meetingDate) : undefined,
       })
       .where(
         and(

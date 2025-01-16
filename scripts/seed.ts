@@ -8,6 +8,7 @@ import {
   agreement,
   agreementTypeEnum,
   companies,
+  generalInformation,
   initialConsultation,
   logs,
   recurringConsultation,
@@ -186,6 +187,7 @@ async function main() {
     await drizzle.insert(initialConsultation).values(
       consultationData.map((row) => {
         if (row.dateSigned) {
+          // eslint-disable-next-line @typescript-eslint/no-unused-vars
           const [_, __, year] = row.dateSigned.split('/');
           consultationSigned[data[row.code]] = parseInt(20 + year);
         }
@@ -294,6 +296,49 @@ async function main() {
         },
         [] as unknown as [{ companyId: string; year: number }],
       ),
+    );
+  } catch (e) {
+    console.error(e);
+  }
+
+  try {
+    // eslint-disable-next-line drizzle/enforce-delete-with-where
+    await drizzle.delete(generalInformation);
+    await drizzle.insert(generalInformation).values(
+      readGeneralInformation().flatMap((row) => {
+        return [
+          {
+            year: 2022,
+            companyId: data[row.code],
+            inhabitants: parseInt(row.inhabitants2022.replaceAll(',', '')),
+            landSurface: parseFloat(row.surface2022),
+            cleaningCost: parseInt(row.cleaningCost2022.replaceAll(',', '')),
+            cleanedKg: row.cleaningKg2022 ? parseInt(row.cleaningKg2022.replaceAll(',', '')) : undefined,
+            epaLitterMeasurement: row.epaLitterMeasurement2022 === 'Yes' ? true : undefined,
+          },
+          {
+            year: 2023,
+            companyId: data[row.code],
+            inhabitants: parseInt(row.inhabitants2023.replaceAll(',', '')),
+            landSurface: parseFloat(row.surface2023),
+            cleaningCost: undefined,
+            cleanedKg: undefined,
+            epaLitterMeasurement: row.epaLitterMeasurement2023 === 'Yes' ? true : undefined,
+          },
+          {
+            year: 2024,
+            companyId: data[row.code],
+            inhabitants: parseInt(row.inhabitants2024.replace(',', '')),
+            landSurface: parseFloat(row.surface2024),
+          },
+          { year: 2025, companyId: data[row.code] },
+          { year: 2026, companyId: data[row.code] },
+          { year: 2027, companyId: data[row.code] },
+          { year: 2028, companyId: data[row.code] },
+          { year: 2029, companyId: data[row.code] },
+          { year: 2030, companyId: data[row.code] },
+        ];
+      }),
     );
   } catch (e) {
     console.error(e);
@@ -462,6 +507,48 @@ function readReporting() {
       reportingDate: string;
       cigaretteButs: string;
       motivationForData: string;
+    },
+  ];
+}
+
+function readGeneralInformation() {
+  const workbook = xlsx.readFile(path.resolve(__dirname, './20241205_Master CRM data.xlsx'));
+  return xlsx.utils
+    .sheet_to_json(workbook.Sheets[workbook.SheetNames[7]], {
+      header: [
+        'code',
+        'inhabitants2022',
+        'surface2022',
+        'cleaningCost2022',
+        'cleaningKg2022',
+        'epaLitterMeasurement2022',
+        'inhabitants2023',
+        'surface2023',
+        'cleaningCost2023',
+        'cleaningKg2023',
+        'epaLitterMeasurement2023',
+        'inhabitants2024',
+        'surface2024',
+      ],
+      raw: false,
+      dateNF: 'dd/mm/yyyy',
+      defval: undefined,
+    })
+    .slice(2) as [
+    {
+      code: string;
+      inhabitants2022: string;
+      surface2022: string;
+      cleaningCost2022: string;
+      cleaningKg2022: string;
+      epaLitterMeasurement2022: string;
+      inhabitants2023: string;
+      surface2023: string;
+      cleaningCost2023: string;
+      cleaningKg2023: string;
+      epaLitterMeasurement2023: string;
+      inhabitants2024: string;
+      surface2024: string;
     },
   ];
 }

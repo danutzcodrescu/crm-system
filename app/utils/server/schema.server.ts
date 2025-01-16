@@ -19,14 +19,14 @@ export const agreementTypeEnum = pgEnum('agreement_type', ['old', 'new']);
 export const status = pgTable('statuses', {
   id: serial().primaryKey(),
   name: text().notNull().unique(),
-  createdAt: timestamp().notNull().defaultNow(),
-  updatedAt: timestamp({ mode: 'date', precision: 3 }).$onUpdate(() => new Date()),
+  createdAt: timestamp({ withTimezone: true, mode: 'date' }).notNull().defaultNow(),
+  updatedAt: timestamp({ withTimezone: true, mode: 'date' }).$onUpdate(() => new Date()),
 });
 
 export const years = pgTable('years', {
   name: smallint().notNull().unique().primaryKey(),
-  createdAt: timestamp().notNull().defaultNow(),
-  updatedAt: timestamp({ mode: 'date', precision: 3 }).$onUpdate(() => new Date()),
+  createdAt: timestamp({ withTimezone: true, mode: 'date' }).notNull().defaultNow(),
+  updatedAt: timestamp({ withTimezone: true, mode: 'date' }).$onUpdate(() => new Date()),
 });
 
 export const companies = pgTable('companies', {
@@ -38,8 +38,8 @@ export const companies = pgTable('companies', {
     .array()
     .default(sql`ARRAY[]::smallint[]`),
   email: text().notNull().unique(),
-  createdAt: timestamp().notNull().defaultNow(),
-  updatedAt: timestamp({ mode: 'date', precision: 3 }).$onUpdate(() => new Date()),
+  createdAt: timestamp({ withTimezone: true, mode: 'date' }).notNull().defaultNow(),
+  updatedAt: timestamp({ withTimezone: true, mode: 'date' }).$onUpdate(() => new Date()),
 });
 
 export const logs = pgTable('logs', {
@@ -47,8 +47,8 @@ export const logs = pgTable('logs', {
   description: text().notNull(),
   companyId: uuid().references(() => companies.id, { onDelete: 'cascade', onUpdate: 'no action' }),
   date: timestamp({ mode: 'date' }).notNull(),
-  createdAt: timestamp().notNull().defaultNow(),
-  updatedAt: timestamp({ mode: 'date', precision: 3 }).$onUpdate(() => new Date()),
+  createdAt: timestamp({ withTimezone: true, mode: 'date' }).notNull().defaultNow(),
+  updatedAt: timestamp({ withTimezone: true, mode: 'date' }).$onUpdate(() => new Date()),
 });
 
 export const responsibles = pgTable('responsibles', {
@@ -69,8 +69,8 @@ export const initialConsultation = pgTable('initial_consultations', {
   dateSigned: timestamp({ mode: 'date' }),
   dateShared: timestamp({ mode: 'date' }),
   link: text(),
-  createdAt: timestamp().notNull().defaultNow(),
-  updatedAt: timestamp({ mode: 'date', precision: 3 }).$onUpdate(() => new Date()),
+  createdAt: timestamp({ withTimezone: true, mode: 'date' }).notNull().defaultNow(),
+  updatedAt: timestamp({ withTimezone: true, mode: 'date' }).$onUpdate(() => new Date()),
 });
 
 export const agreement = pgTable('agreements', {
@@ -88,8 +88,8 @@ export const agreement = pgTable('agreements', {
   newAgreementDateSigned: timestamp({ mode: 'date' }),
   newAgreementDateShared: timestamp({ mode: 'date' }),
   newAgreementLinkToAgreement: text(),
-  createdAt: timestamp().notNull().defaultNow(),
-  updatedAt: timestamp({ mode: 'date', precision: 3 }).$onUpdate(() => new Date()),
+  createdAt: timestamp({ withTimezone: true, mode: 'date' }).notNull().defaultNow(),
+  updatedAt: timestamp({ withTimezone: true, mode: 'date' }).$onUpdate(() => new Date()),
 });
 
 export const recurringConsultation = pgTable(
@@ -102,8 +102,8 @@ export const recurringConsultation = pgTable(
     consultationFormCompleted: boolean(),
     meetingHeld: boolean(),
     dateSharedWithAuthority: timestamp({ mode: 'date' }),
-    createdAt: timestamp().notNull().defaultNow(),
-    updatedAt: timestamp({ mode: 'date', precision: 3 }).$onUpdate(() => new Date()),
+    createdAt: timestamp({ withTimezone: true, mode: 'date' }).notNull().defaultNow(),
+    updatedAt: timestamp({ withTimezone: true, mode: 'date' }).$onUpdate(() => new Date()),
   },
   (table) => {
     return [
@@ -126,8 +126,8 @@ export const reporting = pgTable(
     cigaretteButts: real(),
     motivationForData: boolean(),
     motivation: text(),
-    createdAt: timestamp().notNull().defaultNow(),
-    updatedAt: timestamp({ mode: 'date', precision: 3 }).$onUpdate(() => new Date()),
+    createdAt: timestamp({ withTimezone: true, mode: 'date' }).notNull().defaultNow(),
+    updatedAt: timestamp({ withTimezone: true, mode: 'date' }).$onUpdate(() => new Date()),
   },
   (table) => {
     return [
@@ -139,14 +139,39 @@ export const reporting = pgTable(
   },
 );
 
+export const generalInformation = pgTable(
+  'general_information',
+  {
+    companyId: uuid()
+      .notNull()
+      .references(() => companies.id, { onDelete: 'cascade', onUpdate: 'no action' }),
+    year: smallint().notNull(),
+    inhabitants: integer(),
+    landSurface: real(),
+    cleaningCost: integer(),
+    cleanedKg: integer(),
+    epaLitterMeasurement: boolean(),
+    createdAt: timestamp({ withTimezone: true, mode: 'date' }).notNull().defaultNow(),
+    updatedAt: timestamp({ withTimezone: true, mode: 'date' }).$onUpdate(() => new Date()),
+  },
+  (table) => {
+    return [
+      {
+        pk: primaryKey({ columns: [table.companyId, table.year] }),
+        pkWithCustomName: primaryKey({ name: 'generalInformationPK', columns: [table.companyId, table.year] }),
+      },
+    ];
+  },
+);
+
 export const authSchema = pgSchema('authentication');
 
 export const users = authSchema.table('users', {
   id: serial().primaryKey(),
   username: text().notNull().unique(),
   password: text().notNull(),
-  createdAt: timestamp().notNull().defaultNow(),
-  updatedAt: timestamp({ mode: 'date', precision: 3 }).$onUpdate(() => new Date()),
+  createdAt: timestamp({ withTimezone: true, mode: 'date' }).notNull().defaultNow(),
+  updatedAt: timestamp({ mode: 'date', withTimezone: true }).$onUpdate(() => new Date()),
 });
 
 export const sessions = authSchema.table('sessions', {

@@ -1,4 +1,3 @@
-import { UTCDate } from '@date-fns/utc';
 import { asc, eq, sql } from 'drizzle-orm';
 
 import { logger } from '../logger.server';
@@ -80,10 +79,10 @@ export async function editAgreementRecord(args: EditAgreementRecordArgs) {
       .update(agreement)
       .set({
         ...args,
-        oldAgreementDateShared: args.oldAgreementDateShared ? new UTCDate(args.oldAgreementDateShared) : undefined,
-        oldAgreementDateSigned: args.oldAgreementDateSigned ? new UTCDate(args.oldAgreementDateSigned) : undefined,
-        newAgreementDateShared: args.newAgreementDateShared ? new UTCDate(args.newAgreementDateShared) : undefined,
-        newAgreementDateSigned: args.newAgreementDateSigned ? new UTCDate(args.newAgreementDateSigned) : undefined,
+        oldAgreementDateShared: args.oldAgreementDateShared ? new Date(args.oldAgreementDateShared) : undefined,
+        oldAgreementDateSigned: args.oldAgreementDateSigned ? new Date(args.oldAgreementDateSigned) : undefined,
+        newAgreementDateShared: args.newAgreementDateShared ? new Date(args.newAgreementDateShared) : undefined,
+        newAgreementDateSigned: args.newAgreementDateSigned ? new Date(args.newAgreementDateSigned) : undefined,
       })
       .where(eq(agreement.id, args.id));
     logger.info('Agreement data edited successfully');

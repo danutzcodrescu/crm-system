@@ -1,4 +1,3 @@
-import { UTCDate } from '@date-fns/utc';
 import { and, asc, eq, sql } from 'drizzle-orm';
 
 import { logger } from '../logger.server';
@@ -51,20 +50,18 @@ export async function getAllReportingDataPerYear(year: number): Promise<[null, R
 export async function editReportingRecord(
   args: typeof reporting.$inferInsert,
 ): Promise<[null, string] | [string, null]> {
-  console.log(args);
   try {
     logger.info('Trying to update reporting data for id: ', args.companyId, ' and year: ', args.year);
     await db
       .update(reporting)
       .set({
         ...args,
-        reportingDate: args.reportingDate ? new UTCDate(args.reportingDate) : undefined,
+        reportingDate: args.reportingDate ? new Date(args.reportingDate) : undefined,
       })
       .where(and(eq(reporting.companyId, args.companyId as string), eq(reporting.year, args.year as number)));
     logger.info('Reporting data edited');
     return [null, ''];
   } catch (e) {
-    console.log(e);
     logger.error(e);
     return ['could not edit reporting data', null];
   }
