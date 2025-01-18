@@ -25,6 +25,8 @@ export const status = pgTable('statuses', {
 
 export const years = pgTable('years', {
   name: smallint().notNull().unique().primaryKey(),
+  changeFactor: real().default(1.0),
+  changeFactorLitter: real().default(1.0),
   createdAt: timestamp({ withTimezone: true, mode: 'date' }).notNull().defaultNow(),
   updatedAt: timestamp({ withTimezone: true, mode: 'date' }).$onUpdate(() => new Date()),
 });
