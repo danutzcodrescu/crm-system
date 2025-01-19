@@ -15,8 +15,8 @@ import { getAllYears } from '~/utils/server/repositories/years.server';
 
 export const meta: MetaFunction = () => {
   return [
-    { title: 'CRM System - General information' },
-    { name: 'description', content: 'General information for all municipalities' },
+    { title: 'CRM System - Compensation' },
+    { name: 'description', content: 'Compensation information for all municipalities' },
   ];
 };
 
@@ -44,7 +44,6 @@ export default function Compensation() {
   const data = useLoaderData<typeof loader>();
   const location = useLocation();
   const navigate = useNavigate();
-  console.log(data);
   const columns = useMemo<ColumnDef<CompensationData>[]>(
     () => [
       {

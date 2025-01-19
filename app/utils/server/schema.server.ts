@@ -2,11 +2,12 @@ import { InferSelectModel, sql } from 'drizzle-orm';
 import {
   boolean,
   integer,
+  numeric,
+  PgDoublePrecisionBuilderInitial,
   pgEnum,
   pgSchema,
   pgTable,
   primaryKey,
-  real,
   serial,
   smallint,
   text,
@@ -25,8 +26,14 @@ export const status = pgTable('statuses', {
 
 export const years = pgTable('years', {
   name: smallint().notNull().unique().primaryKey(),
-  changeFactor: real().default(1.0),
-  changeFactorLitter: real().default(1.0),
+  changeFactor: numeric({ precision: 10, scale: 5 }).default(
+    // @ts-expect-error - this is a hack to make the type system happy
+    1,
+  ) as unknown as PgDoublePrecisionBuilderInitial<'changeFactor'>,
+  changeFactorLitter: numeric({ precision: 10, scale: 5 }).default(
+    // @ts-expect-error - this is a hack to make the type system happy
+    1,
+  ) as unknown as PgDoublePrecisionBuilderInitial<'changeFactorLitter'>,
   createdAt: timestamp({ withTimezone: true, mode: 'date' }).notNull().defaultNow(),
   updatedAt: timestamp({ withTimezone: true, mode: 'date' }).$onUpdate(() => new Date()),
 });
@@ -98,7 +105,9 @@ export const recurringConsultation = pgTable(
   'recurring_consultations',
   {
     companyId: uuid(),
-    year: smallint(),
+    year: smallint()
+      .notNull()
+      .references(() => years.name),
     sentDate: timestamp({ mode: 'date' }),
     meetingDate: timestamp({ mode: 'date' }),
     consultationFormCompleted: boolean(),
@@ -108,12 +117,7 @@ export const recurringConsultation = pgTable(
     updatedAt: timestamp({ withTimezone: true, mode: 'date' }).$onUpdate(() => new Date()),
   },
   (table) => {
-    return [
-      {
-        pk: primaryKey({ columns: [table.companyId, table.year] }),
-        pkWithCustomName: primaryKey({ name: 'recurringConsultationPK', columns: [table.companyId, table.year] }),
-      },
-    ];
+    return [primaryKey({ columns: [table.companyId, table.year] })];
   },
 );
 
@@ -123,21 +127,21 @@ export const reporting = pgTable(
     companyId: uuid()
       .notNull()
       .references(() => companies.id, { onDelete: 'cascade', onUpdate: 'no action' }),
-    year: smallint().notNull(),
+    year: smallint()
+      .notNull()
+      .references(() => years.name),
     reportingDate: timestamp({ mode: 'date' }),
-    cigaretteButts: real(),
+    cigaretteButts: numeric({
+      precision: 10,
+      scale: 2,
+    }) as unknown as PgDoublePrecisionBuilderInitial<'cigaretteButts'>,
     motivationForData: boolean(),
     motivation: text(),
     createdAt: timestamp({ withTimezone: true, mode: 'date' }).notNull().defaultNow(),
     updatedAt: timestamp({ withTimezone: true, mode: 'date' }).$onUpdate(() => new Date()),
   },
   (table) => {
-    return [
-      {
-        pk: primaryKey({ columns: [table.companyId, table.year] }),
-        pkWithCustomName: primaryKey({ name: 'reportingPK', columns: [table.companyId, table.year] }),
-      },
-    ];
+    return [primaryKey({ columns: [table.companyId, table.year] })];
   },
 );
 
@@ -147,9 +151,11 @@ export const generalInformation = pgTable(
     companyId: uuid()
       .notNull()
       .references(() => companies.id, { onDelete: 'cascade', onUpdate: 'no action' }),
-    year: smallint().notNull(),
+    year: smallint()
+      .notNull()
+      .references(() => years.name),
     inhabitants: integer(),
-    landSurface: real(),
+    landSurface: numeric({ precision: 10, scale: 2 }) as unknown as PgDoublePrecisionBuilderInitial<'landSurface'>,
     cleaningCost: integer(),
     cleanedKg: integer(),
     epaLitterMeasurement: boolean(),
@@ -157,12 +163,28 @@ export const generalInformation = pgTable(
     updatedAt: timestamp({ withTimezone: true, mode: 'date' }).$onUpdate(() => new Date()),
   },
   (table) => {
-    return [
-      {
-        pk: primaryKey({ columns: [table.companyId, table.year] }),
-        pkWithCustomName: primaryKey({ name: 'generalInformationPK', columns: [table.companyId, table.year] }),
-      },
-    ];
+    return [primaryKey({ columns: [table.companyId, table.year] })];
+  },
+);
+
+export const invoicing = pgTable(
+  'invoicing',
+  {
+    companyId: uuid()
+      .notNull()
+      .references(() => companies.id, { onDelete: 'cascade', onUpdate: 'no action' }),
+    year: smallint()
+      .notNull()
+      .references(() => years.name),
+    invoiceDate: timestamp({ mode: 'date', withTimezone: true }),
+    datePaid: timestamp({ mode: 'date', withTimezone: true }),
+    invoiceAmount: numeric({ precision: 10, scale: 2 }) as unknown as PgDoublePrecisionBuilderInitial<'invoiceAmount'>,
+    vat: numeric({ precision: 10, scale: 2 }) as unknown as PgDoublePrecisionBuilderInitial<'vat'>,
+    createdAt: timestamp({ withTimezone: true, mode: 'date' }).notNull().defaultNow(),
+    updatedAt: timestamp({ withTimezone: true, mode: 'date' }).$onUpdate(() => new Date()),
+  },
+  (table) => {
+    return [primaryKey({ columns: [table.companyId, table.year] })];
   },
 );
 

@@ -10,6 +10,7 @@ import {
   companies,
   generalInformation,
   initialConsultation,
+  invoicing,
   logs,
   recurringConsultation,
   reporting,
@@ -343,6 +344,21 @@ async function main() {
   } catch (e) {
     console.error(e);
   }
+
+  try {
+    // eslint-disable-next-line drizzle/enforce-delete-with-where
+    await drizzle.delete(invoicing);
+    await drizzle.insert(invoicing).values(
+      readInvoicing().map((row) => ({
+        companyId: data[row.code],
+        year: 2023,
+        invoiceAmount: row.invoiceAmount ? parseInt(row.invoiceAmount.replace(',', '')) : undefined,
+        vat: row.vat ? parseInt(row.vat.replaceAll(',', '')) : undefined,
+      })),
+    );
+  } catch (e) {
+    console.error(e);
+  }
   process.exit(0);
 }
 
@@ -549,6 +565,26 @@ function readGeneralInformation() {
       epaLitterMeasurement2023: string;
       inhabitants2024: string;
       surface2024: string;
+    },
+  ];
+}
+
+function readInvoicing() {
+  const workbook = xlsx.readFile(path.resolve(__dirname, './20241205_Master CRM data.xlsx'));
+  return xlsx.utils
+    .sheet_to_json(workbook.Sheets[workbook.SheetNames[6]], {
+      header: ['code', 'invoiceDate', 'datePaid', 'invoiceAmount', 'vat'],
+      raw: false,
+      dateNF: 'dd/mm/yyyy',
+      defval: undefined,
+    })
+    .slice(2) as [
+    {
+      code: string;
+      invoiceDate: string;
+      datePaid: string;
+      invoiceAmount: string;
+      vat: string;
     },
   ];
 }

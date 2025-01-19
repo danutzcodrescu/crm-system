@@ -18,10 +18,7 @@ export interface CompensationData {
   totalCompensation: number;
 }
 
-export async function getCompensationByYear(year: number): Promise<[null, CompensationData[]] | [string, null]> {
-  try {
-    logger.info('Getting compensation data');
-    const data = await db.execute(sql`WITH
+export const compensationQuery = (year: number) => sql`WITH
 	info AS (
 		SELECT
 			"general_information"."company_id",
@@ -85,8 +82,22 @@ export async function getCompensationByYear(year: number): Promise<[null, Compen
 		FROM
 			compensation
 	)
-SELECT
-	totalval.company_id AS id,
+SELECT `;
+
+export const compensationQueryFrom = (year: number) => sql` FROM
+	totalval
+	LEFT JOIN "years" ON "years"."name" = ${year}
+	LEFT JOIN "agreements" ON "agreements"."company_id" = totalval.company_id
+	LEFT JOIN "companies" ON "companies"."id" = totalval.company_id`;
+
+export const compensationQueryOrderBy = sql` ORDER BY "companyName"`;
+
+export async function getCompensationByYear(year: number): Promise<[null, CompensationData[]] | [string, null]> {
+  try {
+    logger.info('Getting compensation data');
+    const query = compensationQuery(year)
+      .append(
+        sql`totalval.company_id AS id,
 	"companies"."name" AS "companyName",
 	"agreements"."type_of_agreement" AS "typeOfAgreement",
 	inhabitants,
@@ -104,16 +115,12 @@ SELECT
 	CASE
 		WHEN "agreements"."new_agreement_date_signed" IS NOT NULL THEN "years"."change_factor" * total_compensation
 		ELSE "years"."change_factor" * total_compensation * "years"."change_factor_litter"
-	END AS "totalCompensation"
-FROM
-	totalval
-	LEFT JOIN "years" ON "years"."name" = 2024
-	LEFT JOIN "agreements" ON "agreements"."company_id" = totalval.company_id
-	LEFT JOIN "companies" ON "companies"."id" = totalval.company_id
-ORDER BY
-	"companyName"`);
+	END AS "totalCompensation"`,
+      )
+      .append(compensationQueryFrom(year))
+      .append(compensationQueryOrderBy);
+    const data = await db.execute(query);
     logger.info('Compensation data fetched');
-    console.log(data.rows);
     return [null, data.rows as unknown as CompensationData[]];
   } catch (e) {
     logger.error(e);

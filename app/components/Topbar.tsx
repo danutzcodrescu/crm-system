@@ -5,6 +5,18 @@ import { Form, Link as RLink } from '@remix-run/react';
 import { getYear } from 'date-fns';
 import { useCallback, useState } from 'react';
 
+const links = [
+  { title: 'Dashboard', href: '/' },
+  { title: 'Initial Consultation', href: '/initial-consultation' },
+  { title: 'Agreement', href: '/agreement' },
+  { title: 'Recurring consultation', href: `/recurring-consultation?year=${getYear(new Date())}` },
+  { title: 'Reporting', href: `/reporting?year=${getYear(new Date()) - 1}` },
+  { title: 'Compensation', href: `/compensation?year=${getYear(new Date()) - 1}` },
+  { title: 'Invoicing', href: `/invoicing?year=${getYear(new Date()) - 1}` },
+  { title: 'General information', href: `/general-information?year=${getYear(new Date())}` },
+  { title: 'Years', href: '/years' },
+];
+
 export function Topbar() {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
 
@@ -46,46 +58,13 @@ export function Topbar() {
           'aria-labelledby': 'basic-button',
         }}
       >
-        <MenuItem onClick={handleClose}>
-          <Link component={RLink} to="/" prefetch="intent">
-            Dashboard
-          </Link>
-        </MenuItem>
-        <MenuItem onClick={handleClose}>
-          <Link component={RLink} to="/initial-consultation" prefetch="intent">
-            Initial Consultation
-          </Link>
-        </MenuItem>
-        <MenuItem onClick={handleClose}>
-          <Link component={RLink} to="/agreement" prefetch="intent">
-            Agreement
-          </Link>
-        </MenuItem>
-        <MenuItem onClick={handleClose}>
-          <Link component={RLink} to={`/recurring-consultation?year=${getYear(new Date())}`} prefetch="intent">
-            Recurring consultation
-          </Link>
-        </MenuItem>
-        <MenuItem onClick={handleClose}>
-          <Link component={RLink} to={`/reporting?year=${getYear(new Date()) - 1}`} prefetch="intent">
-            Reporting
-          </Link>
-        </MenuItem>
-        <MenuItem onClick={handleClose}>
-          <Link component={RLink} to={`/compensation?year=${getYear(new Date()) - 1}`} prefetch="intent">
-            Compensation
-          </Link>
-        </MenuItem>
-        <MenuItem onClick={handleClose}>
-          <Link component={RLink} to={`/general-information?year=${getYear(new Date())}`} prefetch="intent">
-            General information
-          </Link>
-        </MenuItem>
-        <MenuItem onClick={handleClose}>
-          <Link component={RLink} to="/years/" prefetch="intent">
-            Years
-          </Link>
-        </MenuItem>
+        {links.map((link) => (
+          <MenuItem key={link.title} onClick={handleClose}>
+            <Link component={RLink} to={link.href} prefetch="intent">
+              {link.title}
+            </Link>
+          </MenuItem>
+        ))}
       </Menu>
     </>
   );
