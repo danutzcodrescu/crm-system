@@ -7,6 +7,7 @@ import { useCallback, useState } from 'react';
 
 const links = [
   { title: 'Dashboard', href: '/' },
+  { title: 'Municipalities', href: '/municipalities' },
   { title: 'Initial Consultation', href: '/initial-consultation' },
   { title: 'Agreement', href: '/agreement' },
   { title: 'Recurring consultation', href: `/recurring-consultation?year=${getYear(new Date())}` },
@@ -15,6 +16,7 @@ const links = [
   { title: 'Invoicing', href: `/invoicing?year=${getYear(new Date()) - 1}` },
   { title: 'General information', href: `/general-information?year=${getYear(new Date())}` },
   { title: 'Years', href: '/years' },
+  // { title: 'Statuses', href: '/statuses' },
 ];
 
 export function Topbar() {

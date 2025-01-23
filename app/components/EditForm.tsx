@@ -1,5 +1,5 @@
 import { TZDate } from '@date-fns/tz';
-import { Checkbox, FormControlLabel, Stack, TextField, TextFieldProps } from '@mui/material';
+import { Checkbox, FormControlLabel, MenuItem, Stack, TextField, TextFieldProps } from '@mui/material';
 import { DatePicker, DateTimePicker } from '@mui/x-date-pickers';
 import { FormProps } from '@remix-run/react';
 import { cloneElement, Fragment, ReactNode, useRef, useState } from 'react';
@@ -22,6 +22,8 @@ export interface Field {
   };
   condition?: [string, unknown];
   watchable?: boolean;
+  select?: boolean;
+  options?: { label: string; value: string }[];
   render?: () => ReactNode;
 }
 
@@ -123,13 +125,22 @@ export function EditForm({ fields }: Props) {
             required={!!field.required}
             multiline={!!field.multiline}
             maxRows={field.maxRows}
+            select={!!field.select}
             {...(field.watchable
               ? {
                   onChange: (e: React.ChangeEvent<HTMLInputElement>) =>
                     setWatchableFields((prev) => ({ ...prev, [field.name]: e.target.value })),
                 }
               : {})}
-          />
+          >
+            {field.select && field.options
+              ? field.options.map((option) => (
+                  <MenuItem key={option.value} value={option.value}>
+                    {option.label}
+                  </MenuItem>
+                ))
+              : null}
+          </TextField>
         );
       })}
     </Stack>

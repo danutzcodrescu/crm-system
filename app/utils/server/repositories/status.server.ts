@@ -1,30 +1,41 @@
-import { eq } from 'drizzle-orm';
 import { DatabaseError } from 'pg';
 
+import { logger } from '../logger.server';
 import { status } from '../schema.server';
 import { db } from './db.server';
 
-export async function getAllStatuses() {
-  return db.select({ id: status.id, name: status.name }).from(status).orderBy(status.name);
+export interface Status {
+  id: string;
+  name: string;
 }
 
-export async function deleteStatus(id: string): Promise<string | null> {
+export async function getAllStatuses(): Promise<[string, null] | [null, Status[]]> {
   try {
-    await db.delete(status).where(eq(status.id, id));
-    return null;
+    const data = await db.select({ id: status.id, name: status.name }).from(status).orderBy(status.name);
+    return [null, data as unknown as Status[]];
   } catch (e) {
-    return (e as DatabaseError).detail as string;
+    logger.error(e);
+    return ['could not fetch initial consultation data', null];
   }
 }
 
-export async function updateStatus(id: string, value: string): Promise<string | null> {
-  try {
-    await db.update(status).set({ name: value }).where(eq(status.id, id));
-    return null;
-  } catch (e) {
-    return (e as DatabaseError).detail as string;
-  }
-}
+// export async function deleteStatus(id: string): Promise<string | null> {
+//   try {
+//     await db.delete(status).where(eq(status.id, id));
+//     return null;
+//   } catch (e) {
+//     return (e as DatabaseError).detail as string;
+//   }
+// }
+
+// export async function updateStatus(id: string, value: string): Promise<string | null> {
+//   try {
+//     await db.update(status).set({ name: value }).where(eq(status.id, id));
+//     return null;
+//   } catch (e) {
+//     return (e as DatabaseError).detail as string;
+//   }
+// }
 
 export async function createStatus(value: string): Promise<string | null> {
   try {

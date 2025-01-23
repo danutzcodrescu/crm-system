@@ -12,12 +12,13 @@ interface Props {
   url: string;
   isOpen: boolean;
   handleClose: () => void;
+  method?: 'PATCH' | 'POST';
 }
 
-export function EditDialog({ title, fetcher, fields, url, isOpen, handleClose }: Props) {
+export function EditDialog({ title, fetcher, fields, url, isOpen, method = 'PATCH', handleClose }: Props) {
   return (
     <Dialog maxWidth="lg" fullWidth open={isOpen} onClose={handleClose}>
-      <fetcher.Form method="PATCH" action={url}>
+      <fetcher.Form method={method} action={url}>
         <DialogTitle>{title}</DialogTitle>
         <DialogContent sx={{ paddingTop: (theme) => theme.spacing(1) + '!important' }}>
           <EditForm fields={fields} />

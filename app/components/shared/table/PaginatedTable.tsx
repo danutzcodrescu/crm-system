@@ -138,12 +138,12 @@ export function PaginatedTable<T extends { id: string; warning?: boolean }>({
   const { pageSize, pageIndex } = table.getState().pagination;
 
   return (
-    <Box sx={{ width: '100%' }}>
-      <Stack direction="row" gap={3} alignItems="center">
+    <Box sx={{ width: '100%', overflow: 'hidden' }}>
+      <Stack direction="row" gap={3} alignItems="center" sx={{ overflow: 'hidden' }}>
         <ColumnVisibility table={table} />
         <Typography component="p">Columns: {table.getFilteredRowModel().rows.length}</Typography>
       </Stack>
-      <TableContainer component={Paper} sx={{ maxWidth: '100%', height: 'calc(100vh - 170px)' }}>
+      <TableContainer component={Paper} sx={{ maxWidth: '100%', maxHeight: 'calc(100vh - 170px)' }}>
         <Table sx={{ minWidth: 650 }} stickyHeader>
           <TableHead>
             {table.getHeaderGroups().map((headerGroup) => (
@@ -157,6 +157,8 @@ export function PaginatedTable<T extends { id: string; warning?: boolean }>({
                         cursor: header.column.getCanSort() ? 'pointer' : 'default',
                         minWidth: header.getSize(),
                         ...cellPinning(header.column),
+                        zIndex: 2,
+                        position: 'sticky',
                       }}
                       onClick={header.column.getToggleSortingHandler()}
                     >
