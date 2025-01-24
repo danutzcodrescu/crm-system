@@ -66,7 +66,6 @@ export async function editGeneralInformationRecord(
     logger.info('General information data edited');
     return [null, ''];
   } catch (e) {
-    console.log(e);
     logger.error(e);
     return ['could not edit general information data', null];
   }

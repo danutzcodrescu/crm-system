@@ -1,7 +1,7 @@
 import Cancel from '@mui/icons-material/Cancel';
 import CheckBox from '@mui/icons-material/CheckBox';
 import LinkIcon from '@mui/icons-material/Link';
-import { IconButton, MenuItem, Stack, TextField, Tooltip } from '@mui/material';
+import { IconButton, Stack, Tooltip, Typography } from '@mui/material';
 import { ActionFunctionArgs, json, LoaderFunctionArgs, MetaFunction, redirect } from '@remix-run/node';
 import { useFetcher, useLoaderData } from '@remix-run/react';
 import { ColumnDef } from '@tanstack/react-table';
@@ -92,22 +92,26 @@ export default function Agreement() {
       {
         label: 'Type of agreement',
         name: 'typeOfAgreement',
-        type: 'checkbox',
+        type: 'text',
+        select: true,
         defaultValue: data.typeOfAgreement,
         watchable: true,
-        render: () => (
-          <TextField select>
-            <MenuItem value="new">New agreement</MenuItem>
-            <MenuItem value="old">Old agreement</MenuItem>
-          </TextField>
-        ),
+        options: [
+          { label: 'New agreement', value: 'new' },
+          { label: 'Old agreement', value: 'old' },
+        ],
       },
       {
         label: 'Old agreement sent',
         name: 'oldAgreementSent',
-        type: 'checkbox',
+        type: 'text',
+        select: true,
         defaultValue: data.oldAgreementSent,
         condition: ['typeOfAgreement', 'old'],
+        options: [
+          { label: 'Sent', value: 'true' },
+          { label: 'Not sent', value: 'false' },
+        ],
       },
 
       {
@@ -141,9 +145,14 @@ export default function Agreement() {
       {
         label: 'New agreement sent',
         name: 'newAgreementSent',
-        type: 'checkbox',
+        type: 'text',
+        select: true,
         defaultValue: data.newAgreementSent,
         condition: ['typeOfAgreement', 'new'],
+        options: [
+          { label: 'Sent', value: 'true' },
+          { label: 'Not sent', value: 'false' },
+        ],
       },
 
       {
@@ -186,6 +195,25 @@ export default function Agreement() {
         //  ),
       },
       {
+        header: 'In agreement',
+        accessorKey: 'inAgreement',
+        id: 'inAgreement',
+        filterFn: 'boolean',
+        meta: {
+          filterOptions: [
+            { label: 'Yes', value: true },
+            { label: 'No', value: false },
+          ],
+          filterOptionsLabel: 'Document sent',
+        },
+        cell: ({ getValue }) =>
+          getValue() ? (
+            <CheckBox sx={{ color: (theme) => theme.palette.success.main }} />
+          ) : (
+            <Cancel sx={{ color: (theme) => theme.palette.error.main }} />
+          ),
+      },
+      {
         header: 'Type of agreement',
         accessorKey: 'typeOfAgreement',
         id: 'typeOfAgreement',
@@ -200,6 +228,18 @@ export default function Agreement() {
         cell: ({ getValue }) => (getValue() === 'old' ? 'Old agreement' : 'New agreement'),
       },
       {
+        header: 'First time any agreement',
+        accessorKey: 'firstTimeAnyAgreement',
+        id: 'firstTimeAnyAgreement',
+        filterFn: 'dateRange',
+        meta: {
+          filterOptionsLabel: 'first agreement date',
+          filterByDate: true,
+        },
+        cell: ({ getValue }) => (getValue() ? formatDate(getValue() as string) : ''),
+      },
+
+      {
         header: 'Old agreement sent',
         accessorKey: 'oldAgreementSent',
         id: 'oldAgreementSent',
@@ -209,7 +249,7 @@ export default function Agreement() {
             { label: 'Yes', value: true },
             { label: 'No', value: false },
           ],
-          filterOptionsLabel: 'Document sent',
+          filterOptionsLabel: 'Agreement sent',
         },
         cell: ({ getValue }) =>
           getValue() ? (
@@ -244,14 +284,14 @@ export default function Agreement() {
         id: 'oldAgreementSigned',
         filterFn: 'dateRange',
         meta: {
-          filterOptionsLabel: 'Filter Old agreement agreement signed date',
+          filterOptionsLabel: '==Old agreement agreement signed date',
           filterByDate: true,
         },
         enableSorting: false,
         cell: ({ getValue }) => (getValue() ? formatDate(getValue() as string) : ''),
       },
       {
-        header: 'Old agreement agreement shared',
+        header: 'Old agreement agreement shared with EPA',
         accessorKey: 'isOldAgreementShared',
         id: 'isOldAgreementShared',
         filterFn: 'boolean',
@@ -267,17 +307,17 @@ export default function Agreement() {
             { label: 'Yes', value: true },
             { label: 'No', value: false },
           ],
-          filterOptionsLabel: 'Old agreement shared',
+          filterOptionsLabel: 'Old agreement shared with EPA',
         },
       },
       {
-        header: 'Old agreement shared date',
+        header: 'Old agreement shared date with EPA',
         accessorKey: 'oldAgreementShared',
         id: 'oldAgreementShared',
         enableSorting: false,
         filterFn: 'dateRange',
         meta: {
-          filterOptionsLabel: 'Filter Old agreement shared date',
+          filterOptionsLabel: 'Filter Old agreement shared date with EPA',
           filterByDate: true,
         },
         cell: ({ getValue }) => (getValue() ? formatDate(getValue() as string) : ''),
@@ -292,7 +332,7 @@ export default function Agreement() {
             { label: 'Yes', value: true },
             { label: 'No', value: false },
           ],
-          filterOptionsLabel: 'Document sent',
+          filterOptionsLabel: 'New agreement sent',
         },
         cell: ({ getValue }) =>
           getValue() ? (
@@ -328,13 +368,13 @@ export default function Agreement() {
         enableSorting: false,
         filterFn: 'dateRange',
         meta: {
-          filterOptionsLabel: 'Filter New agreement agreement signed date',
+          filterOptionsLabel: 'New agreement agreement signed date',
           filterByDate: true,
         },
         cell: ({ getValue }) => (getValue() ? formatDate(getValue() as string) : ''),
       },
       {
-        header: 'New agreement agreement shared',
+        header: 'New agreement agreement shared with EPA',
         accessorKey: 'isNewAgreementShared',
         id: 'isNewAgreementShared',
         filterFn: 'boolean',
@@ -350,17 +390,17 @@ export default function Agreement() {
             { label: 'Yes', value: true },
             { label: 'No', value: false },
           ],
-          filterOptionsLabel: 'New agreement shared',
+          filterOptionsLabel: 'New agreement shared with EPA',
         },
       },
       {
-        header: 'New agreement shared date',
+        header: 'New agreement shared date with EPA',
         accessorKey: 'newAgreementShared',
         id: 'newAgreementShared',
         enableSorting: false,
         filterFn: 'dateRange',
         meta: {
-          filterOptionsLabel: 'Filter New agreement shared date',
+          filterOptionsLabel: 'New agreement shared date with EPA',
           filterByDate: true,
         },
         cell: ({ getValue }) => (getValue() ? formatDate(getValue() as string) : ''),
@@ -432,7 +472,29 @@ export default function Agreement() {
       additionalTitleElement={null}
       actionData={fetcher.data as { message: string; severity: string } | undefined}
     >
-      <PaginatedTable data={data as AgreementData[]} columns={columns} />
+      <PaginatedTable
+        data={data as AgreementData[]}
+        columns={columns}
+        additionalHeader={(rows) => (
+          <>
+            <Typography>In agreement: {rows.filter((row) => row.original.inAgreement).length}</Typography>
+            <Typography>Old agreement sent: {rows.filter((row) => row.original.oldAgreementSent).length}</Typography>
+            <Typography>
+              Old agreement signed: {rows.filter((row) => row.original.oldAgreementSigned).length}
+            </Typography>
+            <Typography>
+              Old agreement shared with EPA: {rows.filter((row) => row.original.oldAgreementShared).length}
+            </Typography>
+            <Typography>New agreement sent: {rows.filter((row) => row.original.newAgreementSent).length}</Typography>
+            <Typography>
+              New agreement signed: {rows.filter((row) => row.original.newAgreementSigned).length}
+            </Typography>
+            <Typography>
+              New agreement shared with EPA: {rows.filter((row) => row.original.newAgreementShared).length}
+            </Typography>
+          </>
+        )}
+      />
       <ClientOnly>
         {() => (
           <EditDialog

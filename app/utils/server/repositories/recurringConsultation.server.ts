@@ -79,7 +79,6 @@ export async function editRecurringConsultationRecord(
     logger.info('Recurring consultation data edited');
     return [null, ''];
   } catch (e) {
-    console.log(e);
     logger.error(e);
     return ['could not edit recurring consultation data', null];
   }

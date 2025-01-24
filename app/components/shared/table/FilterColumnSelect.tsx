@@ -37,7 +37,7 @@ export function FilterColumnSelect<T>({ column }: { column: Column<T, unknown> }
         anchorEl={filterButton}
       >
         <Typography component="p" fontWeight="bold" gutterBottom>
-          {column.columnDef.meta?.filterOptionsLabel}
+          Filter by {column.columnDef.meta?.filterOptionsLabel}
         </Typography>
         <Stack direction="column" gap={1}>
           {column.columnDef.meta?.filterOptions?.map((option, index) => (

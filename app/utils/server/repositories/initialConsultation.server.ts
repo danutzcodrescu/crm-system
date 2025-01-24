@@ -65,7 +65,6 @@ export async function editInitialConsultationRecord(args: EditInitialConsultatio
     logger.info('Initial consultation data edited');
     return [null, ''];
   } catch (e) {
-    console.log(e);
     logger.error(e);
     return ['could not edit initial consultation data', null];
   }

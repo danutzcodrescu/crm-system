@@ -1,6 +1,6 @@
 import Cancel from '@mui/icons-material/Cancel';
 import CheckBox from '@mui/icons-material/CheckBox';
-import { FormControl, InputLabel, MenuItem, Select } from '@mui/material';
+import { FormControl, InputLabel, MenuItem, Select, Typography } from '@mui/material';
 import { json, LoaderFunctionArgs, MetaFunction, redirect } from '@remix-run/node';
 import { useLoaderData, useLocation, useNavigate } from '@remix-run/react';
 import { ColumnDef } from '@tanstack/react-table';
@@ -155,7 +155,7 @@ export default function Compensation() {
 
   return (
     <PageContainer
-      title="Recurring consultation"
+      title="Compensation"
       additionalTitleElement={
         <FormControl>
           <InputLabel id="years-selector">Select the year</InputLabel>
@@ -175,7 +175,70 @@ export default function Compensation() {
       }
       // actionData={fetcher.data as { message: string; severity: string } | undefined}
     >
-      <PaginatedTable data={(data as LoaderResponse).compensationData} columns={columns} />
+      <PaginatedTable
+        data={(data as LoaderResponse).compensationData}
+        columns={columns}
+        additionalHeader={(rows) => (
+          <>
+            <Typography>In agreement: {rows.filter((row) => row.original.inAgreement).length}</Typography>
+            <Typography>
+              Total inhabitants:{' '}
+              {Intl.NumberFormat('sv-SE').format(rows.reduce((acc, row) => acc + row.original.inhabitants, 0))}
+            </Typography>
+            <Typography>
+              Variable compensation:{' '}
+              {Intl.NumberFormat('sv-SE').format(
+                rows.reduce((acc, row) => acc + parseFloat(row.original.variableCompensation as unknown as string), 0),
+              )}
+            </Typography>
+            <Typography>
+              Additional fixed compensation:{' '}
+              {Intl.NumberFormat('sv-SE').format(
+                rows.reduce(
+                  (acc, row) => acc + parseFloat(row.original.additionalCompensation as unknown as string),
+                  0,
+                ),
+              )}
+            </Typography>
+            <Typography>
+              All old agreements:{' '}
+              {Intl.NumberFormat('sv-SE').format(
+                rows.reduce((acc, row) => {
+                  if (row.original.typeOfAgreement === 'old' && row.original.inAgreement) {
+                    return acc + parseFloat(row.original.totalCompensationOld as unknown as string);
+                  }
+                  return acc;
+                }, 0),
+              )}
+            </Typography>
+            <Typography>
+              All new agreements:{' '}
+              {Intl.NumberFormat('sv-SE').format(
+                rows.reduce((acc, row) => {
+                  if (row.original.typeOfAgreement === 'new' && row.original.inAgreement) {
+                    return acc + parseFloat(row.original.totalCompensationNew as unknown as string);
+                  }
+                  return acc;
+                }, 0),
+              )}
+            </Typography>
+            <Typography>
+              All compensation:{' '}
+              {Intl.NumberFormat('sv-SE').format(
+                rows.reduce((acc, row) => {
+                  if (row.original.typeOfAgreement === 'new' && row.original.inAgreement) {
+                    return acc + parseFloat(row.original.totalCompensationNew as unknown as string);
+                  }
+                  if (row.original.typeOfAgreement === 'old' && row.original.inAgreement) {
+                    return acc + parseFloat(row.original.totalCompensationOld as unknown as string);
+                  }
+                  return acc;
+                }, 0),
+              )}
+            </Typography>
+          </>
+        )}
+      />
     </PageContainer>
   );
 }

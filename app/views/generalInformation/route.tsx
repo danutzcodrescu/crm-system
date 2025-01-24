@@ -232,7 +232,13 @@ export default function Reporting() {
       {
         label: 'EPA littering measurement',
         name: 'epaLitterMeasurement',
-        type: 'checkbox',
+        type: 'text',
+        select: true,
+        options: [
+          { label: 'Sent', value: 'true' },
+          { label: 'Not sent', value: 'false' },
+          { label: 'N/A', value: undefined },
+        ],
         defaultValue: data.epaMeasurement,
       },
     ]);

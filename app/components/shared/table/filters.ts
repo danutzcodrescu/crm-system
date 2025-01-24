@@ -7,7 +7,6 @@ type TData = Record<string, unknown> & { id: string };
 export const booleanFilterFn: FilterFn<TData> = (row: Row<TData>, columnId: string, filterValue: boolean[]) => {
   if (filterValue.length === 0) return true;
   const value = row.original[columnId] as boolean;
-  console.log(value, filterValue);
   return filterValue.includes(value);
 };
 

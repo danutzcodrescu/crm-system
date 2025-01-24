@@ -22,6 +22,8 @@ export interface AgreementData {
   newAgreementSigned?: Date | null;
   newAgreementShared?: Date | null;
   newAgreementLink: string;
+  inAgreement: boolean;
+  firstTimeAnyAgreement: Date | null;
 }
 
 export async function getAgreementData(): Promise<[null, AgreementData[]] | [string, null]> {
@@ -33,7 +35,9 @@ export async function getAgreementData(): Promise<[null, AgreementData[]] | [str
         companyName: companies.name,
         companyId: agreement.companyId,
         typeOfAgreement: agreement.typeOfAgreement,
+        inAgreement: sql<boolean>`CASE WHEN ${agreement.oldAgreementDateSigned} IS NOT NULL OR ${agreement.newAgreementDateSigned} IS NOT NULL THEN TRUE ELSE FALSE END`,
         isOldAgreementSigned: sql<boolean>`CASE WHEN ${agreement.oldAgreementDateSigned} IS NOT NULL THEN TRUE ELSE FALSE END`,
+        firstTimeAnyAgreement: sql<Date>`CASE WHEN ${agreement.oldAgreementDateSigned} IS NOT NULL OR ${agreement.newAgreementDateSigned} IS NOT NULL THEN LEAST(${agreement.oldAgreementDateSigned}, ${agreement.newAgreementDateSigned}) ELSE NULL END`,
         isOldAgreementShared: sql<boolean>`CASE WHEN ${agreement.oldAgreementDateShared} IS NOT NULL THEN TRUE ELSE FALSE END`,
         isNewAgreementSigned: sql<boolean>`CASE WHEN ${agreement.newAgreementDateSigned} IS NOT NULL THEN TRUE ELSE FALSE END`,
         isNewAgreementShared: sql<boolean>`CASE WHEN ${agreement.newAgreementDateShared} IS NOT NULL THEN TRUE ELSE FALSE END`,
@@ -88,7 +92,6 @@ export async function editAgreementRecord(args: EditAgreementRecordArgs) {
     logger.info('Agreement data edited successfully');
     return [null, ''];
   } catch (e) {
-    console.log(e);
     logger.error(e);
     return ['could not edit agreement data', null];
   }

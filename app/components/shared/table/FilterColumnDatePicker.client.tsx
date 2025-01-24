@@ -49,7 +49,7 @@ export function FilterColumnDatePicker<T>({ column }: Props<T>) {
         anchorEl={state.filterButton}
       >
         <Typography component="p" fontWeight="bold" gutterBottom>
-          {column.columnDef.meta?.filterOptionsLabel}
+          Filter by {column.columnDef.meta?.filterOptionsLabel}
         </Typography>
         <Stack direction="row" gap={1} alignContent="center">
           <DatePicker

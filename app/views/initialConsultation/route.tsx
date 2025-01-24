@@ -1,7 +1,7 @@
 import Cancel from '@mui/icons-material/Cancel';
 import CheckBox from '@mui/icons-material/CheckBox';
 import LinkIcon from '@mui/icons-material/Link';
-import { IconButton, Tooltip } from '@mui/material';
+import { IconButton, Tooltip, Typography } from '@mui/material';
 import { ActionFunctionArgs, json, LoaderFunctionArgs, MetaFunction, redirect } from '@remix-run/node';
 import { useFetcher, useLoaderData } from '@remix-run/react';
 import { ColumnDef } from '@tanstack/react-table';
@@ -88,7 +88,12 @@ export default function InitialConsultation() {
       {
         label: 'Document sent',
         name: 'documentSent',
-        type: 'checkbox',
+        type: 'text',
+        select: true,
+        options: [
+          { label: 'Yes', value: 'true' },
+          { label: 'No', value: 'false' },
+        ],
         defaultValue: data.documentSent,
       },
       {
@@ -260,7 +265,21 @@ export default function InitialConsultation() {
       additionalTitleElement={null}
       actionData={fetcher.data as { message: string; severity: string } | undefined}
     >
-      <PaginatedTable data={data as IInitialConsultation[]} columns={columns} />
+      <PaginatedTable
+        data={data as IInitialConsultation[]}
+        columns={columns}
+        additionalHeader={(rows) => (
+          <>
+            <Typography>Initial consultation sent: {rows.filter((row) => row.original.documentSent).length}</Typography>
+            <Typography>
+              Initial consultation document signed: {rows.filter((row) => row.original.isSigned).length}
+            </Typography>
+            <Typography>
+              Initial consultation document signed: {rows.filter((row) => row.original.isShared).length}
+            </Typography>
+          </>
+        )}
+      />
       <ClientOnly>
         {() => (
           <EditDialog

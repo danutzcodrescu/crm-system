@@ -1,6 +1,6 @@
 import Cancel from '@mui/icons-material/Cancel';
 import CheckBox from '@mui/icons-material/CheckBox';
-import { FormControl, InputLabel, MenuItem, Select } from '@mui/material';
+import { FormControl, InputLabel, MenuItem, Select, Typography } from '@mui/material';
 import { ActionFunctionArgs, json, LoaderFunctionArgs, MetaFunction, redirect } from '@remix-run/node';
 import { useFetcher, useLoaderData, useLocation, useNavigate } from '@remix-run/react';
 import { ColumnDef } from '@tanstack/react-table';
@@ -317,7 +317,50 @@ export default function Invoicing() {
       }
       actionData={fetcher.data as { message: string; severity: string } | undefined}
     >
-      <PaginatedTable data={(data as unknown as LoaderResponse).invoicingData} columns={columns} />
+      <PaginatedTable
+        data={(data as unknown as LoaderResponse).invoicingData}
+        columns={columns}
+        additionalHeader={(rows) => (
+          <>
+            <Typography>In agreement: {rows.filter((row) => row.original.inAgreement).length}</Typography>
+            <Typography>
+              Eligible amount:{' '}
+              {Intl.NumberFormat('sv-SE').format(
+                rows.reduce((acc, val) => {
+                  if (val.original.inAgreement) {
+                    return acc + parseFloat(val.original.totalCompensation as unknown as string);
+                  }
+                  return acc;
+                }, 0),
+              )}
+            </Typography>
+            <Typography>Invoices received: {rows.filter((row) => row.original.invoiceReceived).length}</Typography>
+            <Typography>Invoices paid: {rows.filter((row) => row.original.invoicePaid).length}</Typography>
+            <Typography>
+              Amount paid without VAT:{' '}
+              {Intl.NumberFormat('sv-SE').format(
+                rows.reduce((acc, val) => {
+                  if (val.original.invoicePaid && val.original.invoiceAmount) {
+                    return acc + parseFloat(val.original.invoiceAmount as unknown as string);
+                  }
+                  return acc;
+                }, 0),
+              )}
+            </Typography>
+            <Typography>
+              VAT not paid:{' '}
+              {Intl.NumberFormat('sv-SE').format(
+                rows.reduce((acc, val) => {
+                  if (val.original.invoicePaid && val.original.vat) {
+                    return acc + parseFloat(val.original.vat as unknown as string);
+                  }
+                  return acc;
+                }, 0),
+              )}
+            </Typography>
+          </>
+        )}
+      />
       <ClientOnly>
         {() => (
           <EditDialog

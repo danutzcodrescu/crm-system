@@ -99,7 +99,6 @@ export async function editInvoicingRecord(
     logger.info('Invoicing data edited succesfully');
     return [null, ''];
   } catch (e) {
-    console.log(e);
     logger.error(e);
     return ['could not edit invoicing data', null];
   }

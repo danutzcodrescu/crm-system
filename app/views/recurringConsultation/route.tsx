@@ -1,6 +1,6 @@
 import Cancel from '@mui/icons-material/Cancel';
 import CheckBox from '@mui/icons-material/CheckBox';
-import { FormControl, InputLabel, MenuItem, Select } from '@mui/material';
+import { FormControl, InputLabel, MenuItem, Select, Typography } from '@mui/material';
 import { ActionFunctionArgs, json, LoaderFunctionArgs, MetaFunction, redirect } from '@remix-run/node';
 import { useFetcher, useLoaderData, useLocation, useNavigate } from '@remix-run/react';
 import { ColumnDef } from '@tanstack/react-table';
@@ -71,6 +71,7 @@ export async function action({ request }: ActionFunctionArgs) {
         { status: 400 },
       );
     }
+    console.log(body.get('meetingHeld'));
     const promises = [
       editRecurringConsultationRecord({
         companyId: id as string,
@@ -80,7 +81,8 @@ export async function action({ request }: ActionFunctionArgs) {
         // @ts-expect-error - we know that these values are strings
         meetingDate: body.get('meetingDate') as string,
         consultationFormCompleted: body.get('consultationFormCompleted') === 'true',
-        meetingHeld: body.get('meetingHeld') === 'true',
+        meetingHeld:
+          body.get('meetingHeld') === 'true' ? true : body.get('meetingHeld') === 'false' ? false : undefined,
         // @ts-expect-error - we know that these values are strings
         dateSharedWithAuthority: body.get('dateSharedWithAuthority') as string,
       }),
@@ -95,7 +97,7 @@ export async function action({ request }: ActionFunctionArgs) {
     }
     const [consultation, municipality] = await Promise.all(promises);
 
-    if (consultation[0] || municipality[0]) {
+    if (consultation[0] || municipality?.[0]) {
       return json(
         { message: 'Could not update the record', severity: 'error', timeStamp: new Date() },
         { status: 500 },
@@ -144,13 +146,31 @@ export default function RecurringConsultation() {
       {
         label: 'Consultation form completed',
         name: 'meetingDate',
-        type: 'checkbox',
+        select: true,
+        type: 'text',
+        options: [
+          {
+            label: 'Yes',
+            value: 'true',
+          },
+          {
+            label: 'No',
+            value: 'false',
+          },
+          { label: 'N/A', value: undefined },
+        ],
         defaultValue: data.consultationFormCompleted as boolean,
       },
       {
         label: 'Meeting held',
         name: 'meetingHeld',
-        type: 'checkbox',
+        type: 'text',
+        select: true,
+        options: [
+          { label: 'Yes', value: 'true' },
+          { label: 'No', value: 'false' },
+          { label: 'N/A', value: '' },
+        ],
         defaultValue: data.meetingHeld as boolean,
       },
       {
@@ -420,6 +440,7 @@ export default function RecurringConsultation() {
             value={new URLSearchParams(location.search).get('year')}
             label="Select the year"
             onChange={(e) => navigate({ search: `?year=${e.target.value}` })}
+            size="small"
           >
             {(data as { yearsData: number[]; recurringData: RecurringConsultationPerMunicipality[] }).yearsData.map(
               (year) => (
@@ -433,7 +454,24 @@ export default function RecurringConsultation() {
       }
       actionData={fetcher.data as { message: string; severity: string } | undefined}
     >
-      <PaginatedTable data={(data as LoaderResponse).recurringData} columns={columns} />
+      <PaginatedTable
+        data={(data as LoaderResponse).recurringData}
+        columns={columns}
+        additionalHeader={(rows) => (
+          <>
+            <Typography>
+              Requiring recurring consultation: {rows.filter((row) => row.original.agreementType === 'old').length}
+            </Typography>
+            <Typography>
+              Information sent to municipality: {rows.filter((row) => row.original.sentDate).length}
+            </Typography>
+            <Typography>
+              Consultation form completed: {rows.filter((row) => row.original.consultationFormCompleted).length}
+            </Typography>
+            <Typography>Meeting held: {rows.filter((row) => row.original.meetingHeld).length}</Typography>
+          </>
+        )}
+      />
       <ClientOnly>
         {() => (
           <EditDialog

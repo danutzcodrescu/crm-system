@@ -1,6 +1,6 @@
 import Cancel from '@mui/icons-material/Cancel';
 import CheckBox from '@mui/icons-material/CheckBox';
-import { FormControl, InputLabel, MenuItem, Select } from '@mui/material';
+import { FormControl, InputLabel, MenuItem, Select, Typography } from '@mui/material';
 import { ActionFunctionArgs, json, LoaderFunctionArgs, MetaFunction, redirect } from '@remix-run/node';
 import { useFetcher, useLoaderData, useLocation, useNavigate } from '@remix-run/react';
 import { ColumnDef } from '@tanstack/react-table';
@@ -181,14 +181,26 @@ export default function Reporting() {
         accessorKey: 'cigaretteButts',
         id: 'cigaretteButs',
         enableColumnFilter: false,
-        cell: ({ getValue }) => (getValue() ? Intl.NumberFormat('sv-SE').format(getValue() as number) : '-'),
+        cell: ({ getValue }) => (getValue() ? Intl.NumberFormat('sv-SE').format(getValue() as number) : ''),
       },
       {
         header: 'Motivation for data',
         accessorKey: 'motivationForData',
         id: 'motivationForData',
-        enableColumnFilter: false,
-        enableSorting: false,
+        filterFn: 'boolean',
+        meta: {
+          filterOptions: [
+            { label: 'Yes', value: true },
+            { label: 'No', value: false },
+          ],
+          filterOptionsLabel: 'Motivation for data',
+        },
+        cell: ({ getValue }) =>
+          getValue() ? (
+            <CheckBox sx={{ color: (theme) => theme.palette.success.main }} />
+          ) : (
+            <Cancel sx={{ color: (theme) => theme.palette.error.main }} />
+          ),
       },
       {
         header: 'Motivation',
@@ -250,8 +262,13 @@ export default function Reporting() {
       {
         label: 'Motivation for data',
         name: 'motivationForData',
-        type: 'checkbox',
-        defaultValue: data.motivationForData || undefined,
+        type: 'text',
+        select: true,
+        options: [
+          { label: 'Yes', value: 'true' },
+          { label: 'No', value: 'false' },
+        ],
+        defaultValue: !!data.motivationForData,
       },
       {
         label: 'Motivation',
@@ -287,7 +304,31 @@ export default function Reporting() {
       }
       actionData={fetcher.data as { message: string; severity: string } | undefined}
     >
-      <PaginatedTable data={(data as unknown as LoaderResponse).reportingData} columns={columns} />
+      <PaginatedTable
+        data={(data as unknown as LoaderResponse).reportingData}
+        columns={columns}
+        additionalHeader={(rows) => (
+          <>
+            <Typography>In agreement: {rows.filter((row) => row.original.inAgreement).length}</Typography>
+            <Typography>Have reported: {rows.filter((row) => row.original.haveReported).length}</Typography>
+            <Typography>
+              Reported before deadline: {rows.filter((row) => row.original.reportedBeforeDeadline).length}
+            </Typography>
+            <Typography>
+              Total cigarette butts collected:{' '}
+              {Intl.NumberFormat('sv-SE').format(
+                rows.reduce((acc, val) => {
+                  if (val.original.cigaretteButts) {
+                    return acc + parseFloat(val.original.cigaretteButts as unknown as string);
+                  }
+                  return acc;
+                }, 0),
+              )}
+            </Typography>
+            <Typography>Motivation for data: {rows.filter((row) => row.original.motivationForData).length}</Typography>
+          </>
+        )}
+      />
       <ClientOnly>
         {() => (
           <EditDialog

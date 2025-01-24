@@ -1,9 +1,11 @@
 import ArrowDownward from '@mui/icons-material/ArrowDownward';
 import ArrowUpward from '@mui/icons-material/ArrowUpward';
 import ErrorOutline from '@mui/icons-material/ErrorOutline';
+import SwapVert from '@mui/icons-material/SwapVert';
 import {
   Box,
   BoxProps,
+  IconButton,
   Paper,
   Stack,
   Table,
@@ -26,6 +28,7 @@ import {
   getFilteredRowModel,
   getPaginationRowModel,
   getSortedRowModel,
+  Row,
   RowData,
   useReactTable,
 } from '@tanstack/react-table';
@@ -54,6 +57,7 @@ interface Props<T> {
   data: T[];
   action?: string;
   warningMessage?: string;
+  additionalHeader?: (rows: Row<T>[]) => React.ReactNode;
 }
 
 function cellPinning<T>(column: Column<T>): BoxProps['sx'] {
@@ -80,6 +84,7 @@ export function PaginatedTable<T extends { id: string; warning?: boolean }>({
   data,
   columns,
   warningMessage,
+  additionalHeader,
 }: Props<T>) {
   const [dt, setDt] = useState(data);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
@@ -109,10 +114,16 @@ export function PaginatedTable<T extends { id: string; warning?: boolean }>({
       pagination: {
         pageSize: 50,
       },
+      sorting: [
+        {
+          id: 'companyName',
+          desc: false,
+        },
+      ],
     },
     defaultColumn: {
-      size: 150,
-      minSize: 100,
+      size: 200,
+      minSize: 150,
       maxSize: Number.MAX_SAFE_INTEGER,
     },
     maxMultiSortColCount: 1,
@@ -138,12 +149,13 @@ export function PaginatedTable<T extends { id: string; warning?: boolean }>({
   const { pageSize, pageIndex } = table.getState().pagination;
 
   return (
-    <Box sx={{ width: '100%', overflow: 'hidden' }}>
-      <Stack direction="row" gap={3} alignItems="center" sx={{ overflow: 'hidden' }}>
+    <Box sx={{ width: '100%', maxHeight: 'calc(100vh - 50px - 56px)' }}>
+      <Stack direction="row" gap={3} alignItems="center">
         <ColumnVisibility table={table} />
-        <Typography component="p">Columns: {table.getFilteredRowModel().rows.length}</Typography>
+        <Typography component="p">Rows: {table.getFilteredRowModel().rows.length}</Typography>
+        {additionalHeader ? additionalHeader(table.getFilteredRowModel().rows) : undefined}
       </Stack>
-      <TableContainer component={Paper} sx={{ maxWidth: '100%', maxHeight: 'calc(100vh - 170px)' }}>
+      <TableContainer component={Paper} sx={{ maxWidth: '100%', maxHeight: 'calc(100vh - 200px)', overflow: 'auto' }}>
         <Table sx={{ minWidth: 650 }} stickyHeader>
           <TableHead>
             {table.getHeaderGroups().map((headerGroup) => (
@@ -160,19 +172,30 @@ export function PaginatedTable<T extends { id: string; warning?: boolean }>({
                         zIndex: 2,
                         position: 'sticky',
                       }}
-                      onClick={header.column.getToggleSortingHandler()}
                     >
                       <Stack width="100%" direction="row" alignItems="center" gap={1}>
                         <Box component="span" sx={{ flex: 1 }}>
                           {flexRender(header.column.columnDef.header, header.getContext())}
                         </Box>
-                        <Stack component={'span'} gap={1} direction="row">
-                          {header.column.getIsSorted() === 'asc' ? (
-                            <ArrowUpward />
-                          ) : header.column.getIsSorted() === 'desc' ? (
-                            <ArrowDownward />
-                          ) : null}
+                        <Stack component={'span'} gap={1} direction="row" alignItems="center">
                           {header.column.getCanFilter() ? <Filter column={header.column} /> : null}
+                          {header.column.getCanSort() ? (
+                            <IconButton
+                              aria-label="sort column"
+                              onClick={header.column.getToggleSortingHandler()}
+                              size="small"
+                            >
+                              <SwapVert />
+                            </IconButton>
+                          ) : null}
+                          {header.column.getIsSorted() === 'asc' ? (
+                            <ArrowUpward fontSize="small" />
+                          ) : (
+                            <ArrowDownward
+                              fontSize="small"
+                              sx={{ opacity: header.column.getIsSorted() === 'desc' ? '100%' : '0' }}
+                            />
+                          )}
                         </Stack>
                       </Stack>
                     </TableCell>

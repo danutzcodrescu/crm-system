@@ -230,7 +230,7 @@ async function main() {
       }),
     );
   } catch (e) {
-    console.log(e);
+    console.error(e);
   }
 
   try {
@@ -240,12 +240,11 @@ async function main() {
       readRecurringConsultation().map((row) => ({
         companyId: data[row.code],
         year: 2024,
-        dateSent:
-          row.infoSentToMunicipality && row.infoSentToMunicipality !== 'N/A'
-            ? formatDate(row.infoSentToMunicipality)
-            : undefined,
+        sentDate: row.dateSent && row.dateSent !== 'N/A' ? formatDate(row.dateSent) : undefined,
         meetingDate:
-          row.meetingScheduled && row.meetingScheduled !== 'N/A' ? formatDate(row.meetingScheduled) : undefined,
+          row.meetingScheduled && row.meetingScheduled !== 'N/A'
+            ? new Date(`${row.meetingScheduled} ${row.meetingTime}`)
+            : undefined,
         consultationFormCompleted: row.consultationForm ? row.consultationForm === 'Yes' : undefined,
         meetingHeld: row.meetingHeld && row.meetingHeld === 'Yes' ? true : undefined,
         infoSharedWith: row.infoSharedWith,
@@ -275,13 +274,16 @@ async function main() {
     // eslint-disable-next-line drizzle/enforce-delete-with-where
     await drizzle.delete(reporting);
     await drizzle.insert(reporting).values(
-      readReporting().map((row) => ({
-        companyId: data[row.code],
-        year: 2023,
-        reportingDate: formatDate(row.reportingDate),
-        cigaretteButs: parseFloat(row.cigaretteButs),
-        motivationForData: row.motivationForData ? row.motivationForData === 'Yes' : undefined,
-      })),
+      readReporting().map((row) => {
+        return {
+          companyId: data[row.code],
+          year: 2023,
+          reportingDate: formatDate(row.reportingDate),
+          cigaretteButts: row.cigaretteButs ? parseFloat(row.cigaretteButs) : undefined,
+          motivationForData:
+            row.motivationForData === 'Yes' ? true : row.motivationForData === 'No' ? false : undefined,
+        };
+      }),
     );
     await drizzle.insert(reporting).values(
       Object.values(data).reduce(
@@ -479,7 +481,6 @@ function readRecurringConsultation() {
     .sheet_to_json(workbook.Sheets[workbook.SheetNames[3]], {
       header: [
         'code',
-        'infoSentToMunicipality',
         'dateSent',
         'meetingScheduled',
         'meetingTime',
@@ -492,10 +493,9 @@ function readRecurringConsultation() {
       dateNF: 'dd/mm/yyyy',
       defval: undefined,
     })
-    .slice(2) as [
+    .slice(1) as [
     {
       code: string;
-      infoSentToMunicipality: string;
       dateSent: string;
       meetingScheduled: string;
       meetingTime: string;
@@ -516,7 +516,7 @@ function readReporting() {
       dateNF: 'dd/mm/yyyy',
       defval: undefined,
     })
-    .slice(2) as [
+    .slice(1) as [
     {
       code: string;
       haveReported: string;

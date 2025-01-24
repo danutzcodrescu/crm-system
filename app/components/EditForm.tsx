@@ -1,8 +1,8 @@
 import { TZDate } from '@date-fns/tz';
-import { Checkbox, FormControlLabel, MenuItem, Stack, TextField, TextFieldProps } from '@mui/material';
+import { MenuItem, Stack, TextField, TextFieldProps } from '@mui/material';
 import { DatePicker, DateTimePicker } from '@mui/x-date-pickers';
 import { FormProps } from '@remix-run/react';
-import { cloneElement, Fragment, ReactNode, useRef, useState } from 'react';
+import { cloneElement, ReactNode, useState } from 'react';
 
 export interface Field {
   name: string;
@@ -23,7 +23,7 @@ export interface Field {
   condition?: [string, unknown];
   watchable?: boolean;
   select?: boolean;
-  options?: { label: string; value: string }[];
+  options?: { label: string; value?: string }[];
   render?: () => ReactNode;
 }
 
@@ -32,7 +32,6 @@ interface Props extends FormProps {
 }
 
 export function EditForm({ fields }: Props) {
-  const inputRef = useRef<HTMLInputElement>(null);
   const [watchableFields, setWatchableFields] = useState<Record<string, unknown>>({});
   return (
     <Stack sx={{ gap: 2, width: '100%' }}>
@@ -59,30 +58,6 @@ export function EditForm({ fields }: Props) {
                 }
               : {}),
           });
-        if (field.type === 'checkbox') {
-          return (
-            <Fragment key={field.name}>
-              {/* make sure the checkbox is in sync */}
-              <input type="hidden" name={field.name} defaultValue={field.defaultValue as string} ref={inputRef} />
-              <FormControlLabel
-                // name={field.name}
-                control={
-                  <Checkbox
-                    defaultChecked={field.defaultValue as boolean}
-                    onChange={(val) => {
-                      // @ts-expect-error - we know that the inputRef is an input element
-                      inputRef.current.value = val.target.checked;
-                      if (field.watchable)
-                        setWatchableFields((prev) => ({ ...prev, [field.name]: val.target.checked }));
-                    }}
-                    required={!!field.required}
-                  />
-                }
-                label={field.label as string}
-              />
-            </Fragment>
-          );
-        }
         if (field.type === 'datetime') {
           return (
             <DateTimePicker
