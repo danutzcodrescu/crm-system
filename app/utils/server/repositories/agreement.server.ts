@@ -1,4 +1,4 @@
-import { asc, eq, sql } from 'drizzle-orm';
+import { asc, count, eq, isNotNull, or, sql } from 'drizzle-orm';
 
 import { logger } from '../logger.server';
 import { agreement, companies } from '../schema.server';
@@ -94,5 +94,28 @@ export async function editAgreementRecord(args: EditAgreementRecordArgs) {
   } catch (e) {
     logger.error(e);
     return ['could not edit agreement data', null];
+  }
+}
+
+interface GetInAgreementCount {
+  inOldAgreement: number;
+  inNewAgreement: number;
+}
+
+export async function getInAgreementCount(): Promise<[null, GetInAgreementCount[]] | [string, null]> {
+  try {
+    logger.info('Getting in agreement count');
+    const data = await db
+      .select({
+        inOldAgreement: count(agreement.oldAgreementDateSigned),
+        inNewAgreement: count(agreement.newAgreementDateSigned),
+      })
+      .from(agreement)
+      .where(or(isNotNull(agreement.oldAgreementDateSigned), isNotNull(agreement.newAgreementDateSigned)));
+    logger.info('In agreement count fetched');
+    return [null, data as GetInAgreementCount[]];
+  } catch (e) {
+    logger.error(e);
+    return ['could not fetch in agreement count', null];
   }
 }

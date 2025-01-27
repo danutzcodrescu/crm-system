@@ -21,7 +21,15 @@ export function PageContainer({ children, title, additionalTitleElement, actionD
   }, [parentActionData?.timeStamp]);
 
   return (
-    <Box sx={{ width: '100%', maxHeight: 'calc(100vh - 49px)', p: 1.5, overflow: 'hidden' }}>
+    <Box
+      sx={{
+        width: '100%',
+        maxHeight: 'calc(100vh - 49px)',
+        p: 1.5,
+        overflow: 'hidden',
+        minHeight: 'calc(100vh - 49px)',
+      }}
+    >
       <Stack direction="row" alignItems="center" sx={{ mb: 2 }}>
         {typeof title === 'string' ? (
           <Typography variant="h5" component="h1" fontWeight="bold" sx={{ flex: 1 }}>

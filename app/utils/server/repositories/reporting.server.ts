@@ -1,4 +1,4 @@
-import { and, asc, eq, sql } from 'drizzle-orm';
+import { and, asc, count, eq, gt, lte, sql, sum } from 'drizzle-orm';
 
 import { logger } from '../logger.server';
 import { agreement, companies, reporting } from '../schema.server';
@@ -64,5 +64,38 @@ export async function editReportingRecord(
   } catch (e) {
     logger.error(e);
     return ['could not edit reporting data', null];
+  }
+}
+
+export interface GroupedReportingPerYear {
+  year: number;
+  haveReported: number;
+  haveMotivated: number;
+  cigaretteButts: string | null;
+  haveReportedBeforeDeadline: number;
+}
+
+export async function getGroupedReportingPerYear(
+  startYear: number,
+  endYear: number,
+): Promise<[null, GroupedReportingPerYear[]] | [string, null]> {
+  try {
+    logger.info('Getting grouped reporting data');
+    const data = await db
+      .select({
+        year: reporting.year,
+        haveReported: count(reporting.reportingDate),
+        haveMotivated: count(reporting.motivationForData),
+        cigaretteButts: sum(reporting.cigaretteButts),
+        haveReportedBeforeDeadline: sql<number>`count( CASE WHEN reporting_date <= TO_DATE(${reporting.year} || '-02-15', 'YYYY-MM-DD') THEN 1 END )`,
+      })
+      .from(reporting)
+      .where(and(gt(reporting.year, startYear), lte(reporting.year, endYear)))
+      .groupBy(reporting.year);
+    logger.info('Grouped reporting data fetched');
+    return [null, data];
+  } catch (e) {
+    logger.error(e);
+    return ['could not fetch grouped reporting data', null];
   }
 }

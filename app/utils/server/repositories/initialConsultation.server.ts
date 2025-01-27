@@ -1,4 +1,4 @@
-import { asc, eq, sql } from 'drizzle-orm';
+import { asc, count, eq, isNotNull, sql } from 'drizzle-orm';
 
 import { logger } from '../logger.server';
 import { companies, initialConsultation } from '../schema.server';
@@ -67,5 +67,24 @@ export async function editInitialConsultationRecord(args: EditInitialConsultatio
   } catch (e) {
     logger.error(e);
     return ['could not edit initial consultation data', null];
+  }
+}
+
+export interface InitialConsultationSigned {
+  initialConsultationSigned: number;
+}
+
+export async function getSignedInitialConsultation(): Promise<[null, InitialConsultationSigned[]] | [string, null]> {
+  try {
+    logger.info('Getting signed initial consultation data');
+    const data = await db
+      .select({ initialConsultationSigned: count(initialConsultation.id) })
+      .from(initialConsultation)
+      .where(isNotNull(initialConsultation.dateSigned));
+    logger.info('Signed initial consultation data fetched');
+    return [null, data as InitialConsultationSigned[]];
+  } catch (e) {
+    logger.error(e);
+    return ['could not fetch signed initial consultation data', null];
   }
 }
