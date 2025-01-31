@@ -1,13 +1,14 @@
-import { Alert, AlertColor, Box, Snackbar, Stack, Typography } from '@mui/material';
+import { Alert, AlertColor, Box, BoxProps, Snackbar, Stack, Typography } from '@mui/material';
 import { PropsWithChildren, useEffect, useState } from 'react';
 
 interface Props extends PropsWithChildren {
   title: string | React.ReactNode;
   additionalTitleElement: React.ReactNode;
   actionData?: { message: string; severity: string; timeStamp?: number };
+  sx?: BoxProps['sx'];
 }
 
-export function PageContainer({ children, title, additionalTitleElement, actionData: parentActionData }: Props) {
+export function PageContainer({ children, title, additionalTitleElement, actionData: parentActionData, sx }: Props) {
   const [isAlertOpen, setAlertStatus] = useState(false);
 
   useEffect(() => {
@@ -28,6 +29,7 @@ export function PageContainer({ children, title, additionalTitleElement, actionD
         p: 1.5,
         overflow: 'hidden',
         minHeight: 'calc(100vh - 49px)',
+        ...sx,
       }}
     >
       <Stack direction="row" alignItems="center" sx={{ mb: 2 }}>

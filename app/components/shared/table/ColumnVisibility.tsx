@@ -12,7 +12,11 @@ export function ColumnVisibility<T>({ table }: Props<T>) {
   return (
     <>
       <Tooltip title="Column visibility">
-        <IconButton onClick={(event) => setAnchorEl(event.currentTarget)}>
+        <IconButton
+          onClick={(event) => {
+            setAnchorEl(event.currentTarget);
+          }}
+        >
           <ViewWeek />
         </IconButton>
       </Tooltip>
@@ -28,6 +32,8 @@ export function ColumnVisibility<T>({ table }: Props<T>) {
         }}
         onClose={() => setAnchorEl(null)}
         open={!!anchorEl}
+        anchorEl={anchorEl}
+        slotProps={{ paper: { sx: { px: 2, py: 1.5 } } }}
       >
         <Typography component="p" fontWeight="bold">
           Toggle columns

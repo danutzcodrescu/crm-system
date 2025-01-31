@@ -1,5 +1,5 @@
 import PersonAdd from '@mui/icons-material/PersonAdd';
-import { IconButton, Stack, Typography } from '@mui/material';
+import { Box, IconButton, Stack, Typography } from '@mui/material';
 import { useFetcher } from '@remix-run/react';
 import { ColumnDef } from '@tanstack/react-table';
 import { useCallback, useMemo } from 'react';
@@ -127,7 +127,9 @@ export function LogsTable({ data, companyId, fetcher }: Props) {
           <PersonAdd />
         </IconButton>
       </Stack>
-      <PaginatedTable hideHeader columns={columns} data={data} />
+      <Box sx={{ minWidth: 650 }}>
+        <PaginatedTable defaultSorting={{ id: 'date', desc: true }} columns={columns} data={data} />
+      </Box>
       <ClientOnly>
         {() => (
           <EditDialog
