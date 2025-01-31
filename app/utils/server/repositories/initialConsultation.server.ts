@@ -88,3 +88,58 @@ export async function getSignedInitialConsultation(): Promise<[null, InitialCons
     return ['could not fetch signed initial consultation data', null];
   }
 }
+
+interface InitialConsultationData {
+  documentSent: boolean;
+  isSigned: boolean;
+  dateSigned: Date | null;
+  isShared: boolean;
+  dateShared: Date | null;
+  link: string | null;
+}
+
+export async function getInitialConsultationForMunicipality(
+  municipalityId: string,
+): Promise<[string | null, InitialConsultationData | null]> {
+  try {
+    logger.info('Getting initial consultation data for municipality:', municipalityId);
+    const data = await db
+      .select({
+        documentSent: initialConsultation.documentSent,
+        isSigned: initialConsultation.documentSent,
+        dateSigned: initialConsultation.dateSigned,
+        isShared: initialConsultation.dateShared,
+        dateShared: initialConsultation.dateShared,
+        link: initialConsultation.link,
+        id: initialConsultation.id,
+      })
+      .from(initialConsultation)
+      .where(eq(initialConsultation.companyId, municipalityId))
+      .limit(1);
+
+    const result = data[0] || {
+      documentSent: false,
+      isSigned: false,
+      dateSigned: null,
+      isShared: null,
+      dateShared: null,
+      link: null,
+    };
+
+    logger.info('Initial consultation data fetched for municipality:', municipalityId);
+    return [
+      null,
+      {
+        ...result,
+        documentSent: result.documentSent ?? false,
+        isSigned: result.isSigned ?? false,
+        isShared: result.dateShared !== null,
+        dateSigned: result.dateSigned ?? null,
+        dateShared: result.dateShared ?? null,
+      },
+    ];
+  } catch (error) {
+    logger.error('Error fetching initial consultation data for municipality:', municipalityId, error);
+    return ['could not retrieve initial consultation data', null];
+  }
+}

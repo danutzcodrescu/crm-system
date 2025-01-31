@@ -22,6 +22,7 @@ import {
   Column,
   ColumnDef,
   ColumnFiltersState,
+  ColumnSort,
   FilterFn,
   flexRender,
   getCoreRowModel,
@@ -59,6 +60,7 @@ interface Props<T> {
   additionalHeader?: (rows: Row<T>[]) => React.ReactNode;
   hideHeader?: true;
   disablePagination?: true;
+  defaultSorting?: ColumnSort;
 }
 
 function cellPinning<T>(column: Column<T>): BoxProps['sx'] {
@@ -88,6 +90,7 @@ export function PaginatedTable<T extends { id: string; warning?: boolean }>({
   additionalHeader,
   hideHeader,
   disablePagination,
+  defaultSorting,
 }: Props<T>) {
   const [dt, setDt] = useState(data);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
@@ -118,7 +121,7 @@ export function PaginatedTable<T extends { id: string; warning?: boolean }>({
         pageSize: 50,
       },
       sorting: [
-        {
+        defaultSorting ?? {
           id: 'companyName',
           desc: false,
         },

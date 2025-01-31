@@ -63,7 +63,7 @@ export async function getResponsiblesForMunicipality(
         name: responsibles.name,
         email: responsibles.email,
         title: responsibles.title,
-        phone: responsibles.phoneNumber,
+        phoneNumber: responsibles.phoneNumber,
       })
       .from(responsibles)
       .where(eq(responsibles.companyId, companyId));

@@ -2,23 +2,46 @@
 import { Box, Card, CardContent, Chip, Typography } from '@mui/material';
 import { json, LoaderFunctionArgs, redirect } from '@remix-run/node';
 import { useFetcher, useLoaderData } from '@remix-run/react';
-import { useCallback, useState } from 'react';
+import { ClientOnly } from 'remix-utils/client-only';
 
+import { AgreementCard } from '~/components/municipality/AgreementCard';
+import { InitialConsultationCard } from '~/components/municipality/InitialConsultationCard';
 import { LogsTable } from '~/components/municipality/LogsTable';
 import { ResponsiblesTable } from '~/components/municipality/ResponsiblesTable';
 import { PageContainer } from '~/components/shared/PageContainer';
 import { auth } from '~/utils/server/auth.server';
+import { getAgreementForMunicipality } from '~/utils/server/repositories/agreement.server';
+import { getInitialConsultationForMunicipality } from '~/utils/server/repositories/initialConsultation.server';
 import { getMunicipalityData, MunicipalityData } from '~/utils/server/repositories/municipalities.server';
 import { getLogsForCompany, LogForCompany } from '~/utils/server/repositories/notes-log.server';
 import { getResponsiblesForMunicipality, ResponsibleData } from '~/utils/server/repositories/responsibles.server';
 import { getAllStatuses, Status } from '~/utils/server/repositories/status.server';
-type TabValues = 'logs' | 'employees' | 'reminders' | 'meetings';
 
 interface LoaderResponse {
   logs: LogForCompany[];
   municipality: MunicipalityData;
   statuses: Status[];
   responsibles: ResponsibleData[];
+  initialConsultation: {
+    id: string;
+    documentSent: boolean;
+    isSigned: boolean;
+    dateSigned: Date | null;
+    isShared: boolean;
+    dateShared: Date | null;
+    link: string | null;
+  };
+  agreement: {
+    id: string;
+    oldAgreementLink: string | null;
+    oldAgreementDateSigned: Date | null;
+    oldAgreementShared: boolean;
+    oldAgreementDateShared: Date | null;
+    newAgreementLink: string | null;
+    newAgreementDateSigned: Date | null;
+    newAgreementShared: boolean;
+    newAgreementDateShared: Date | null;
+  };
 }
 
 export async function loader({ request, params }: LoaderFunctionArgs) {
@@ -26,13 +49,23 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
   if (!isLoggedIn) return redirect('/signin');
 
   const id = params.municipalityId as string;
-  const [logsResp, statuses, municipalityResp, responsiblesResp] = await Promise.all([
-    getLogsForCompany(id),
-    getAllStatuses(),
-    getMunicipalityData(id),
-    getResponsiblesForMunicipality(id),
-  ]);
-  if (logsResp[0] || statuses[0] || municipalityResp[0] || responsiblesResp[0]) {
+  const [logsResp, statuses, municipalityResp, responsiblesResp, initialConsultationResp, agreementResp] =
+    await Promise.all([
+      getLogsForCompany(id),
+      getAllStatuses(),
+      getMunicipalityData(id),
+      getResponsiblesForMunicipality(id),
+      getInitialConsultationForMunicipality(id),
+      getAgreementForMunicipality(id),
+    ]);
+  if (
+    logsResp[0] ||
+    statuses[0] ||
+    municipalityResp[0] ||
+    responsiblesResp[0] ||
+    initialConsultationResp[0] ||
+    agreementResp[0]
+  ) {
     return json({ message: 'Could not fetch data for company', severity: 'error' }, { status: 500 });
   }
   return json({
@@ -41,6 +74,8 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
       municipality: municipalityResp[1],
       statuses: statuses[1],
       responsibles: responsiblesResp[1],
+      initialConsultation: initialConsultationResp[1],
+      agreement: agreementResp[1],
     },
     severity: 'success',
   });
@@ -48,13 +83,9 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
 
 export default function Municipality() {
   const data = useLoaderData<typeof loader>();
-  console.log(data);
-  const [tabValue, setTabValue] = useState<TabValues>('logs');
   const fetcher = useFetcher();
 
-  const handleChange = useCallback((_: React.SyntheticEvent, newValue: TabValues) => {
-    setTabValue(newValue);
-  }, []);
+  const municipalityData = data.message as unknown as LoaderResponse;
 
   return (
     <PageContainer
@@ -66,45 +97,37 @@ export default function Municipality() {
           fontWeight="bold"
           sx={{ flex: 1, display: 'flex', gap: 1, alignItems: 'center' }}
         >
-          {(data.message as unknown as LoaderResponse).municipality.name} (
-          {(data.message as unknown as LoaderResponse).municipality.code}){' '}
-          <Chip color="primary" label={(data.message as unknown as LoaderResponse).municipality.statusName} />
+          {municipalityData.municipality.name} ({municipalityData.municipality.code}){' '}
+          <Chip color="primary" label={municipalityData.municipality.statusName} />
           <Box component="span" sx={{ fontSize: '0.75em', fontWeight: 'normal' }}>
-            General email {(data.message as unknown as LoaderResponse).municipality.email}
+            General email {municipalityData.municipality.email}
           </Box>
         </Typography>
       }
-      additionalTitleElement={
-        // <Tooltip title={`Edit commune ${(data.message as any).company.name}`}>
-        //   <IconButton onClick={() => setEditingMode(true)} aria-label="Edit commune">
-        //     <Edit />
-        //   </IconButton>
-        // </Tooltip>
-        null
-      }
+      additionalTitleElement={null}
+      sx={{ overflow: 'auto', maxHeight: 'none', minHeight: 'none' }}
     >
-      <Box sx={{ display: 'grid', gap: 3, gridTemplateColumns: 'repeat(2, 1fr)' }}>
+      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
         <Card>
           <CardContent>
-            <Typography variant="h6" component="h2" sx={{ fontWeight: 'bold' }} gutterBottom>
-              Responsibles
-            </Typography>
-            <ResponsiblesTable
-              data={(data.message as unknown as LoaderResponse).responsibles}
-              companyId={(data.message as unknown as LoaderResponse).municipality.id}
-            />
+            <ResponsiblesTable data={municipalityData.responsibles} companyId={municipalityData.municipality.id} />
           </CardContent>
         </Card>
 
         <Card>
           <CardContent>
-            <LogsTable
-              data={(data.message as unknown as LoaderResponse).logs}
-              companyId={(data.message as unknown as LoaderResponse).municipality.id}
-              fetcher={fetcher}
-            />
+            <LogsTable data={municipalityData.logs} companyId={municipalityData.municipality.id} fetcher={fetcher} />
           </CardContent>
         </Card>
+
+        <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 3 }}>
+          <ClientOnly fallback={<div>Loading...</div>}>
+            {() => <InitialConsultationCard data={municipalityData.initialConsultation} fetcher={fetcher} />}
+          </ClientOnly>
+          <ClientOnly fallback={<div>Loading...</div>}>
+            {() => <AgreementCard data={municipalityData.agreement} fetcher={fetcher} />}
+          </ClientOnly>
+        </Box>
       </Box>
     </PageContainer>
   );

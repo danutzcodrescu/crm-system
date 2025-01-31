@@ -119,3 +119,56 @@ export async function getInAgreementCount(): Promise<[null, GetInAgreementCount[
     return ['could not fetch in agreement count', null];
   }
 }
+
+interface MunicipalityAgreementData {
+  id: string;
+  oldAgreementLink: string | null;
+  oldAgreementDateSigned: Date | null;
+  oldAgreementShared: boolean;
+  oldAgreementDateShared: Date | null;
+  newAgreementLink: string | null;
+  newAgreementDateSigned: Date | null;
+  newAgreementShared: boolean;
+  newAgreementDateShared: Date | null;
+}
+
+export async function getAgreementForMunicipality(
+  municipalityId: string,
+): Promise<[null, MunicipalityAgreementData] | [string, null]> {
+  try {
+    logger.info('Getting agreement data for municipality:', municipalityId);
+    const data = await db
+      .select({
+        id: agreement.id,
+        oldAgreementLink: agreement.oldAgreementLinkToAgreement,
+        oldAgreementDateSigned: agreement.oldAgreementDateSigned,
+        oldAgreementShared: sql<boolean>`CASE WHEN ${agreement.oldAgreementDateShared} IS NOT NULL THEN TRUE ELSE FALSE END`,
+        oldAgreementDateShared: agreement.oldAgreementDateShared,
+        newAgreementLink: agreement.newAgreementLinkToAgreement,
+        newAgreementDateSigned: agreement.newAgreementDateSigned,
+        newAgreementShared: sql<boolean>`CASE WHEN ${agreement.newAgreementDateShared} IS NOT NULL THEN TRUE ELSE FALSE END`,
+        newAgreementDateShared: agreement.newAgreementDateShared,
+      })
+      .from(agreement)
+      .where(eq(agreement.companyId, municipalityId))
+      .limit(1);
+
+    const result = data[0] || {
+      id: '',
+      oldAgreementLink: null,
+      oldAgreementDateSigned: null,
+      oldAgreementShared: false,
+      oldAgreementDateShared: null,
+      newAgreementLink: null,
+      newAgreementDateSigned: null,
+      newAgreementShared: false,
+      newAgreementDateShared: null,
+    };
+
+    logger.info('Agreement data fetched for municipality:', municipalityId);
+    return [null, result];
+  } catch (error) {
+    logger.error('Error fetching agreement data for municipality:', municipalityId, error);
+    return ['could not retrieve agreement data', null];
+  }
+}

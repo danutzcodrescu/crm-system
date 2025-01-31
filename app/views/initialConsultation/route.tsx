@@ -288,7 +288,7 @@ export default function InitialConsultation() {
             fields={fields}
             title={`Edit initial consultation for ${(data as IInitialConsultation[])?.find((d) => d.id === fields[0]?.defaultValue)?.companyName}`}
             fetcher={fetcher}
-            url="/initialConsultation"
+            url="/initial-consultation"
           />
         )}
       </ClientOnly>
