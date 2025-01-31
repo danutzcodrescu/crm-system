@@ -1,8 +1,8 @@
 import Cancel from '@mui/icons-material/Cancel';
 import CheckBox from '@mui/icons-material/CheckBox';
-import { FormControl, InputLabel, MenuItem, Select, Typography } from '@mui/material';
+import { FormControl, InputLabel, Link, MenuItem, Select, Typography } from '@mui/material';
 import { json, LoaderFunctionArgs, MetaFunction, redirect } from '@remix-run/node';
-import { useLoaderData, useLocation, useNavigate } from '@remix-run/react';
+import { Link as RLink, useLoaderData, useLocation, useNavigate } from '@remix-run/react';
 import { ColumnDef } from '@tanstack/react-table';
 import { getYear } from 'date-fns';
 import { useMemo } from 'react';
@@ -52,11 +52,11 @@ export default function Compensation() {
         accessorFn: (row) => row.companyName,
         id: 'companyName',
         size: 370,
-        //  cell: ({ getValue, row }) => (
-        //    <Link component={RLink} to={`/communes/${row.original.id}`}>
-        //      {getValue() as string}
-        //    </Link>
-        //  ), },
+        cell: ({ getValue, row }) => (
+          <Link component={RLink} to={`/municipalities/${row.original.id}`} prefetch="intent">
+            {getValue() as string}
+          </Link>
+        ),
       },
       {
         header: 'In agreement',

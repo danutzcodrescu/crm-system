@@ -55,9 +55,10 @@ declare module '@tanstack/react-table' {
 interface Props<T> {
   columns: ColumnDef<T>[];
   data: T[];
-  action?: string;
   warningMessage?: string;
   additionalHeader?: (rows: Row<T>[]) => React.ReactNode;
+  hideHeader?: true;
+  disablePagination?: true;
 }
 
 function cellPinning<T>(column: Column<T>): BoxProps['sx'] {
@@ -85,6 +86,8 @@ export function PaginatedTable<T extends { id: string; warning?: boolean }>({
   columns,
   warningMessage,
   additionalHeader,
+  hideHeader,
+  disablePagination,
 }: Props<T>) {
   const [dt, setDt] = useState(data);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
@@ -150,7 +153,7 @@ export function PaginatedTable<T extends { id: string; warning?: boolean }>({
 
   return (
     <Box sx={{ width: '100%', maxHeight: 'calc(100vh - 50px - 56px)' }}>
-      <Stack direction="row" gap={3} alignItems="center">
+      <Stack direction="row" gap={3} alignItems="center" {...(hideHeader ? { sx: { display: 'none' } } : {})}>
         <ColumnVisibility table={table} />
         <Typography component="p">Rows: {table.getFilteredRowModel().rows.length}</Typography>
         {additionalHeader ? additionalHeader(table.getFilteredRowModel().rows) : undefined}
@@ -236,26 +239,28 @@ export function PaginatedTable<T extends { id: string; warning?: boolean }>({
           </TableBody>
         </Table>
       </TableContainer>
-      <TablePagination
-        rowsPerPageOptions={[50, 100, 200]}
-        component="div"
-        count={table.getFilteredRowModel().rows.length}
-        rowsPerPage={pageSize}
-        page={pageIndex}
-        slotProps={{
-          select: {
-            inputProps: { 'aria-label': 'rows per page' },
-            native: true,
-          },
-        }}
-        onPageChange={(_, page) => {
-          table.setPageIndex(page);
-        }}
-        onRowsPerPageChange={(e) => {
-          const size = e.target.value ? Number(e.target.value) : 10;
-          table.setPageSize(size);
-        }}
-      />
+      {!disablePagination ? (
+        <TablePagination
+          rowsPerPageOptions={[50, 100, 200]}
+          component="div"
+          count={table.getFilteredRowModel().rows.length}
+          rowsPerPage={pageSize}
+          page={pageIndex}
+          slotProps={{
+            select: {
+              inputProps: { 'aria-label': 'rows per page' },
+              native: true,
+            },
+          }}
+          onPageChange={(_, page) => {
+            table.setPageIndex(page);
+          }}
+          onRowsPerPageChange={(e) => {
+            const size = e.target.value ? Number(e.target.value) : 10;
+            table.setPageSize(size);
+          }}
+        />
+      ) : null}
     </Box>
   );
 }

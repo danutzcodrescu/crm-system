@@ -1,7 +1,7 @@
 import PersonAdd from '@mui/icons-material/PersonAdd';
 import { Box, IconButton, Link, Stack, Typography } from '@mui/material';
 import { json, LoaderFunctionArgs, redirect } from '@remix-run/node';
-import { useFetcher, useLoaderData } from '@remix-run/react';
+import { Link as RLink, useFetcher, useLoaderData } from '@remix-run/react';
 import { ColumnDef } from '@tanstack/react-table';
 import { useCallback, useMemo } from 'react';
 import { ClientOnly } from 'remix-utils/client-only';
@@ -44,11 +44,11 @@ export default function Companies() {
         accessorKey: 'name',
         filterFn: 'includesString',
         size: 250,
-        // cell: ({ getValue, row }) => (
-        //   <Link component={RLink} to={`/communes/${row.original.id}`}>
-        //     {getValue() as string}
-        //   </Link>
-        // ),
+        cell: ({ getValue, row }) => (
+          <Link component={RLink} to={`/municipalities/${row.original.id}`}>
+            {getValue() as string}
+          </Link>
+        ),
       },
       {
         header: 'Code',
@@ -112,7 +112,7 @@ export default function Companies() {
           return (
             <TableActionsCell
               additionalElement={
-                <IconButton onClick={() => setNewResponsibleFields(row.original.id)}>
+                <IconButton aria-label="Add new responsible" onClick={() => setNewResponsibleFields(row.original.id)}>
                   <PersonAdd />
                 </IconButton>
               }
@@ -120,7 +120,7 @@ export default function Companies() {
               id={row.original.id as string}
               isEditable
               onEdit={() => setMunicipalityFields(row.original, (data as unknown as LoaderResponse).statuses)}
-              link={`/communes/${row.original.id}`}
+              link={`/municipalities/${row.original.id}`}
             />
           );
         },

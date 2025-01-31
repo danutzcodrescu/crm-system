@@ -1,8 +1,8 @@
 import Cancel from '@mui/icons-material/Cancel';
 import CheckBox from '@mui/icons-material/CheckBox';
-import { FormControl, InputLabel, MenuItem, Select, Typography } from '@mui/material';
+import { FormControl, InputLabel, Link, MenuItem, Select, Typography } from '@mui/material';
 import { ActionFunctionArgs, json, LoaderFunctionArgs, MetaFunction, redirect } from '@remix-run/node';
-import { useFetcher, useLoaderData, useLocation, useNavigate } from '@remix-run/react';
+import { Link as RLink, useFetcher, useLoaderData, useLocation, useNavigate } from '@remix-run/react';
 import { ColumnDef } from '@tanstack/react-table';
 import { getYear } from 'date-fns';
 import { useCallback, useMemo } from 'react';
@@ -100,11 +100,11 @@ export default function Reporting() {
         accessorFn: (row) => row.companyName,
         id: 'companyName',
         size: 370,
-        //  cell: ({ getValue, row }) => (
-        //    <Link component={RLink} to={`/communes/${row.original.id}`}>
-        //      {getValue() as string}
-        //    </Link>
-        //  ), },
+        cell: ({ getValue, row }) => (
+          <Link component={RLink} to={`/municipalities/${row.original.id}`} prefetch="intent">
+            {getValue() as string}
+          </Link>
+        ),
         // eslint-disable-next-line react-hooks/exhaustive-deps
       },
       {
@@ -222,7 +222,7 @@ export default function Reporting() {
               id={row.original.id as string}
               isEditable
               onEdit={() => setEditableFields(row.original)}
-              link={`/communes/${row.original.id}`}
+              link={`/municipalities/${row.original.id}`}
             />
           );
         },

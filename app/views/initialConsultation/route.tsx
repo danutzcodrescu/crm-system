@@ -1,9 +1,9 @@
 import Cancel from '@mui/icons-material/Cancel';
 import CheckBox from '@mui/icons-material/CheckBox';
 import LinkIcon from '@mui/icons-material/Link';
-import { IconButton, Tooltip, Typography } from '@mui/material';
+import { IconButton, Link, Tooltip, Typography } from '@mui/material';
 import { ActionFunctionArgs, json, LoaderFunctionArgs, MetaFunction, redirect } from '@remix-run/node';
-import { useFetcher, useLoaderData } from '@remix-run/react';
+import { Link as RLink, useFetcher, useLoaderData } from '@remix-run/react';
 import { ColumnDef } from '@tanstack/react-table';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { ClientOnly } from 'remix-utils/client-only';
@@ -127,11 +127,11 @@ export default function InitialConsultation() {
         enableHiding: false,
         filterFn: 'includesString',
         size: 370,
-        //  cell: ({ getValue, row }) => (
-        //    <Link component={RLink} to={`/communes/${row.original.id}`}>
-        //      {getValue() as string}
-        //    </Link>
-        //  ),
+        cell: ({ getValue, row }) => (
+          <Link component={RLink} to={`/municipality/${row.original.id}`} prefetch="intent">
+            {getValue() as string}
+          </Link>
+        ),
       },
       {
         header: 'Initial consultation document sent',
@@ -230,7 +230,7 @@ export default function InitialConsultation() {
               id={row.original.id as string}
               isEditable
               onEdit={() => setEditableData(row.original)}
-              link={`/communes/${row.original.companyId}`}
+              link={`/municipalities/${row.original.companyId}`}
               additionalElement={
                 row.original.link ? (
                   <Tooltip title="Bilaga 7.2. Formulär för inledande samråd">

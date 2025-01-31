@@ -1,62 +1,65 @@
 import { desc, eq } from 'drizzle-orm';
 import { DatabaseError } from 'pg';
 
-import { employees, notesLog } from '../schema.server';
+import { logger } from '../logger.server';
+import { logs } from '../schema.server';
 import { db } from './db.server';
 
 export interface LogForCompany {
   id: string;
   description: string;
   date: Date;
-  employeeId: string | null;
-  employeeName: string | null;
 }
 
 export async function deleteLog(id: string): Promise<string | null> {
   try {
-    await db.delete(notesLog).where(eq(notesLog.id, id));
+    logger.info('Deleting log', id);
+    await db.delete(logs).where(eq(logs.id, id));
     return null;
   } catch (e) {
-    return (e as DatabaseError).detail as string;
+    logger.error(e);
+    return `Could not delete log: ${(e as DatabaseError).detail}`;
   }
 }
 
 export async function updateLog(id: string, description: string, date: Date): Promise<string | null> {
   try {
-    await db.update(notesLog).set({ description, date }).where(eq(notesLog.id, id));
+    logger.info('Updating log', id);
+    await db.update(logs).set({ description, date }).where(eq(logs.id, id));
     return null;
   } catch (e) {
-    return (e as DatabaseError).detail as string;
+    logger.error(e);
+    return `Could not update log: ${(e as DatabaseError).detail}`;
   }
 }
 
-export async function createLog(employeeId: string, description: string, date: Date): Promise<string | null> {
+export async function createLog(companyId: string, description: string, date: Date): Promise<string | null> {
   try {
-    await db.insert(notesLog).values({ employeeId, description, date });
+    logger.info('Creating log for company', companyId);
+    await db.insert(logs).values({ companyId, description, date });
     return null;
   } catch (e) {
-    return (e as DatabaseError).detail as string;
+    return `Could not create log: ${(e as DatabaseError).detail}`;
   }
 }
 
 export async function getLogsForCompany(companyId: string): Promise<[string | undefined, LogForCompany[] | undefined]> {
   try {
+    logger.info('Fetching logs for company', companyId);
     return [
       undefined,
       await db
         .select({
-          id: notesLog.id,
-          description: notesLog.description,
-          date: notesLog.date,
-          employeeId: employees.id,
-          employeeName: employees.name,
+          id: logs.id,
+          description: logs.description,
+          date: logs.date,
         })
-        .from(notesLog)
-        .leftJoin(employees, eq(notesLog.employeeId, employees.id))
-        .where(eq(employees.companyId, companyId))
-        .orderBy(desc(notesLog.date)),
+        .from(logs)
+        .where(eq(logs.companyId, companyId))
+        .orderBy(desc(logs.date)),
     ];
   } catch (e) {
-    return [(e as DatabaseError).detail, undefined];
+    logger.error(e);
+    return [`Could not retrieve logs for company`, undefined];
   }
 }

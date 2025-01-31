@@ -36,6 +36,10 @@ export default defineConfig(({ isSsrBuild }) => ({
             route('/api/municipalities/:companyId', 'api/municipalities/route.ts');
             route('/api/municipalities/:companyId/responsibles', 'api/municipalities/responsibles.ts');
           });
+          route('/api/logs', 'api/notes-log/layout.tsx', () => {
+            route('/api/logs/:companyId', 'api/notes-log/companyLog.ts');
+            route('/api/logs/:companyId/:logId', 'api/notes-log/log.ts');
+          });
           route('/', 'views/layout.tsx', () => {
             route('', 'views/dashboard/route.tsx', { index: true });
             route('/initial-consultation', 'views/initialConsultation/route.tsx');
@@ -47,7 +51,7 @@ export default defineConfig(({ isSsrBuild }) => ({
             route('/invoicing', 'views/invoicing/route.tsx');
             route('municipalities', 'views/municipalities/layout.tsx', () => {
               route('', 'views/municipalities/route.tsx', { index: true });
-              // route(':municipalityId', 'views/municipalities/municipality.tsx');
+              route(':municipalityId', 'views/municipalities/municipality.tsx');
             });
             // route('/statuses', 'views/statuses/route.tsx');
             route('/years', 'views/years/route.tsx');

@@ -34,7 +34,7 @@ export function EditDialog({ title, fetcher, fields, url, isOpen, method = 'PATC
             disabled={fetcher.state !== 'idle'}
             variant="contained"
           >
-            Update
+            {method === 'POST' ? 'Create' : 'Update'}
           </LoadingButton>
         </DialogActions>
       </fetcher.Form>
