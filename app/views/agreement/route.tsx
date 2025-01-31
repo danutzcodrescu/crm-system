@@ -1,9 +1,9 @@
 import Cancel from '@mui/icons-material/Cancel';
 import CheckBox from '@mui/icons-material/CheckBox';
 import LinkIcon from '@mui/icons-material/Link';
-import { IconButton, Stack, Tooltip, Typography } from '@mui/material';
+import { IconButton, Link, Stack, Tooltip, Typography } from '@mui/material';
 import { ActionFunctionArgs, json, LoaderFunctionArgs, MetaFunction, redirect } from '@remix-run/node';
-import { useFetcher, useLoaderData } from '@remix-run/react';
+import { Link as RLink, useFetcher, useLoaderData } from '@remix-run/react';
 import { ColumnDef } from '@tanstack/react-table';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { ClientOnly } from 'remix-utils/client-only';
@@ -188,11 +188,11 @@ export default function Agreement() {
         accessorKey: 'companyName',
         filterFn: 'includesString',
         size: 370,
-        //  cell: ({ getValue, row }) => (
-        //    <Link component={RLink} to={`/communes/${row.original.id}`}>
-        //      {getValue() as string}
-        //    </Link>
-        //  ),
+        cell: ({ getValue, row }) => (
+          <Link component={RLink} to={`/municipalities/${row.original.id}`} prefetch="intent">
+            {getValue() as string}
+          </Link>
+        ),
       },
       {
         header: 'In agreement',

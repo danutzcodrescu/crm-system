@@ -10,7 +10,7 @@ type Props = {
   id: string;
   additionalElement?: ReactNode;
   isEditable: boolean;
-  link: string;
+  link?: string;
   onEdit: (id: string) => void;
 };
 
@@ -25,11 +25,13 @@ export function TableActionsCell({ name, id, additionalElement, isEditable, link
           </IconButton>
         </Tooltip>
       ) : null}
-      <Tooltip title={`View ${name}`}>
-        <IconButton size="small" aria-label={`View ${name}`} component={Link} to={link}>
-          <Preview />
-        </IconButton>
-      </Tooltip>
+      {link ? (
+        <Tooltip title={`View ${name}`}>
+          <IconButton size="small" aria-label={`View ${name}`} component={Link} to={link} prefetch="intent">
+            <Preview />
+          </IconButton>
+        </Tooltip>
+      ) : null}
 
       {/* <DeleteButton title={name} onClick={() => onDelete(id)} /> */}
     </Stack>
