@@ -71,7 +71,6 @@ export async function action({ request }: ActionFunctionArgs) {
         { status: 400 },
       );
     }
-    console.log(body.get('meetingHeld'));
     const promises = [
       editRecurringConsultationRecord({
         companyId: id as string,

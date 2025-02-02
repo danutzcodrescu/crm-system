@@ -55,6 +55,46 @@ export async function getRecurringConsultationData(
   }
 }
 
+export async function getRecurringConsultationForCompanyAndYears(
+  companyId: string,
+  years: number[],
+): Promise<[null, RecurringConsultationPerMunicipality[]] | [string, null]> {
+  try {
+    logger.info('Getting recurring consultation data for company:', companyId, 'and years:', years);
+    const data = await db
+      .select({
+        companyName: companies.name,
+        id: companies.id,
+        consultations: companies.consultations,
+        year: recurringConsultation.year,
+        sentDate: recurringConsultation.sentDate,
+        meetingDate: recurringConsultation.meetingDate,
+        consultationFormCompleted: recurringConsultation.consultationFormCompleted,
+        meetingHeld: recurringConsultation.meetingHeld,
+        infoSharedWithAuthority: sql`CASE WHEN ${recurringConsultation.dateSharedWithAuthority} IS NOT NULL THEN TRUE ELSE FALSE END`,
+        dateSharedWithAuthority: recurringConsultation.dateSharedWithAuthority,
+        agreementType: agreement.typeOfAgreement,
+        recurringConsultation: sql<boolean>`CASE WHEN ${agreement.typeOfAgreement} = 'old' THEN TRUE ELSE FALSE END`,
+        initialConsultationSignedDate: initialConsultation.dateSigned,
+      })
+      .from(recurringConsultation)
+      .leftJoin(companies, eq(recurringConsultation.companyId, companies.id))
+      .leftJoin(agreement, eq(recurringConsultation.companyId, agreement.companyId))
+      .leftJoin(initialConsultation, eq(recurringConsultation.companyId, initialConsultation.companyId))
+      .where(
+        and(
+          eq(recurringConsultation.companyId, companyId),
+          sql`${recurringConsultation.year} = ANY(ARRAY[${sql.join(years, sql`, `)}]::smallint[])`,
+        ),
+      );
+    logger.info('Recurring consultation data fetched for company:', companyId);
+    return [null, data as RecurringConsultationPerMunicipality[]];
+  } catch (e) {
+    logger.error(e);
+    return ['could not fetch recurring consultation data', null];
+  }
+}
+
 type EditRecurringConsultationArgs = typeof recurringConsultation.$inferInsert;
 
 export async function editRecurringConsultationRecord(

@@ -12,6 +12,7 @@ export interface MunicipalityData {
   statusName: string;
   email: string;
   responsibles: Responsible[];
+  consultations: number[];
 }
 
 type Responsible = { name: string; email: string; phoneNumber: string; title: string; id: string };
@@ -27,6 +28,7 @@ export async function getMunicipalitiesData(): Promise<[null, MunicipalityData[]
         statusId: companies.statusId,
         statusName: status.name,
         email: companies.email,
+        consultations: companies.consultations,
         responsibles: sql<
           Responsible[]
         >`JSON_AGG(JSON_BUILD_OBJECT('name', responsibles.name, 'email', responsibles.email, 'phone', responsibles.phone_number, 'title', responsibles.title, 'id', responsibles.id))`,
@@ -47,6 +49,7 @@ export async function getMunicipalitiesData(): Promise<[null, MunicipalityData[]
         statusName: item.statusName,
         email: item.email,
         responsibles: item.responsibles,
+        consultations: item.consultations || [],
       })) as MunicipalityData[],
     ];
   } catch (e) {
@@ -66,12 +69,13 @@ export async function getMunicipalityData(companyId: string): Promise<[null, Mun
         statusId: companies.statusId,
         statusName: status.name,
         email: companies.email,
+        consultations: companies.consultations,
       })
       .from(companies)
       .leftJoin(status, eq(companies.statusId, status.id))
       .where(eq(companies.id, companyId))
       .groupBy(companies.id, status.name);
-    return [null, data[0] as MunicipalityData];
+    return [null, { ...data[0], consultations: data[0].consultations || [] } as MunicipalityData];
   } catch (e) {
     logger.error(e);
     return ['could not fetch municipality data', null];
