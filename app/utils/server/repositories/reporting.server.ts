@@ -99,3 +99,31 @@ export async function getGroupedReportingPerYear(
     return ['could not fetch grouped reporting data', null];
   }
 }
+
+export async function getReportingForCompany(
+  companyId: string,
+  limitYear: number,
+): Promise<[null, ReportingData[]] | [string, null]> {
+  try {
+    logger.info('Getting reporting data for company:', companyId);
+    const data = await db
+      .select({
+        companyName: companies.name,
+        id: companies.id,
+        year: reporting.year,
+        reportingDate: reporting.reportingDate,
+        cigaretteButts: reporting.cigaretteButts,
+        motivation: reporting.motivation,
+        motivationForData: reporting.motivationForData,
+      })
+      .from(reporting)
+      .leftJoin(companies, eq(reporting.companyId, companies.id))
+      .where(and(eq(reporting.companyId, companyId), lte(reporting.year, limitYear)))
+      .orderBy(asc(reporting.year));
+    logger.info('Reporting data fetched for company');
+    return [null, data as ReportingData[]];
+  } catch (e) {
+    logger.error(e);
+    return ['could not fetch reporting data for company', null];
+  }
+}

@@ -7,6 +7,7 @@ import { AgreementCard } from '~/components/municipality/AgreementCard';
 import { InitialConsultationCard } from '~/components/municipality/InitialConsultationCard';
 import { LogsTable } from '~/components/municipality/LogsTable';
 import { RecurringConsultation } from '~/components/municipality/RecurringConsultationCard';
+import { ReportingCard } from '~/components/municipality/ReportingCard';
 import { ResponsiblesTable } from '~/components/municipality/ResponsiblesTable';
 import { PageContainer } from '~/components/shared/PageContainer';
 import { auth } from '~/utils/server/auth.server';
@@ -18,6 +19,7 @@ import {
   getRecurringConsultationForCompanyAndYears,
   RecurringConsultationPerMunicipality,
 } from '~/utils/server/repositories/recurringConsultation.server';
+import { getReportingForCompany, ReportingData } from '~/utils/server/repositories/reporting.server';
 import { getResponsiblesForMunicipality, ResponsibleData } from '~/utils/server/repositories/responsibles.server';
 import { getAllStatuses, Status } from '~/utils/server/repositories/status.server';
 
@@ -50,6 +52,7 @@ interface LoaderResponse {
     data: RecurringConsultationPerMunicipality[];
     years: number[];
   };
+  reporting: ReportingData[];
 }
 
 export async function loader({ request, params }: LoaderFunctionArgs) {
@@ -57,15 +60,23 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
   if (!isLoggedIn) return redirect('/signin');
 
   const id = params.municipalityId as string;
-  const [logsResp, statuses, municipalityResp, responsiblesResp, initialConsultationResp, agreementResp] =
-    await Promise.all([
-      getLogsForCompany(id),
-      getAllStatuses(),
-      getMunicipalityData(id),
-      getResponsiblesForMunicipality(id),
-      getInitialConsultationForMunicipality(id),
-      getAgreementForMunicipality(id),
-    ]);
+  const [
+    logsResp,
+    statuses,
+    municipalityResp,
+    responsiblesResp,
+    initialConsultationResp,
+    agreementResp,
+    reportingResp,
+  ] = await Promise.all([
+    getLogsForCompany(id),
+    getAllStatuses(),
+    getMunicipalityData(id),
+    getResponsiblesForMunicipality(id),
+    getInitialConsultationForMunicipality(id),
+    getAgreementForMunicipality(id),
+    getReportingForCompany(id, new Date().getFullYear()),
+  ]);
 
   if (
     logsResp[0] ||
@@ -73,7 +84,8 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
     municipalityResp[0] ||
     responsiblesResp[0] ||
     initialConsultationResp[0] ||
-    agreementResp[0]
+    agreementResp[0] ||
+    reportingResp[0]
   ) {
     return json({ message: 'Could not fetch data for company', severity: 'error' }, { status: 500 });
   }
@@ -100,6 +112,7 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
         data: recurringConsultationData,
         years: municipalityResp?.[1]?.consultations as number[],
       },
+      reporting: reportingResp[1],
     },
     severity: 'success',
   });
@@ -107,7 +120,7 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
 
 export default function Municipality() {
   const data = useLoaderData<typeof loader>();
-  const fetcher = useFetcher();
+  const fetcher = useFetcher<{ message: string; severity: string }>();
 
   const municipalityData = data.message as unknown as LoaderResponse;
 
@@ -155,6 +168,8 @@ export default function Municipality() {
           data={municipalityData.recurringConsultation.data}
           fetcher={fetcher}
         />
+
+        <ReportingCard data={municipalityData.reporting} fetcher={fetcher} />
       </Box>
     </PageContainer>
   );
