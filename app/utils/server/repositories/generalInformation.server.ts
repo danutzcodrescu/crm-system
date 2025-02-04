@@ -1,7 +1,7 @@
-import { and, asc, eq, sql } from 'drizzle-orm';
+import { and, asc, eq, lte, sql } from 'drizzle-orm';
 
 import { logger } from '../logger.server';
-import { companies, generalInformation } from '../schema.server';
+import { companies, compensationView, generalInformation } from '../schema.server';
 import { db } from './db.server';
 
 export interface GeneralInformationPerMunicipality {
@@ -64,9 +64,41 @@ export async function editGeneralInformationRecord(
         ),
       );
     logger.info('General information data edited');
+    await db.refreshMaterializedView(compensationView);
     return [null, ''];
   } catch (e) {
     logger.error(e);
     return ['could not edit general information data', null];
+  }
+}
+
+export async function getGeneralInformationForCompany(
+  companyId: string,
+  limitYear: number,
+): Promise<[null, GeneralInformationPerMunicipality[]] | [string, null]> {
+  try {
+    logger.info('Getting general information data for company:', companyId);
+    const data = await db
+      .select({
+        companyName: companies.name,
+        id: companies.id,
+        year: generalInformation.year,
+        inhabitants: generalInformation.inhabitants,
+        landSurface: generalInformation.landSurface,
+        cleaningCost: generalInformation.cleaningCost,
+        cleaningCostsPerInhabitant: sql`CASE WHEN ${generalInformation.cleaningCost} is NOT NULL AND ${generalInformation.inhabitants} is NOT NULL THEN  ROUND(${generalInformation.cleaningCost} * 1.0 / ${generalInformation.inhabitants}) ELSE NULL END`,
+        cleanedKg: generalInformation.cleanedKg,
+        kgPerInhabitant: sql`CASE WHEN ${generalInformation.inhabitants} is NOT NULL AND ${generalInformation.cleanedKg} is NOT NULL THEN ROUND(${generalInformation.cleanedKg} * 1.00 / ${generalInformation.inhabitants}, 10) ELSE NULL END`,
+        epaMeasurement: generalInformation.epaLitterMeasurement,
+      })
+      .from(generalInformation)
+      .leftJoin(companies, eq(generalInformation.companyId, companies.id))
+      .where(and(eq(generalInformation.companyId, companyId), lte(generalInformation.year, limitYear)))
+      .orderBy(asc(generalInformation.year));
+    logger.info('General information data fetched for company');
+    return [null, data as GeneralInformationPerMunicipality[]];
+  } catch (e) {
+    logger.error(e);
+    return ['could not fetch general information data for company', null];
   }
 }

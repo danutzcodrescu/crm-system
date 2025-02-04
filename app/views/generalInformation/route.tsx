@@ -66,10 +66,10 @@ export async function action({ request }: ActionFunctionArgs) {
     const [error] = await editGeneralInformationRecord({
       companyId: id as string,
       year: parseInt(year as string),
-      inhabitants: parseInt(body.get('inhabitants') as string),
-      landSurface: parseFloat(body.get('landSurface') as string),
-      cleaningCost: parseInt(body.get('cleaningCost') as string),
-      cleanedKg: parseInt(body.get('cleanedKg') as string),
+      inhabitants: body.get('inhabitants') ? parseInt(body.get('inhabitants') as string) : undefined,
+      landSurface: body.get('landSurface') ? parseFloat(body.get('landSurface') as string) : undefined,
+      cleaningCost: body.get('cleaningCost') ? parseInt(body.get('cleaningCost') as string) : undefined,
+      cleanedKg: body.get('cleanedKg') ? parseInt(body.get('cleanedKg') as string) : undefined,
       epaLitterMeasurement: body.get('epaLitterMeasurement') === 'true' ? true : undefined,
     });
 

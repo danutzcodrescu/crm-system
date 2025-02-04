@@ -106,8 +106,8 @@ export default function Compensation() {
 
       {
         header: `Addition to fixed compensation`,
-        id: 'additionalCompensation',
-        accessorKey: 'additionalCompensation',
+        id: 'totalAddition',
+        accessorKey: 'totalAddition',
         enableColumnFilter: false,
         cell: ({ getValue }) => Intl.NumberFormat('sv-SE', { maximumFractionDigits: 2 }).format(getValue() as number),
       },

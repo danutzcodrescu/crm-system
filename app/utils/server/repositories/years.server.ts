@@ -1,7 +1,7 @@
 import { asc, eq, lte, sql } from 'drizzle-orm';
 
 import { logger } from '../logger.server';
-import { years } from '../schema.server';
+import { compensationView, years } from '../schema.server';
 import { db } from './db.server';
 
 export async function getAllYears(startYear = 2022, currentYear = true): Promise<[string, null] | [null, number[]]> {
@@ -57,6 +57,7 @@ export async function updateYear(args: UpdateYear): Promise<string | null> {
         changeFactorLitter: args.changeFactorLitter,
       })
       .where(eq(years.name, args.name));
+    await db.refreshMaterializedView(compensationView);
     return null;
   } catch (e) {
     logger.error(e);

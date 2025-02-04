@@ -19,16 +19,17 @@ export const theme = createTheme({
   components: {
     MuiTextField: {
       defaultProps: {
+        autoComplete: 'new-password',
         slotProps: {
           htmlInput: {
-            autoComplete: 'one-time-code',
+            autoComplete: 'off',
           },
         },
       },
     },
     MuiOutlinedInput: {
       defaultProps: {
-        autoComplete: 'one-time-code',
+        autoComplete: 'off',
       },
     },
     MuiIconButton: {

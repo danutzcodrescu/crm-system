@@ -1,7 +1,7 @@
 import { asc, count, eq, isNotNull, or, sql } from 'drizzle-orm';
 
 import { logger } from '../logger.server';
-import { agreement, companies } from '../schema.server';
+import { agreement, companies, compensationView } from '../schema.server';
 import { db } from './db.server';
 
 export interface AgreementData {
@@ -166,6 +166,7 @@ export async function getAgreementForMunicipality(
     };
 
     logger.info('Agreement data fetched for municipality:', municipalityId);
+    await db.refreshMaterializedView(compensationView);
     return [null, result];
   } catch (error) {
     logger.error('Error fetching agreement data for municipality:', municipalityId, error);

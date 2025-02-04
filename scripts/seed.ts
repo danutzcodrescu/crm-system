@@ -8,6 +8,7 @@ import {
   agreement,
   agreementTypeEnum,
   companies,
+  compensationView,
   generalInformation,
   initialConsultation,
   invoicing,
@@ -351,16 +352,47 @@ async function main() {
     // eslint-disable-next-line drizzle/enforce-delete-with-where
     await drizzle.delete(invoicing);
     await drizzle.insert(invoicing).values(
-      readInvoicing().map((row) => ({
-        companyId: data[row.code],
-        year: 2023,
-        invoiceAmount: row.invoiceAmount ? parseInt(row.invoiceAmount.replace(',', '')) : undefined,
-        vat: row.vat ? parseInt(row.vat.replaceAll(',', '')) : undefined,
-      })),
+      readInvoicing().flatMap((row) => [
+        {
+          companyId: data[row.code],
+          year: 2023,
+          invoiceAmount: row.invoiceAmount ? parseInt(row.invoiceAmount.replace(',', '')) : undefined,
+          vat: row.vat ? parseInt(row.vat.replaceAll(',', '')) : undefined,
+        },
+        {
+          companyId: data[row.code],
+          year: 2024,
+        },
+        {
+          companyId: data[row.code],
+          year: 2025,
+        },
+        {
+          companyId: data[row.code],
+          year: 2026,
+        },
+        {
+          companyId: data[row.code],
+          year: 2027,
+        },
+        {
+          companyId: data[row.code],
+          year: 2028,
+        },
+        {
+          companyId: data[row.code],
+          year: 2029,
+        },
+        {
+          companyId: data[row.code],
+          year: 2030,
+        },
+      ]),
     );
   } catch (e) {
     console.error(e);
   }
+  await drizzle.refreshMaterializedView(compensationView);
   process.exit(0);
 }
 
@@ -578,7 +610,7 @@ function readInvoicing() {
       dateNF: 'dd/mm/yyyy',
       defval: undefined,
     })
-    .slice(2) as [
+    .slice(1) as [
     {
       code: string;
       invoiceDate: string;

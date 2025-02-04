@@ -4,7 +4,10 @@ import { json, LoaderFunctionArgs, redirect } from '@remix-run/node';
 import { useFetcher, useLoaderData } from '@remix-run/react';
 
 import { AgreementCard } from '~/components/municipality/AgreementCard';
+import { CompensationCard } from '~/components/municipality/CompensationCard';
+import { GeneralInformationCard } from '~/components/municipality/GeneralInformationCard';
 import { InitialConsultationCard } from '~/components/municipality/InitialConsultationCard';
+import { InvoicingCard } from '~/components/municipality/InvoicingCard';
 import { LogsTable } from '~/components/municipality/LogsTable';
 import { RecurringConsultation } from '~/components/municipality/RecurringConsultationCard';
 import { ReportingCard } from '~/components/municipality/ReportingCard';
@@ -12,7 +15,13 @@ import { ResponsiblesTable } from '~/components/municipality/ResponsiblesTable';
 import { PageContainer } from '~/components/shared/PageContainer';
 import { auth } from '~/utils/server/auth.server';
 import { getAgreementForMunicipality } from '~/utils/server/repositories/agreement.server';
+import { CompensationDataPerCompany, getCompensationForCompany } from '~/utils/server/repositories/compensation.server';
+import {
+  GeneralInformationPerMunicipality,
+  getGeneralInformationForCompany,
+} from '~/utils/server/repositories/generalInformation.server';
 import { getInitialConsultationForMunicipality } from '~/utils/server/repositories/initialConsultation.server';
+import { getInvoicingForCompany, InvoicingData } from '~/utils/server/repositories/invoicing.server';
 import { getMunicipalityData, MunicipalityData } from '~/utils/server/repositories/municipalities.server';
 import { getLogsForCompany, LogForCompany } from '~/utils/server/repositories/notes-log.server';
 import {
@@ -53,6 +62,9 @@ interface LoaderResponse {
     years: number[];
   };
   reporting: ReportingData[];
+  generalInformation: GeneralInformationPerMunicipality[];
+  compensation: CompensationDataPerCompany[];
+  invoicing: InvoicingData[];
 }
 
 export async function loader({ request, params }: LoaderFunctionArgs) {
@@ -60,14 +72,18 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
   if (!isLoggedIn) return redirect('/signin');
 
   const id = params.municipalityId as string;
+  const currentYear = new Date().getFullYear();
   const [
     logsResp,
-    statuses,
+    statusesResp,
     municipalityResp,
     responsiblesResp,
     initialConsultationResp,
     agreementResp,
     reportingResp,
+    generalInformationResp,
+    compensationResp,
+    invoicingResp,
   ] = await Promise.all([
     getLogsForCompany(id),
     getAllStatuses(),
@@ -75,17 +91,23 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
     getResponsiblesForMunicipality(id),
     getInitialConsultationForMunicipality(id),
     getAgreementForMunicipality(id),
-    getReportingForCompany(id, new Date().getFullYear()),
+    getReportingForCompany(id, currentYear),
+    getGeneralInformationForCompany(id, currentYear),
+    getCompensationForCompany(id, currentYear),
+    getInvoicingForCompany(id, currentYear),
   ]);
 
   if (
     logsResp[0] ||
-    statuses[0] ||
+    statusesResp[0] ||
     municipalityResp[0] ||
     responsiblesResp[0] ||
     initialConsultationResp[0] ||
     agreementResp[0] ||
-    reportingResp[0]
+    reportingResp[0] ||
+    generalInformationResp[0] ||
+    compensationResp[0] ||
+    invoicingResp[0]
   ) {
     return json({ message: 'Could not fetch data for company', severity: 'error' }, { status: 500 });
   }
@@ -104,7 +126,7 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
     message: {
       logs: logsResp[1],
       municipality: municipalityResp[1],
-      statuses: statuses[1],
+      statuses: statusesResp[1],
       responsibles: responsiblesResp[1],
       initialConsultation: initialConsultationResp[1],
       agreement: agreementResp[1],
@@ -113,6 +135,9 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
         years: municipalityResp?.[1]?.consultations as number[],
       },
       reporting: reportingResp[1],
+      generalInformation: generalInformationResp[1],
+      compensation: compensationResp[1],
+      invoicing: invoicingResp[1],
     },
     severity: 'success',
   });
@@ -120,7 +145,7 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
 
 export default function Municipality() {
   const data = useLoaderData<typeof loader>();
-  const fetcher = useFetcher<{ message: string; severity: string }>();
+  const fetcher = useFetcher();
 
   const municipalityData = data.message as unknown as LoaderResponse;
 
@@ -170,6 +195,12 @@ export default function Municipality() {
         />
 
         <ReportingCard data={municipalityData.reporting} fetcher={fetcher} />
+
+        <CompensationCard data={municipalityData.compensation} />
+
+        <InvoicingCard data={municipalityData.invoicing} fetcher={fetcher} />
+
+        <GeneralInformationCard data={municipalityData.generalInformation} fetcher={fetcher} />
       </Box>
     </PageContainer>
   );
