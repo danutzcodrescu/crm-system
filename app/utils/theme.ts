@@ -17,6 +17,13 @@ export const theme = createTheme({
     },
   },
   components: {
+    MuiCard: {
+      styleOverrides: {
+        root: {
+          boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
+        },
+      },
+    },
     MuiTextField: {
       defaultProps: {
         autoComplete: 'new-password',

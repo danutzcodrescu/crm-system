@@ -123,3 +123,37 @@ export async function editRecurringConsultationRecord(
     return ['could not edit recurring consultation data', null];
   }
 }
+
+export interface UpcomingMeeting {
+  companyName: string;
+  meetingDate: Date;
+  companyId: string;
+}
+
+export async function getUpcomingMeetings(year: number): Promise<[string | null, UpcomingMeeting[] | null]> {
+  try {
+    logger.info('Getting upcoming meetings');
+    const data = await db
+      .select({
+        companyId: recurringConsultation.companyId,
+        companyName: companies.name,
+        meetingDate: recurringConsultation.meetingDate,
+      })
+      .from(recurringConsultation)
+      .leftJoin(companies, eq(recurringConsultation.companyId, companies.id))
+      .where(
+        and(
+          eq(recurringConsultation.year, year),
+          sql`${recurringConsultation.meetingDate} IS NOT NULL`,
+          sql`${recurringConsultation.meetingHeld} IS NOT TRUE`,
+          sql`${recurringConsultation.meetingDate} >= CURRENT_DATE`,
+        ),
+      )
+      .orderBy(asc(recurringConsultation.meetingDate), asc(companies.name));
+
+    return [null, data as UpcomingMeeting[]];
+  } catch (e) {
+    logger.error(e);
+    return [(e as Error).message, null];
+  }
+}

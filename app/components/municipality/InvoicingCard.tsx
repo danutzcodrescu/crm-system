@@ -122,52 +122,28 @@ export function InvoicingCard({ data, fetcher }: Props) {
                           <Stack spacing={1}>
                             <Typography>
                               Invoice received from municipality:{' '}
-                              <Box
-                                component="span"
-                                sx={{ color: yearData.invoiceReceived ? 'success.main' : 'error.main' }}
-                              >
-                                {yearData.invoiceReceived ? 'Yes' : 'No'}
-                              </Box>{' '}
-                              /{' '}
-                              <Box component="span" sx={{ color: 'text.disabled' }}>
-                                N/A
-                              </Box>
+                              <Box component="span">{yearData.invoiceReceived ? 'Yes' : 'No'}</Box> /{' '}
+                              <Box component="span">N/A</Box>
                             </Typography>
                             <Typography>
                               Time for receiving invoice:{' '}
                               {yearData.invoiceDate ? (
-                                <Box component="span" sx={{ color: 'success.main' }}>
-                                  {formatDate(yearData.invoiceDate as unknown as string)}
-                                </Box>
+                                <Box component="span">{formatDate(yearData.invoiceDate as unknown as string)}</Box>
                               ) : (
-                                <Box component="span" sx={{ color: 'text.disabled' }}>
-                                  N/A
-                                </Box>
+                                <Box component="span">N/A</Box>
                               )}
                             </Typography>
                             <Typography>
                               Invoice paid by SUP Filter:{' '}
-                              <Box
-                                component="span"
-                                sx={{ color: yearData.invoicePaid ? 'success.main' : 'error.main' }}
-                              >
-                                {yearData.invoicePaid ? 'Yes' : 'No'}
-                              </Box>{' '}
-                              /{' '}
-                              <Box component="span" sx={{ color: 'text.disabled' }}>
-                                N/A
-                              </Box>
+                              <Box component="span">{yearData.invoicePaid ? 'Yes' : 'No'}</Box> /{' '}
+                              <Box component="span">N/A</Box>
                             </Typography>
                             <Typography>
                               Time for paying the invoice:{' '}
                               {yearData.datePaid ? (
-                                <Box component="span" sx={{ color: 'success.main' }}>
-                                  {formatDate(yearData.datePaid as unknown as string)}
-                                </Box>
+                                <Box component="span">{formatDate(yearData.datePaid as unknown as string)}</Box>
                               ) : (
-                                <Box component="span" sx={{ color: 'text.disabled' }}>
-                                  N/A
-                                </Box>
+                                <Box component="span">N/A</Box>
                               )}
                             </Typography>
                           </Stack>
@@ -196,10 +172,7 @@ export function InvoicingCard({ data, fetcher }: Props) {
                             </Table>
                           </TableContainer>
                           <Typography sx={{ mt: 2 }}>
-                            VAT not paid out:{' '}
-                            <Box component="span" sx={{ color: 'success.main' }}>
-                              {yearData.vat ?? 'N/A'}
-                            </Box>
+                            VAT not paid out: <Box component="span">{yearData.vat ?? 'N/A'}</Box>
                           </Typography>
                         </Box>
                       </Stack>

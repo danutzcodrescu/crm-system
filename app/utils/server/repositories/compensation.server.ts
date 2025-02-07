@@ -1,7 +1,7 @@
-import { and, asc, eq, lte } from 'drizzle-orm';
+import { and, asc, eq, gte, lte, sql, sum } from 'drizzle-orm';
 
 import { logger } from '../logger.server';
-import { compensationView } from '../schema.server';
+import { agreement, compensationView } from '../schema.server';
 import { db } from './db.server';
 
 export interface CompensationData {
@@ -25,6 +25,12 @@ export interface CompensationDataPerCompany {
   old: number;
   typeOfAgreement: 'new' | 'old';
   year: number;
+}
+
+export interface AggregatedCompensationPerYear {
+  year: number;
+  totalCompensation: number;
+  eligible: number;
 }
 
 export async function getCompensationByYear(year: number): Promise<[null, CompensationData[]] | [string, null]> {
@@ -66,5 +72,29 @@ export async function getCompensationForCompany(
   } catch (e) {
     logger.error(e);
     return ['could not fetch compensation data', null];
+  }
+}
+
+export async function getAggregatedCompensationPerYear(
+  startYear: number,
+  endYear: number,
+): Promise<[null, AggregatedCompensationPerYear[]] | [string, null]> {
+  try {
+    logger.info('Getting aggregated compensation per year');
+    const data = await db
+      .select({
+        year: compensationView.year,
+        totalCompensation: sum(compensationView.totalCompensation),
+        eligible: sql<number>`SUM(CASE WHEN EXTRACT(YEAR FROM ${agreement.oldAgreementDateSigned}) <= (${compensationView.year} + 1) OR EXTRACT(YEAR FROM ${agreement.newAgreementDateSigned}) <= (${compensationView.year} + 1) THEN ${compensationView.totalCompensation} END)`,
+      })
+      .from(compensationView)
+      .where(and(gte(compensationView.year, startYear), lte(compensationView.year, endYear)))
+      .leftJoin(agreement, eq(agreement.companyId, compensationView.id))
+      .groupBy(compensationView.year);
+    logger.info('Aggregated compensation per year fetched');
+    return [null, data as unknown as AggregatedCompensationPerYear[]];
+  } catch (e) {
+    logger.error(e);
+    return ['could not fetch aggregated compensation per year', null];
   }
 }

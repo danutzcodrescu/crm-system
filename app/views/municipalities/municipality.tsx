@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { Box, Card, CardContent, Chip, Typography } from '@mui/material';
+import { Box, Card, CardContent } from '@mui/material';
 import { json, LoaderFunctionArgs, redirect } from '@remix-run/node';
 import { useFetcher, useLoaderData } from '@remix-run/react';
 
@@ -12,6 +12,7 @@ import { LogsTable } from '~/components/municipality/LogsTable';
 import { RecurringConsultation } from '~/components/municipality/RecurringConsultationCard';
 import { ReportingCard } from '~/components/municipality/ReportingCard';
 import { ResponsiblesTable } from '~/components/municipality/ResponsiblesTable';
+import { MunicipalityTitle } from '~/components/municipality/Title';
 import { PageContainer } from '~/components/shared/PageContainer';
 import { auth } from '~/utils/server/auth.server';
 import { getAgreementForMunicipality } from '~/utils/server/repositories/agreement.server';
@@ -153,23 +154,16 @@ export default function Municipality() {
     <PageContainer
       actionData={fetcher.data as { message: string; severity: string } | undefined}
       title={
-        <Typography
-          variant="h5"
-          component="h1"
-          fontWeight="bold"
-          sx={{ flex: 1, display: 'flex', gap: 1, alignItems: 'center' }}
-        >
-          {municipalityData.municipality.name} ({municipalityData.municipality.code}){' '}
-          <Chip color="primary" label={municipalityData.municipality.statusName} />
-          <Box component="span" sx={{ fontSize: '0.75em', fontWeight: 'normal' }}>
-            General email {municipalityData.municipality.email}
-          </Box>
-        </Typography>
+        <MunicipalityTitle
+          municipality={municipalityData.municipality}
+          fetcher={fetcher}
+          statusList={municipalityData.statuses}
+        />
       }
       additionalTitleElement={null}
       sx={{ overflow: 'auto', maxHeight: 'none', minHeight: 'none' }}
     >
-      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
+      <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 3 }}>
         <Card>
           <CardContent>
             <ResponsiblesTable data={municipalityData.responsibles} companyId={municipalityData.municipality.id} />
@@ -182,12 +176,9 @@ export default function Municipality() {
           </CardContent>
         </Card>
 
-        <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 3 }}>
-          <InitialConsultationCard data={municipalityData.initialConsultation} fetcher={fetcher} />
+        <InitialConsultationCard data={municipalityData.initialConsultation} fetcher={fetcher} />
 
-          <AgreementCard data={municipalityData.agreement} fetcher={fetcher} />
-        </Box>
-
+        <AgreementCard data={municipalityData.agreement} fetcher={fetcher} />
         <RecurringConsultation
           years={municipalityData.recurringConsultation.years}
           data={municipalityData.recurringConsultation.data}

@@ -1,8 +1,8 @@
-import { eq, ilike, InferSelectModel, sql } from 'drizzle-orm';
+import { and, asc, eq, ilike, InferSelectModel, sql } from 'drizzle-orm';
 import { DatabaseError } from 'pg';
 
 import { logger } from '../logger.server';
-import { companies } from '../schema.server';
+import { companies, recurringConsultation } from '../schema.server';
 import { db } from './db.server';
 
 export async function getCompanies(
@@ -67,5 +67,30 @@ export async function deleteCompany(id: string): Promise<string | null> {
     return null;
   } catch (e) {
     return (e as DatabaseError).detail as string;
+  }
+}
+
+export interface ConsultationPerYear {
+  id: string;
+  name: string;
+  meetingDate: Date | null;
+}
+
+export async function getCompaniesWithConsultationInYear(
+  year: number,
+): Promise<[string | null, ConsultationPerYear[] | null]> {
+  try {
+    return [
+      null,
+      await db
+        .select({ id: companies.id, name: companies.name, meetingDate: recurringConsultation.meetingDate })
+        .from(companies)
+        .leftJoin(recurringConsultation, eq(recurringConsultation.companyId, companies.id))
+        .where(and(sql`${companies.consultations} @> ARRAY[${year}::SMALLINT]`, eq(recurringConsultation.year, year)))
+        .orderBy(asc(companies.name)),
+    ];
+  } catch (e) {
+    logger.error(e);
+    return [(e as DatabaseError).detail as string, null];
   }
 }

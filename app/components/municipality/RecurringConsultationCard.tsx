@@ -131,22 +131,14 @@ export function RecurringConsultation({ years, data, fetcher }: Props) {
           <Box sx={{ mb: 2 }}>
             <Typography variant="body1" gutterBottom>
               Recurring consultations mandatory:{' '}
-              <Box component="span" sx={{ color: isRecurringMandatory ? 'success.main' : 'error.main' }}>
+              <Box component="span" sx={{ fontWeight: isRecurringMandatory ? 'bold' : 'normal' }}>
                 {isRecurringMandatory ? 'Yes' : 'No'}
               </Box>
             </Typography>
 
             <Typography variant="body1" gutterBottom>
               Occasions for Recurring Consultation meetings:{' '}
-              {years.length > 0 ? (
-                <Box component="span" sx={{ color: 'success.main' }}>
-                  {years.join(', ')}
-                </Box>
-              ) : (
-                <Box component="span" sx={{ color: 'text.secondary' }}>
-                  N/A
-                </Box>
-              )}
+              {years.length > 0 ? <Box component="span">{years.join(', ')}</Box> : <Box component="span">N/A</Box>}
             </Typography>
           </Box>
 
@@ -164,54 +156,38 @@ export function RecurringConsultation({ years, data, fetcher }: Props) {
                   <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
                     <Typography>
                       Information and form sent to municipality:{' '}
-                      <Box component="span" sx={{ color: dt.sentDate ? 'success.main' : 'error.main' }}>
-                        {dt.sentDate ? 'Yes' : 'No'}
-                      </Box>
+                      <Box component="span">{dt.sentDate ? 'Yes' : 'No'}</Box>
                     </Typography>
 
                     <Typography>
                       Time for sending information and form:{' '}
                       {dt.sentDate ? (
-                        <Box component="span" sx={{ color: 'success.main' }}>
-                          {formatDate(dt.sentDate as unknown as string, 'Pp')}
-                        </Box>
+                        <Box component="span">{formatDate(dt.sentDate as unknown as string, 'Pp')}</Box>
                       ) : (
-                        <Box component="span" sx={{ color: 'text.secondary' }}>
-                          N/A
-                        </Box>
+                        <Box component="span">N/A</Box>
                       )}
                     </Typography>
 
                     <Typography>
                       Time scheduled with municipality:{' '}
                       {dt.meetingDate ? (
-                        <Box component="span" sx={{ color: 'success.main' }}>
-                          {formatDate(dt.meetingDate as unknown as string, 'Pp')}
-                        </Box>
+                        <Box component="span">{formatDate(dt.meetingDate as unknown as string, 'Pp')}</Box>
                       ) : (
-                        <Box component="span" sx={{ color: 'text.secondary' }}>
-                          N/A
-                        </Box>
+                        <Box component="span">N/A</Box>
                       )}
                     </Typography>
 
                     <Typography>
                       Recurring Consultation Form shared with NPA:{' '}
-                      <Box component="span" sx={{ color: dt.infoSharedWithAuthority ? 'success.main' : 'error.main' }}>
-                        {dt.infoSharedWithAuthority ? 'Yes' : 'No'}
-                      </Box>
+                      <Box component="span">{dt.infoSharedWithAuthority ? 'Yes' : 'No'}</Box>
                     </Typography>
 
                     <Typography>
                       Date when Recurring Consultation form was shared with NPA:{' '}
                       {dt.dateSharedWithAuthority ? (
-                        <Box component="span" sx={{ color: 'success.main' }}>
-                          {formatDate(dt.dateSharedWithAuthority as unknown as string)}
-                        </Box>
+                        <Box component="span">{formatDate(dt.dateSharedWithAuthority as unknown as string)}</Box>
                       ) : (
-                        <Box component="span" sx={{ color: 'text.secondary' }}>
-                          N/A
-                        </Box>
+                        <Box component="span">N/A</Box>
                       )}
                     </Typography>
                   </Box>
