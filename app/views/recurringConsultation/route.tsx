@@ -197,7 +197,7 @@ export default function RecurringConsultation() {
         enableHiding: false,
         accessorFn: (row) => row.companyName,
         id: 'companyName',
-        size: 370,
+        size: 200,
         cell: ({ getValue, row }) => (
           <Link component={RLink} to={`/municipalities/${row.original.id}`}>
             {getValue() as string}

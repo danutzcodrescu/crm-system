@@ -1,16 +1,19 @@
-import { Box, Card, CardContent, Stack, Typography } from '@mui/material';
+import { Box, Card, CardContent, Link, Stack, Typography } from '@mui/material';
 import { json, LoaderFunctionArgs, MetaFunction, redirect } from '@remix-run/node';
-import { useLoaderData } from '@remix-run/react';
+import { Link as RLink, useLoaderData } from '@remix-run/react';
 
 import { PageContainer } from '~/components/shared/PageContainer';
+import { formatDate } from '~/utils/client/dates';
 import { auth } from '~/utils/server/auth.server';
 import { getInAgreementCount } from '~/utils/server/repositories/agreement.server';
+import { ConsultationPerYear, getCompaniesWithConsultationInYear } from '~/utils/server/repositories/companies.server';
 import {
   AggregatedCompensationPerYear,
   getAggregatedCompensationPerYear,
 } from '~/utils/server/repositories/compensation.server';
 import { getSignedInitialConsultation } from '~/utils/server/repositories/initialConsultation.server';
 import { getInvoicingAggregatedPerYear, InvoicingAggregated } from '~/utils/server/repositories/invoicing.server';
+import { getUpcomingMeetings, UpcomingMeeting } from '~/utils/server/repositories/recurringConsultation.server';
 import { getGroupedReportingPerYear, GroupedReportingPerYear } from '~/utils/server/repositories/reporting.server';
 
 export const meta: MetaFunction = () => {
@@ -26,25 +29,50 @@ interface LoaderResponse {
   reporting: GroupedReportingPerYear[];
   compensation: AggregatedCompensationPerYear[];
   invoicing: InvoicingAggregated[];
+  recurringConsultations: ConsultationPerYear[];
+  upcomingMeetings: UpcomingMeeting[];
 }
 
 export async function loader({ request }: LoaderFunctionArgs) {
   if (!auth.isLoggedIn(request)) {
     return redirect('/signin');
   }
-  const [initialConsultation, agreement, reporting, compensation, invoicing] = await Promise.all([
-    getSignedInitialConsultation(),
-    getInAgreementCount(),
-    getGroupedReportingPerYear(2022, new Date().getFullYear()),
-    getAggregatedCompensationPerYear(2023, new Date().getFullYear()),
-    getInvoicingAggregatedPerYear(2023, new Date().getFullYear()),
-  ]);
-  if (initialConsultation[0] || agreement[0] || reporting[0] || compensation[0] || invoicing[0]) {
+  const currentYear = new Date().getFullYear();
+  const [initialConsultation, agreement, reporting, compensation, invoicing, recurringConsultations, upcomingMeetings] =
+    await Promise.all([
+      getSignedInitialConsultation(),
+      getInAgreementCount(),
+      getGroupedReportingPerYear(2022, currentYear),
+      getAggregatedCompensationPerYear(2023, currentYear),
+      getInvoicingAggregatedPerYear(2023, currentYear),
+      getCompaniesWithConsultationInYear(currentYear),
+      getUpcomingMeetings(currentYear),
+    ]);
+
+  if (
+    initialConsultation[0] ||
+    agreement[0] ||
+    reporting[0] ||
+    compensation[0] ||
+    invoicing[0] ||
+    recurringConsultations[0] ||
+    upcomingMeetings[0]
+  ) {
     return json(
-      { error: initialConsultation[0] || agreement[0] || reporting[0] || compensation[0] || invoicing[0] },
+      {
+        error:
+          initialConsultation[0] ||
+          agreement[0] ||
+          reporting[0] ||
+          compensation[0] ||
+          invoicing[0] ||
+          recurringConsultations[0] ||
+          upcomingMeetings[0],
+      },
       { status: 500 },
     );
   }
+
   return json({
     initialConsultation: initialConsultation[1]?.[0].initialConsultationSigned,
     agreement: {
@@ -54,6 +82,8 @@ export async function loader({ request }: LoaderFunctionArgs) {
     reporting: reporting[1],
     compensation: compensation[1],
     invoicing: invoicing[1],
+    recurringConsultations: recurringConsultations[1] || [],
+    upcomingMeetings: upcomingMeetings[1] || [],
   });
 }
 
@@ -61,7 +91,7 @@ export default function Dashboard() {
   const data = useLoaderData<LoaderResponse>();
   if (!data) return null;
   return (
-    <PageContainer title="Dashboard" additionalTitleElement={null}>
+    <PageContainer title="Dashboard" additionalTitleElement={null} sx={{ overflow: 'auto' }}>
       <Box sx={{ display: 'flex', gap: 3, flexWrap: 'wrap', bgcolor: 'primary.dark', p: 3, borderRadius: 2, px: 0 }}>
         <Card sx={{ bgcolor: 'background.paper' }}>
           <CardContent>
@@ -230,6 +260,52 @@ export default function Dashboard() {
                   </Typography>
                 ))}
               </Box>
+            </CardContent>
+          </Card>
+        </Stack>
+        <Stack spacing={3} width="100%" direction="row">
+          <Card sx={{ bgcolor: 'background.paper', flex: 1 }}>
+            <CardContent>
+              <Typography variant="h6" gutterBottom sx={{ color: 'text.primary', fontWeight: 'bold' }}>
+                Companies with Recurring Consultations in {new Date().getFullYear()}
+              </Typography>
+              {data.recurringConsultations.length === 0 ? (
+                <Typography color="text.secondary">
+                  No companies found with recurring consultations in {new Date().getFullYear()}
+                </Typography>
+              ) : (
+                <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(5, 3fr)' }}>
+                  {data.recurringConsultations.map((company) => (
+                    <Typography key={company.id}>
+                      <Link component={RLink} to={`/municipalities/${company.id}`} underline="hover">
+                        {company.name}
+                      </Link>
+                      {company.meetingDate ? ` - ${formatDate(company.meetingDate)}` : ''}
+                    </Typography>
+                  ))}
+                </Box>
+              )}
+            </CardContent>
+          </Card>
+          <Card sx={{ bgcolor: 'background.paper', flex: 1 }}>
+            <CardContent>
+              <Typography variant="h6" gutterBottom sx={{ color: 'text.primary', fontWeight: 'bold' }}>
+                Upcoming Meetings
+              </Typography>
+              {data.upcomingMeetings.length === 0 ? (
+                <Typography color="text.secondary">No upcoming meetings scheduled</Typography>
+              ) : (
+                <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(5, 3fr)' }}>
+                  {data.upcomingMeetings.map((meeting, index) => (
+                    <Typography key={index}>
+                      <Link component={RLink} to={`/municipalities/${meeting.companyId}`} underline="hover">
+                        {meeting.companyName}
+                      </Link>
+                      &nbsp;- {formatDate(meeting.meetingDate)}
+                    </Typography>
+                  ))}
+                </Box>
+              )}
             </CardContent>
           </Card>
         </Stack>

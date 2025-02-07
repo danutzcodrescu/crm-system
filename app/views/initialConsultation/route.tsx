@@ -126,9 +126,9 @@ export default function InitialConsultation() {
         id: 'companyName',
         enableHiding: false,
         filterFn: 'includesString',
-        size: 370,
+        size: 200,
         cell: ({ getValue, row }) => (
-          <Link component={RLink} to={`/municipality/${row.original.id}`} prefetch="intent">
+          <Link component={RLink} to={`/municipalities/${row.original.id}`} prefetch="intent">
             {getValue() as string}
           </Link>
         ),

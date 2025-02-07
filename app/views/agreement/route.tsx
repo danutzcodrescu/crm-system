@@ -187,7 +187,7 @@ export default function Agreement() {
         enableHiding: false,
         accessorKey: 'companyName',
         filterFn: 'includesString',
-        size: 370,
+        size: 200,
         cell: ({ getValue, row }) => (
           <Link component={RLink} to={`/municipalities/${row.original.id}`} prefetch="intent">
             {getValue() as string}

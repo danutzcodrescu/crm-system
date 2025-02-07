@@ -1,11 +1,11 @@
 import FilterAlt from '@mui/icons-material/FilterAlt';
-import { Collapse, Input, Stack } from '@mui/material';
+import { Input, Popover, Stack, Typography } from '@mui/material';
 import { useDebouncedCallback } from '@react-hookz/web';
 import { Column } from '@tanstack/react-table';
 import { ChangeEvent, useState } from 'react';
 
 export function FilterColumn<T>({ column }: { column: Column<T, unknown> }) {
-  const [isSearchFieldVisible, setIsSearchFieldVisible] = useState(false);
+  const [filterButton, setFilterButton] = useState<SVGSVGElement | null>(null);
   const columnFilterValue = column.getFilterValue();
   const setFilter = useDebouncedCallback(
     (e: ChangeEvent<HTMLInputElement>) => {
@@ -16,29 +16,39 @@ export function FilterColumn<T>({ column }: { column: Column<T, unknown> }) {
   );
 
   return (
-    <Stack direction="row" gap={1} onClick={(e) => e.stopPropagation()}>
-      <Collapse orientation="horizontal" in={isSearchFieldVisible} unmountOnExit>
+    <>
+      <Stack direction="row" gap={1} onClick={(e) => e.stopPropagation()}>
+        <FilterAlt
+          sx={{ cursor: 'pointer' }}
+          onClick={(e) => {
+            setFilterButton(e.currentTarget);
+          }}
+        />
+      </Stack>
+      <Popover
+        open={!!filterButton}
+        sx={{ '& .MuiPopover-paper': { p: 1 } }}
+        onClose={() => setFilterButton(null)}
+        anchorEl={filterButton}
+      >
+        <Typography component="p" fontWeight="bold" gutterBottom>
+          Filter by {column.columnDef.header as string}
+        </Typography>
         <Input
           defaultValue={columnFilterValue}
           placeholder={`Filter by ${column.columnDef.header}`}
           onChange={setFilter}
           onKeyUp={(e) => {
             if (e.code == 'Escape') {
-              setIsSearchFieldVisible(false);
+              setFilterButton(null);
               column.setFilterValue('');
             }
             if (e.code == 'Enter') {
-              setIsSearchFieldVisible(false);
+              setFilterButton(null);
             }
           }}
         />
-      </Collapse>
-      <FilterAlt
-        sx={{ cursor: 'pointer' }}
-        onClick={() => {
-          setIsSearchFieldVisible(!isSearchFieldVisible);
-        }}
-      />
-    </Stack>
+      </Popover>
+    </>
   );
 }

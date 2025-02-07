@@ -79,7 +79,7 @@ function cellPinning<T>(column: Column<T>): BoxProps['sx'] {
     position: isPinned ? 'sticky' : 'relative',
     backgroundColor: (theme) => theme.palette.background.paper,
     width: column.getSize(),
-    zIndex: isPinned ? 1 : 0,
+    zIndex: isPinned ? 2 : 0,
   };
 }
 
@@ -129,7 +129,7 @@ export function PaginatedTable<T extends { id: string; warning?: boolean }>({
     },
     defaultColumn: {
       size: 200,
-      minSize: 150,
+      minSize: 100,
       maxSize: Number.MAX_SAFE_INTEGER,
     },
     maxMultiSortColCount: 1,
@@ -156,7 +156,12 @@ export function PaginatedTable<T extends { id: string; warning?: boolean }>({
 
   return (
     <Box sx={{ width: '100%', maxHeight: 'calc(100vh - 50px - 56px)' }}>
-      <Stack direction="row" gap={3} alignItems="center" {...(hideHeader ? { sx: { display: 'none' } } : {})}>
+      <Stack
+        direction="row"
+        gap={3}
+        alignItems="center"
+        {...(hideHeader ? { sx: { display: 'none' } } : { marginBottom: 2 })}
+      >
         <ColumnVisibility table={table} />
         <Typography component="p">Rows: {table.getFilteredRowModel().rows.length}</Typography>
         {additionalHeader ? additionalHeader(table.getFilteredRowModel().rows) : undefined}
@@ -175,8 +180,9 @@ export function PaginatedTable<T extends { id: string; warning?: boolean }>({
                         cursor: header.column.getCanSort() ? 'pointer' : 'default',
                         minWidth: header.getSize(),
                         ...cellPinning(header.column),
-                        zIndex: 2,
                         position: 'sticky',
+                        top: 0,
+                        zIndex: header.column.getIsPinned() ? 30 : 20,
                       }}
                     >
                       <Stack width="100%" direction="row" alignItems="center" gap={1}>

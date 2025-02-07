@@ -99,7 +99,7 @@ export default function Reporting() {
         enableHiding: false,
         accessorFn: (row) => row.companyName,
         id: 'companyName',
-        size: 370,
+        size: 200,
         cell: ({ getValue, row }) => (
           <Link component={RLink} to={`/municipalities/${row.original.id}`} prefetch="intent">
             {getValue() as string}
