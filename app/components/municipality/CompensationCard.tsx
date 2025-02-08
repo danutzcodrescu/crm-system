@@ -1,6 +1,7 @@
-import { Box, Card, CardContent, Stack, Typography } from '@mui/material';
+import Receipt from '@mui/icons-material/Receipt';
+import { Box, Card, CardContent, IconButton, Link, Stack, Typography } from '@mui/material';
 
-import type { CompensationDataPerCompany } from '~/utils/server/repositories/compensation.server';
+import { CompensationDataPerCompany } from '~/utils/server/repositories/compensation.server';
 
 import { CompensationTable } from './CompensationTable';
 

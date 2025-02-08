@@ -106,7 +106,7 @@ export function InvoicingCard({ data, fetcher }: Props) {
               <TabContext value={value}>
                 <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
                   <TabList onChange={handleChange} aria-label="Invoicing years">
-                    {years.map((year) => (
+                    {years.toSorted().map((year) => (
                       <Tab key={year} label={year} value={year.toString()} />
                     ))}
                   </TabList>

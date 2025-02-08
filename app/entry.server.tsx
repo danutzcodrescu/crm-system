@@ -19,11 +19,12 @@ import { renderToPipeableStream, renderToString } from 'react-dom/server';
 
 import { createEmotion } from './emotion/emotion-server';
 import { logger } from './utils/server/logger.server';
+import { handlePDFRequest } from './utils/server/pdf.server';
 import { theme } from './utils/theme';
 
 const ABORT_DELAY = 5_000;
 
-export default function handleRequest(
+export default async function handleRequest(
   request: Request,
   responseStatusCode: number,
   responseHeaders: Headers,
@@ -34,6 +35,11 @@ export default function handleRequest(
   loadContext: AppLoadContext,
 ) {
   logger.info(`${request.method} ${request.url} `);
+
+  if (new URL(request.url).pathname.endsWith('.pdf')) {
+    console.log(request.url);
+    return await handlePDFRequest(request, responseHeaders);
+  }
 
   return isbot(request.headers.get('user-agent') || '')
     ? handleBotRequest(request, responseStatusCode, responseHeaders, remixContext)

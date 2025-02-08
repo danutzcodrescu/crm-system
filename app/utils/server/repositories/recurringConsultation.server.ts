@@ -24,7 +24,7 @@ export async function getRecurringConsultationData(
   year: number,
 ): Promise<[null, RecurringConsultationPerMunicipality[]] | [string, null]> {
   try {
-    logger.info('Getting recurring consultation data');
+    logger.debug('Getting recurring consultation data');
     const data = await db
       .select({
         companyName: companies.name,
@@ -47,7 +47,7 @@ export async function getRecurringConsultationData(
       .leftJoin(initialConsultation, eq(recurringConsultation.companyId, initialConsultation.companyId))
       .where(eq(recurringConsultation.year, year))
       .orderBy(asc(companies.name));
-    logger.info('Recurring consultation data fetched');
+    logger.debug('Recurring consultation data fetched');
     return [null, data as RecurringConsultationPerMunicipality[]];
   } catch (e) {
     logger.error(e);
@@ -60,7 +60,7 @@ export async function getRecurringConsultationForCompanyAndYears(
   years: number[],
 ): Promise<[null, RecurringConsultationPerMunicipality[]] | [string, null]> {
   try {
-    logger.info('Getting recurring consultation data for company:', companyId, 'and years:', years);
+    logger.debug('Getting recurring consultation data for company:', companyId, 'and years:', years);
     const data = await db
       .select({
         companyName: companies.name,
@@ -87,7 +87,7 @@ export async function getRecurringConsultationForCompanyAndYears(
           sql`${recurringConsultation.year} = ANY(ARRAY[${sql.join(years, sql`, `)}]::smallint[])`,
         ),
       );
-    logger.info('Recurring consultation data fetched for company:', companyId);
+    logger.debug('Recurring consultation data fetched for company:', companyId);
     return [null, data as RecurringConsultationPerMunicipality[]];
   } catch (e) {
     logger.error(e);
@@ -101,7 +101,7 @@ export async function editRecurringConsultationRecord(
   args: EditRecurringConsultationArgs,
 ): Promise<[string, null] | [null, string]> {
   try {
-    logger.info('Trying to update recurring consultation data for id: ', args.companyId, ' and year: ', args.year);
+    logger.debug('Trying to update recurring consultation data for id: ', args.companyId, ' and year: ', args.year);
     await db
       .update(recurringConsultation)
       .set({
@@ -116,7 +116,7 @@ export async function editRecurringConsultationRecord(
           eq(recurringConsultation.year, args.year as number),
         ),
       );
-    logger.info('Recurring consultation data edited');
+    logger.debug('Recurring consultation data edited');
     return [null, ''];
   } catch (e) {
     logger.error(e);
@@ -132,7 +132,7 @@ export interface UpcomingMeeting {
 
 export async function getUpcomingMeetings(year: number): Promise<[string | null, UpcomingMeeting[] | null]> {
   try {
-    logger.info('Getting upcoming meetings');
+    logger.debug('Getting upcoming meetings');
     const data = await db
       .select({
         companyId: recurringConsultation.companyId,

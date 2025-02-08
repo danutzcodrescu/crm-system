@@ -27,7 +27,7 @@ export const auth = {
       return ['Invalid username or password', null];
     }
     const sessionString = await setSession(req, user[0].userId);
-    logger.info(`login -> Session created for ${userId}`);
+    logger.debug(`login -> Session created for ${userId}`);
     return [null, sessionString];
   },
 
@@ -36,11 +36,11 @@ export const auth = {
     try {
       const sessionId = fromSessionTokenToSessionId(session.get('session') as string);
       await invalidateSession(sessionId);
-      logger.info(`logout -> Session destroyed for ${session.get('session')}`);
+      logger.debug(`logout -> Session destroyed for ${session.get('session')}`);
     } catch (e) {
       logger.error(e);
     }
-    logger.info(`logout -> Destroying session for ${session.get('session')}`);
+    logger.debug(`logout -> Destroying session for ${session.get('session')}`);
     destroySession(session);
     return;
   },
@@ -48,9 +48,9 @@ export const auth = {
   isLoggedIn: async function (request: Request): Promise<boolean> {
     const sessionDetails = await getSession(request.headers.get('Cookie'));
     if (sessionDetails.has('session')) {
-      logger.info(`isLoggedIn -> Session found`);
+      logger.debug(`isLoggedIn -> Session found`);
       const { session } = await validateSessionToken(sessionDetails.get('session') as string);
-      logger.info(`isLoggedIn -> ${Boolean(session)}, session is valid`);
+      logger.debug(`isLoggedIn -> ${Boolean(session)}, session is valid`);
       return Boolean(session);
     }
     return false;

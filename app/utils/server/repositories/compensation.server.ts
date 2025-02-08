@@ -1,7 +1,7 @@
 import { and, asc, eq, gte, lte, sql, sum } from 'drizzle-orm';
 
 import { logger } from '../logger.server';
-import { agreement, compensationView } from '../schema.server';
+import { agreement, compensationView, years } from '../schema.server';
 import { db } from './db.server';
 
 export interface CompensationData {
@@ -75,12 +75,57 @@ export async function getCompensationForCompany(
   }
 }
 
+export interface CompensationDataPerCompanyPerYear {
+  id: string;
+  year: number;
+  companyName: string | null;
+  total: number | null;
+  variableCompensation: number | null;
+  inhabitants: number | null;
+  surcharge: number | null;
+  changeFactor: number | null;
+  changeFactorLitter: number | null;
+}
+
+export async function getCompensationForCompanyByYear(
+  companyId: string,
+  year: number,
+): Promise<[null, CompensationDataPerCompanyPerYear] | [string, null]> {
+  try {
+    logger.debug('Getting compensation data for company:', companyId);
+
+    return [
+      null,
+      (
+        await db
+          .select({
+            id: compensationView.id,
+            companyName: compensationView.companyName,
+            year: compensationView.year,
+            total: compensationView.totalCompensation,
+            variableCompensation: compensationView.variableCompensation,
+            inhabitants: compensationView.inhabitants,
+            surcharge: compensationView.totalAddition,
+            changeFactor: years.changeFactor,
+            changeFactorLitter: years.changeFactorLitter,
+          })
+          .from(compensationView)
+          .leftJoin(years, eq(compensationView.year, years.name))
+          .where(and(eq(compensationView.id, companyId), eq(compensationView.year, year)))
+          .limit(1)
+      )[0],
+    ];
+  } catch (e) {
+    logger.error(e);
+    return ['could not fetch compensation data', null];
+  }
+}
 export async function getAggregatedCompensationPerYear(
   startYear: number,
   endYear: number,
 ): Promise<[null, AggregatedCompensationPerYear[]] | [string, null]> {
   try {
-    logger.info('Getting aggregated compensation per year');
+    logger.debug('Getting aggregated compensation per year');
     const data = await db
       .select({
         year: compensationView.year,
@@ -91,7 +136,7 @@ export async function getAggregatedCompensationPerYear(
       .where(and(gte(compensationView.year, startYear), lte(compensationView.year, endYear)))
       .leftJoin(agreement, eq(agreement.companyId, compensationView.id))
       .groupBy(compensationView.year);
-    logger.info('Aggregated compensation per year fetched');
+    logger.debug('Aggregated compensation per year fetched');
     return [null, data as unknown as AggregatedCompensationPerYear[]];
   } catch (e) {
     logger.error(e);
