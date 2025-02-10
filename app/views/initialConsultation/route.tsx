@@ -112,7 +112,7 @@ export default function InitialConsultation() {
       {
         label: 'Link to signed document',
         name: 'link',
-        type: 'text',
+        type: 'link',
         defaultValue: data.link,
       },
     ]);
@@ -128,7 +128,7 @@ export default function InitialConsultation() {
         filterFn: 'includesString',
         size: 200,
         cell: ({ getValue, row }) => (
-          <Link component={RLink} to={`/municipalities/${row.original.id}`} prefetch="intent">
+          <Link component={RLink} to={`/municipalities/${row.original.companyId}`} prefetch="intent">
             {getValue() as string}
           </Link>
         ),
@@ -240,9 +240,6 @@ export default function InitialConsultation() {
                   </Tooltip>
                 ) : null
               }
-              // onDelete={(id) => {
-              //   fetcher.submit({}, { method: 'DELETE', action: `/api/notes-log/${id}`, relative: 'path' });
-              // }}
             />
           );
         },

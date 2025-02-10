@@ -15,7 +15,7 @@ export async function handlePDFRequest(request: Request, headers: Headers) {
   headers.set('Content-Type', 'application/pdf');
   headers.set(
     'Content-Disposition',
-    `inline; filename="compensation-${response.companyName?.toLowerCase()}-${response.year}.pdf"`,
+    `${process.env.NODE_ENV === 'development' ? 'inline' : 'attachment'}; filename="compensation-${response.companyName?.toLowerCase()}-${response.year}.pdf"`,
   );
   // render the PDF to a stream
   const stream = await renderToStream(<PDF {...response} />);

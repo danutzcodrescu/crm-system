@@ -16,7 +16,7 @@ const links = [
   { title: 'Invoicing', href: `/invoicing?year=${getYear(new Date()) - 1}` },
   { title: 'General information', href: `/general-information?year=${getYear(new Date())}` },
   { title: 'Years', href: '/years' },
-  // { title: 'Statuses', href: '/statuses' },
+  { title: 'Statuses', href: '/statuses' },
 ];
 
 export function Topbar() {

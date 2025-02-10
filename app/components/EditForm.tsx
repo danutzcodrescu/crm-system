@@ -1,5 +1,5 @@
 import { TZDate } from '@date-fns/tz';
-import { MenuItem, Stack, TextField, TextFieldProps } from '@mui/material';
+import { Box, MenuItem, TextField, TextFieldProps } from '@mui/material';
 import { DatePicker, DateTimePicker } from '@mui/x-date-pickers';
 import { FormProps } from '@remix-run/react';
 import { cloneElement, ReactNode, useState } from 'react';
@@ -34,7 +34,7 @@ interface Props extends FormProps {
 export function EditForm({ fields }: Props) {
   const [watchableFields, setWatchableFields] = useState<Record<string, unknown>>({});
   return (
-    <Stack sx={{ gap: 2, width: '100%' }}>
+    <Box sx={{ gap: 2, display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)' }}>
       {fields.map((field) => {
         if (
           field.condition &&
@@ -68,6 +68,7 @@ export function EditForm({ fields }: Props) {
                 (field.defaultValue as string) ? new TZDate(field.defaultValue as unknown as string) : undefined
               }
               sx={{ minWidth: 150 }}
+              slotProps={{ textField: { size: 'small' } }}
             />
           );
         }
@@ -80,7 +81,7 @@ export function EditForm({ fields }: Props) {
               defaultValue={
                 (field.defaultValue as string) ? new TZDate(field.defaultValue as unknown as string) : undefined
               }
-              sx={{ minWidth: 150 }}
+              slotProps={{ textField: { size: 'small' } }}
             />
           );
         }
@@ -88,7 +89,10 @@ export function EditForm({ fields }: Props) {
           <TextField
             size="small"
             fullWidth
-            sx={{ display: field.hidden ? 'none' : 'block' }}
+            sx={{
+              display: field.hidden ? 'none' : 'block',
+              gridColumn: field.multiline ? 'span 5' : field.type === 'link' ? 'span 3' : 'span 1',
+            }}
             key={field.name}
             name={field.name}
             type={field.type}
@@ -118,6 +122,6 @@ export function EditForm({ fields }: Props) {
           </TextField>
         );
       })}
-    </Stack>
+    </Box>
   );
 }

@@ -37,8 +37,7 @@ export default async function handleRequest(
   logger.info(`${request.method} ${request.url} `);
 
   if (new URL(request.url).pathname.endsWith('.pdf')) {
-    console.log(request.url);
-    return await handlePDFRequest(request, responseHeaders);
+    return handlePDFRequest(request, responseHeaders);
   }
 
   return isbot(request.headers.get('user-agent') || '')

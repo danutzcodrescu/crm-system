@@ -120,9 +120,10 @@ export async function getInAgreementCount(): Promise<[null, GetInAgreementCount[
   }
 }
 
-interface MunicipalityAgreementData {
+export interface MunicipalityAgreementData {
   id: string;
   oldAgreementLink: string | null;
+  oldAgreementAppendix: string | null;
   oldAgreementDateSigned: Date | null;
   oldAgreementShared: boolean;
   oldAgreementDateShared: Date | null;
@@ -141,6 +142,7 @@ export async function getAgreementForMunicipality(
       .select({
         id: agreement.id,
         oldAgreementLink: agreement.oldAgreementLinkToAgreement,
+        oldAgreementAppendix: agreement.oldAgreementLinkToAppendix,
         oldAgreementDateSigned: agreement.oldAgreementDateSigned,
         oldAgreementShared: sql<boolean>`CASE WHEN ${agreement.oldAgreementDateShared} IS NOT NULL THEN TRUE ELSE FALSE END`,
         oldAgreementDateShared: agreement.oldAgreementDateShared,
@@ -156,6 +158,7 @@ export async function getAgreementForMunicipality(
     const result = data[0] || {
       id: '',
       oldAgreementLink: null,
+      oldAgreementAppendix: null,
       oldAgreementDateSigned: null,
       oldAgreementShared: false,
       oldAgreementDateShared: null,

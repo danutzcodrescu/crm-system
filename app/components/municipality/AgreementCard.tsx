@@ -1,3 +1,4 @@
+import AddLink from '@mui/icons-material/AddLink';
 import Cancel from '@mui/icons-material/Cancel';
 import CheckBox from '@mui/icons-material/CheckBox';
 import Edit from '@mui/icons-material/Edit';
@@ -8,6 +9,7 @@ import {
   CardContent,
   IconButton,
   Link,
+  Stack,
   Table,
   TableBody,
   TableCell,
@@ -22,19 +24,10 @@ import { ClientOnly } from 'remix-utils/client-only';
 import { Field } from '~/components/EditForm';
 import { EditDialog } from '~/components/shared/EditDialog.client';
 import { formatDate } from '~/utils/client/dates';
+import { MunicipalityAgreementData } from '~/utils/server/repositories/agreement.server';
 
 interface AgreementCardProps {
-  data: {
-    id: string;
-    oldAgreementLink: string | null;
-    oldAgreementDateSigned: Date | null;
-    oldAgreementShared: boolean;
-    oldAgreementDateShared: Date | null;
-    newAgreementLink: string | null;
-    newAgreementDateSigned: Date | null;
-    newAgreementShared: boolean;
-    newAgreementDateShared: Date | null;
-  };
+  data: MunicipalityAgreementData;
   fetcher: FetcherWithComponents<unknown>;
 }
 
@@ -97,8 +90,15 @@ export function AgreementCard({ data, fetcher }: AgreementCardProps) {
       {
         label: 'Link to signed document',
         name: 'oldAgreementLink',
-        type: 'text',
+        type: 'link',
         defaultValue: data.oldAgreementLink || undefined,
+        condition: ['typeOfAgreement', 'old'],
+      },
+      {
+        label: 'Link to appendix',
+        name: 'oldAgreementAppendix',
+        type: 'link',
+        defaultValue: data.oldAgreementAppendix || undefined,
         condition: ['typeOfAgreement', 'old'],
       },
       {
@@ -130,7 +130,7 @@ export function AgreementCard({ data, fetcher }: AgreementCardProps) {
       {
         label: 'Link to signed document',
         name: 'newAgreementLink',
-        type: 'text',
+        type: 'link',
         defaultValue: data.newAgreementLink || undefined,
         condition: ['typeOfAgreement', 'new'],
       },
@@ -171,8 +171,27 @@ export function AgreementCard({ data, fetcher }: AgreementCardProps) {
                 <TableCell>Agreement link</TableCell>
                 <TableCell>
                   {data.oldAgreementLink ? (
+                    <Stack direction="row" alignItems="center" gap={0.5}>
+                      <Link
+                        href={data.oldAgreementLink}
+                        target="_blank"
+                        rel="noreferrer"
+                        sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}
+                      >
+                        <LinkIcon /> View document
+                      </Link>
+                      <Link
+                        href={data.oldAgreementAppendix as string}
+                        target="_blank"
+                        rel="noreferrer"
+                        sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}
+                      >
+                        <AddLink /> View appendix
+                      </Link>
+                    </Stack>
+                  ) : data.newAgreementLink ? (
                     <Link
-                      href={data.oldAgreementLink}
+                      href={data.newAgreementLink}
                       target="_blank"
                       rel="noreferrer"
                       sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}

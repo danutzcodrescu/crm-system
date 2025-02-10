@@ -15,7 +15,7 @@ import { ResponsiblesTable } from '~/components/municipality/ResponsiblesTable';
 import { MunicipalityTitle } from '~/components/municipality/Title';
 import { PageContainer } from '~/components/shared/PageContainer';
 import { auth } from '~/utils/server/auth.server';
-import { getAgreementForMunicipality } from '~/utils/server/repositories/agreement.server';
+import { getAgreementForMunicipality, MunicipalityAgreementData } from '~/utils/server/repositories/agreement.server';
 import { CompensationDataPerCompany, getCompensationForCompany } from '~/utils/server/repositories/compensation.server';
 import {
   GeneralInformationPerMunicipality,
@@ -47,17 +47,7 @@ interface LoaderResponse {
     dateShared: Date | null;
     link: string | null;
   };
-  agreement: {
-    id: string;
-    oldAgreementLink: string | null;
-    oldAgreementDateSigned: Date | null;
-    oldAgreementShared: boolean;
-    oldAgreementDateShared: Date | null;
-    newAgreementLink: string | null;
-    newAgreementDateSigned: Date | null;
-    newAgreementShared: boolean;
-    newAgreementDateShared: Date | null;
-  };
+  agreement: MunicipalityAgreementData;
   recurringConsultation: {
     data: RecurringConsultationPerMunicipality[];
     years: number[];

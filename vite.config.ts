@@ -54,7 +54,7 @@ export default defineConfig(({ isSsrBuild }) => ({
               route('', 'views/municipalities/route.tsx', { index: true });
               route(':municipalityId', 'views/municipalities/municipality.tsx');
             });
-            // route('/statuses', 'views/statuses/route.tsx');
+            route('/statuses', 'views/statuses/route.tsx');
             route('/years', 'views/years/route.tsx');
           });
         });

@@ -1,4 +1,4 @@
-import PersonAdd from '@mui/icons-material/PersonAdd';
+import PostAdd from '@mui/icons-material/PostAdd';
 import { Box, IconButton, Stack, Typography } from '@mui/material';
 import { useFetcher } from '@remix-run/react';
 import { ColumnDef } from '@tanstack/react-table';
@@ -124,7 +124,7 @@ export function LogsTable({ data, companyId, fetcher }: Props) {
           Logs
         </Typography>
         <IconButton size="small" aria-label="Add new log" onClick={() => setNewLogFields()}>
-          <PersonAdd />
+          <PostAdd />
         </IconButton>
       </Stack>
       <Box sx={{ minWidth: 650 }}>

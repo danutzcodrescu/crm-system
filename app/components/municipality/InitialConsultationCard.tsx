@@ -69,7 +69,7 @@ export function InitialConsultationCard({ data, fetcher }: InitialConsultationCa
       {
         label: 'Link to signed document',
         name: 'link',
-        type: 'text',
+        type: 'link',
         defaultValue: data.link || undefined,
       },
     ]);

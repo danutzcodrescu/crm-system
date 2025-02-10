@@ -1,6 +1,7 @@
 import Cancel from '@mui/icons-material/Cancel';
 import CheckBox from '@mui/icons-material/CheckBox';
 import LinkIcon from '@mui/icons-material/Link';
+import LinkAddIcon from '@mui/icons-material/AddLink';
 import { IconButton, Link, Stack, Tooltip, Typography } from '@mui/material';
 import { ActionFunctionArgs, json, LoaderFunctionArgs, MetaFunction, redirect } from '@remix-run/node';
 import { Link as RLink, useFetcher, useLoaderData } from '@remix-run/react';
@@ -131,15 +132,15 @@ export default function Agreement() {
       {
         label: 'Link to signed document',
         name: 'oldAgreementLink',
-        type: 'text',
-        defaultValue: data.oldAgreementLink,
+        type: 'link',
+        defaultValue: data.oldAgreementLink || undefined,
         condition: ['typeOfAgreement', 'old'],
       },
       {
         label: 'Link to appendix',
         name: 'oldAgreementAppendix',
-        type: 'text',
-        defaultValue: data.oldAgreementAppendix,
+        type: 'link',
+        defaultValue: data.oldAgreementAppendix || undefined,
         condition: ['typeOfAgreement', 'old'],
       },
       {
@@ -172,8 +173,8 @@ export default function Agreement() {
       {
         label: 'Link to signed document',
         name: 'newAgreementLink',
-        type: 'text',
-        defaultValue: data.newAgreementLink,
+        type: 'link',
+        defaultValue: data.newAgreementLink || undefined,
         condition: ['typeOfAgreement', 'new'],
       },
     ]);
@@ -189,7 +190,7 @@ export default function Agreement() {
         filterFn: 'includesString',
         size: 200,
         cell: ({ getValue, row }) => (
-          <Link component={RLink} to={`/municipalities/${row.original.id}`} prefetch="intent">
+          <Link component={RLink} to={`/municipalities/${row.original.companyId}`} prefetch="intent">
             {getValue() as string}
           </Link>
         ),
@@ -405,6 +406,34 @@ export default function Agreement() {
         },
         cell: ({ getValue }) => (getValue() ? formatDate(getValue() as string) : ''),
       },
+      {
+        header: 'Links',
+        accessorKey: 'oldAgreementLink',
+        id: 'links',
+        enableSorting: false,
+        enableColumnFilter: false,
+        cell: ({ row }) =>
+          row.original.newAgreementLink ? (
+            <Tooltip title="Avtal om den kommunala insamlingen av fimpar">
+              <IconButton component="a" href={row.original.newAgreementLink} target="_blank" rel="noreferrer">
+                <LinkIcon />
+              </IconButton>
+            </Tooltip>
+          ) : row.original.oldAgreementLink ? (
+            <Stack direction="row" spacing={1}>
+              <Tooltip title="Avtal om den kommunala insamlingen av fimpar">
+                <IconButton component="a" href={row.original.oldAgreementLink} target="_blank" rel="noreferrer">
+                  <LinkIcon />
+                </IconButton>
+              </Tooltip>
+              <Tooltip title="Bilaga 8.1. Ersättningsmodell ">
+                <IconButton component="a" href={row.original.oldAgreementAppendix} target="_blank" rel="noreferrer">
+                  <LinkAddIcon />
+                </IconButton>
+              </Tooltip>
+            </Stack>
+          ) : null,
+      },
 
       {
         id: 'actions',
@@ -420,36 +449,6 @@ export default function Agreement() {
               isEditable
               onEdit={() => setEditableData(row.original)}
               link={`/communes/${row.original.companyId}`}
-              additionalElement={
-                row.original.newAgreementLink || row.original.oldAgreementLink ? (
-                  <Stack direction="row" gap={1}>
-                    {row.original.oldAgreementLink ? (
-                      <Tooltip title="Avtal om den kommunala insamlingen av fimpar">
-                        <IconButton component="a" href={row.original.oldAgreementLink} target="_blank" rel="noreferrer">
-                          <LinkIcon />
-                        </IconButton>
-                      </Tooltip>
-                    ) : null}
-                    {row.original.oldAgreementAppendix ? (
-                      <Tooltip title="Bilaga 8.1. Ersättningsmodell ">
-                        <IconButton component="a" href={row.original.oldAgreementLink} target="_blank" rel="noreferrer">
-                          <LinkIcon />
-                        </IconButton>
-                      </Tooltip>
-                    ) : null}
-                    {row.original.newAgreementLink ? (
-                      <Tooltip title="Avtal om den kommunala insamlingen av fimpar">
-                        <IconButton component="a" href={row.original.oldAgreementLink} target="_blank" rel="noreferrer">
-                          <LinkIcon />
-                        </IconButton>
-                      </Tooltip>
-                    ) : null}
-                  </Stack>
-                ) : null
-              }
-              // onDelete={(id) => {
-              //   fetcher.submit({}, { method: 'DELETE', action: `/api/notes-log/${id}`, relative: 'path' });
-              // }}
             />
           );
         },
