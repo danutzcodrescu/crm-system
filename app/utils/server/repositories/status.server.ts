@@ -1,5 +1,5 @@
-import { DatabaseError } from 'pg';
 import { eq } from 'drizzle-orm';
+import { DatabaseError } from 'pg';
 
 import { logger } from '../logger.server';
 import { status } from '../schema.server';

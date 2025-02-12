@@ -38,6 +38,7 @@ export function AgreementCard({ data, fetcher }: AgreementCardProps) {
     if (fetcher.state === 'idle' && fields.length) {
       setFields([]);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [fetcher.state]);
 
   const handleEdit = () => {

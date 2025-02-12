@@ -79,6 +79,7 @@ export const renderBoolean = (value: unknown): ReactNode => {
 
 export const renderNumber = (value: unknown): string => {
   if (typeof value === 'number') return formatNumber(value);
+  if (typeof value === 'string') return formatNumber(parseFloat(value));
   return 'N/A';
 };
 

@@ -1,6 +1,6 @@
 import ExitToApp from '@mui/icons-material/ExitToApp';
 import MenuIcon from '@mui/icons-material/Menu';
-import { AppBar, Box, IconButton, Link, Menu, MenuItem, Toolbar, Typography } from '@mui/material';
+import { AppBar, Box, IconButton, Menu, MenuItem, Toolbar, Typography } from '@mui/material';
 import { Form, Link as RLink } from '@remix-run/react';
 import { getYear } from 'date-fns';
 import { useCallback, useState } from 'react';
@@ -61,10 +61,15 @@ export function Topbar() {
         }}
       >
         {links.map((link) => (
-          <MenuItem key={link.title} onClick={handleClose}>
-            <Link component={RLink} to={link.href} prefetch="intent">
-              {link.title}
-            </Link>
+          <MenuItem
+            key={link.title}
+            onClick={handleClose}
+            component={RLink}
+            to={link.href}
+            prefetch="intent"
+            sx={{ '&:hover': { textDecoration: 'underline' } }}
+          >
+            {link.title}
           </MenuItem>
         ))}
       </Menu>
