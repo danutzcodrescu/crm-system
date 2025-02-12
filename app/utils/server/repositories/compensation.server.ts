@@ -11,7 +11,7 @@ export interface CompensationData {
   inAgreement: boolean;
   inhabitants: number;
   variableCompensation: number;
-  additionalCompensation: number;
+  totalAddition: number;
   changeFactor: number;
   changeFactorLitter: number;
   totalCompensationOld: number;
@@ -78,13 +78,16 @@ export async function getCompensationForCompany(
 export interface CompensationDataPerCompanyPerYear {
   id: string;
   year: number;
-  companyName: string | null;
-  total: number | null;
-  variableCompensation: number | null;
-  inhabitants: number | null;
-  surcharge: number | null;
-  changeFactor: number | null;
-  changeFactorLitter: number | null;
+  companyName: string;
+  total: number;
+  variableCompensation: number;
+  inhabitants: number;
+  surcharge: number;
+  changeFactor: number;
+  changeFactorLitter: number;
+  typeOfAgreement: 'new' | 'old';
+  yearSekAdmin: number;
+  adminFee: number;
 }
 
 export async function getCompensationForCompanyByYear(
@@ -101,19 +104,23 @@ export async function getCompensationForCompanyByYear(
           .select({
             id: compensationView.id,
             companyName: compensationView.companyName,
+            yearSekAdmin: years.sekAdmin,
             year: compensationView.year,
+            adminFee: years.adminFee,
             total: compensationView.totalCompensation,
             variableCompensation: compensationView.variableCompensation,
             inhabitants: compensationView.inhabitants,
             surcharge: compensationView.totalAddition,
             changeFactor: years.changeFactor,
             changeFactorLitter: years.changeFactorLitter,
+            typeOfAgreement: compensationView.typeOfAgreement,
           })
           .from(compensationView)
           .leftJoin(years, eq(compensationView.year, years.name))
+          .leftJoin(agreement, eq(compensationView.id, agreement.companyId))
           .where(and(eq(compensationView.id, companyId), eq(compensationView.year, year)))
           .limit(1)
-      )[0],
+      )[0] as CompensationDataPerCompanyPerYear,
     ];
   } catch (e) {
     logger.error(e);

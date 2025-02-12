@@ -32,7 +32,7 @@ export async function getAllReportingDataPerYear(year: number): Promise<[null, R
         reportedBeforeDeadline: sql`CASE WHEN ${reporting.reportingDate} IS NOT NULL AND ${reporting.reportingDate} <= TO_DATE(${year + 1}  || '-02-15', 'YYYY-MM-DD') THEN TRUE ELSE FALSE END`,
         cigaretteButts: reporting.cigaretteButts,
         motivation: reporting.motivation,
-        motivationForData: reporting.motivationForData,
+        motivationForData: sql`CASE WHEN ${reporting.motivation} IS NOT NULL THEN TRUE WHEN ${reporting.motivation} is NULL AND ${reporting.reportingDate} IS NOT NULL THEN FALSE ELSE NULL END`,
       })
       .from(reporting)
       .leftJoin(companies, eq(reporting.companyId, companies.id))
@@ -85,7 +85,7 @@ export async function getGroupedReportingPerYear(
       .select({
         year: reporting.year,
         haveReported: count(reporting.reportingDate),
-        haveMotivated: count(reporting.motivationForData),
+        haveMotivated: count(reporting.motivation),
         cigaretteButts: sum(reporting.cigaretteButts),
         haveReportedBeforeDeadline: sql<number>`count( CASE WHEN reporting_date <= TO_DATE(${reporting.year} || '-02-15', 'YYYY-MM-DD') THEN 1 END )`,
       })
@@ -114,7 +114,6 @@ export async function getReportingForCompany(
         reportingDate: reporting.reportingDate,
         cigaretteButts: reporting.cigaretteButts,
         motivation: reporting.motivation,
-        motivationForData: reporting.motivationForData,
       })
       .from(reporting)
       .leftJoin(companies, eq(reporting.companyId, companies.id))

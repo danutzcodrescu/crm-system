@@ -1,7 +1,7 @@
 import { and, asc, eq, gte, lte, sql } from 'drizzle-orm';
 
 import { logger } from '../logger.server';
-import { agreement, compensationView, invoicing, years } from '../schema.server';
+import { agreement, compensationView, invoicing, reporting, years } from '../schema.server';
 import { db } from './db.server';
 
 export interface InvoicingData {
@@ -16,6 +16,7 @@ export interface InvoicingData {
   vat: number;
   totalCompensation: number;
   inAgreement: boolean;
+  entitled: boolean;
 }
 
 export async function getInvoicingDataByYear(year: number): Promise<[null, InvoicingData[]] | [string, null]> {
@@ -42,25 +43,21 @@ export async function getInvoicingDataByYear(year: number): Promise<[null, Invoi
 	END `,
         vat: invoicing.vat,
         totalCompensation: compensationView.totalCompensation,
-        inAgreement: sql.join([
-          sql`CASE
-		WHEN (
-			agreements.new_agreement_date_signed IS NOT NULL
-			AND agreements.new_agreement_date_signed <= `,
-          year === 2023 ? sql`'2024-12-31'` : sql`TO_DATE(${year + 1}  || '-02-15', 'YYYY-MM-DD')`,
-          sql`) OR (
+        inAgreement: sql<boolean>`CASE WHEN agreements.new_agreement_date_signed IS NOT NULL OR agreements.old_agreement_date_signed IS NOT NULL THEN TRUE ELSE FALSE END`,
+        entitled: sql<boolean>`CASE
+		WHEN
+			(agreements.new_agreement_date_signed IS NOT NULL
+			AND reporting.reporting_date IS NOT NULL)  OR (
 			agreements.old_agreement_date_signed IS NOT NULL
-			AND agreements.old_agreement_date_signed <= `,
-          year === 2023 ? sql`'2024-12-31'` : sql`TO_DATE(${year + 1}  || '-02-15', 'YYYY-MM-DD')`,
-          sql`) THEN TRUE
+			AND reporting.reporting_date IS NOT NULL )THEN TRUE
 		ELSE FALSE
 	END`,
-        ]),
       })
       .from(invoicing)
+      .where(eq(invoicing.year, year))
       .leftJoin(compensationView, and(eq(invoicing.companyId, compensationView.id), eq(compensationView.year, year)))
       .leftJoin(agreement, eq(invoicing.companyId, agreement.companyId))
-      .leftJoin(years, eq(years.name, year))
+      .leftJoin(reporting, and(eq(invoicing.companyId, reporting.companyId), eq(reporting.year, year)))
       .orderBy(asc(compensationView.companyName));
 
     logger.info('Invoicing data fetched');

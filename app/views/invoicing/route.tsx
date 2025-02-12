@@ -138,9 +138,9 @@ export default function Invoicing() {
       {
         header: 'Entitled',
         id: 'entitled',
-        accessorKey: 'inAgreement',
+        accessorKey: 'entitled',
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        filterFn: (row, _, filterValue, addMeta) => booleanFilterFn(row as any, 'inAgreement', filterValue, addMeta),
+        filterFn: (row, _, filterValue, addMeta) => booleanFilterFn(row as any, 'entitled', filterValue, addMeta),
         meta: {
           filterOptions: [
             { label: 'Yes', value: true },

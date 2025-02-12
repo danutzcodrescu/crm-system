@@ -56,8 +56,6 @@ export async function action({ request }: ActionFunctionArgs) {
       reportingDate: body.get('reportingDate') as string,
       cigaretteButts: body.get('cigaretteButts') ? parseInt(body.get('cigaretteButts') as string) : null,
       motivation: body.get('motivation') as string,
-      // @ts-expect-error we know that the value is a string
-      motivationForData: body.get('motivationForData'),
     });
 
     if (error) {
@@ -260,17 +258,6 @@ export default function Reporting() {
         defaultValue: data.cigaretteButts || undefined,
       },
       {
-        label: 'Motivation for data',
-        name: 'motivationForData',
-        type: 'text',
-        select: true,
-        options: [
-          { label: 'Yes', value: 'true' },
-          { label: 'No', value: 'false' },
-        ],
-        defaultValue: !!data.motivationForData,
-      },
-      {
         label: 'Motivation',
         name: 'motivation',
         type: 'text',
@@ -325,7 +312,7 @@ export default function Reporting() {
                 }, 0),
               )}
             </Typography>
-            <Typography>Motivation for data: {rows.filter((row) => row.original.motivationForData).length}</Typography>
+            <Typography>Motivation for data: {rows.filter((row) => row.original.motivation).length}</Typography>
           </>
         )}
       />

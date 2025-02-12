@@ -281,8 +281,6 @@ async function main() {
           year: 2023,
           reportingDate: formatDate(row.reportingDate),
           cigaretteButts: row.cigaretteButs ? parseFloat(row.cigaretteButs) : undefined,
-          motivationForData:
-            row.motivationForData === 'Yes' ? true : row.motivationForData === 'No' ? false : undefined,
         };
       }),
     );

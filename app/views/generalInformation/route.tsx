@@ -122,6 +122,14 @@ export default function Reporting() {
           getValue() !== undefined ? Intl.NumberFormat('sv-SE').format(getValue() as number) : '',
       },
       {
+        header: 'Inhabitants / km²',
+        accessorKey: 'inhabitantsPerKm2',
+        id: 'inhabitantsPerKm2',
+        enableColumnFilter: false,
+        cell: ({ getValue }) =>
+          getValue() !== undefined ? Intl.NumberFormat('sv-SE').format(getValue() as number) : '',
+      },
+      {
         header: 'Cleaning costs',
         accessorKey: 'cleaningCost',
         id: 'cleaningCost',

@@ -173,7 +173,6 @@ export default function Compensation() {
           </Select>
         </FormControl>
       }
-      // actionData={fetcher.data as { message: string; severity: string } | undefined}
     >
       <PaginatedTable
         data={(data as LoaderResponse).compensationData}
@@ -194,10 +193,7 @@ export default function Compensation() {
             <Typography>
               Additional fixed compensation:{' '}
               {Intl.NumberFormat('sv-SE').format(
-                rows.reduce(
-                  (acc, row) => acc + parseFloat(row.original.additionalCompensation as unknown as string),
-                  0,
-                ),
+                rows.reduce((acc, row) => acc + parseFloat(row.original.totalAddition as unknown as string), 0),
               )}
             </Typography>
             <Typography>

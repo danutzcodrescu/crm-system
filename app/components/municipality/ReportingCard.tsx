@@ -47,17 +47,6 @@ export function ReportingCard({ data, fetcher }: Props) {
           defaultValue: year.cigaretteButts || undefined,
         },
         {
-          label: 'Motivation for data',
-          name: 'motivationForData',
-          type: 'text',
-          select: true,
-          options: [
-            { label: 'Yes', value: 'true' },
-            { label: 'No', value: 'false' },
-          ],
-          defaultValue: !!year.motivationForData,
-        },
-        {
           label: 'Motivation',
           name: 'motivation',
           type: 'text',
@@ -100,10 +89,6 @@ export function ReportingCard({ data, fetcher }: Props) {
   );
 }
 
-const renderMotivationForData = (value: unknown): string => {
-  return value ? 'Yes' : 'N/A';
-};
-
 export function ReportingTable({ data, onEdit }: { data: ReportingData[]; onEdit: (year: ReportingData) => void }) {
   const columns: Column<ReportingData>[] = [
     {
@@ -116,11 +101,11 @@ export function ReportingTable({ data, onEdit }: { data: ReportingData[]; onEdit
       key: 'reportingDate',
       render: renderDate,
     },
-    {
-      label: 'Explanation of reported quantity',
-      key: 'motivationForData',
-      render: renderMotivationForData,
-    },
+    // {
+    //   label: 'Explanation of reported quantity',
+    //   key: 'motivationForData',
+    //   render: (value, ),
+    // },
     {
       label: 'Motivation',
       key: 'motivation',

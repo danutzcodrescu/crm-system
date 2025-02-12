@@ -24,13 +24,27 @@ export interface FullYearData {
   name: number;
   changeFactor: number | null;
   changeFactorLitter: number | null;
+  sekAdmin: number | null;
+  adminFee: number | null;
+  addition_1: number | null;
+  addition_2: number | null;
+  addition_3: number | null;
 }
 
 export async function getYearsData(): Promise<[string, null] | [null, FullYearData[]]> {
   try {
     logger.info('Getting all years data');
     const data = await db
-      .select({ name: years.name, changeFactor: years.changeFactor, changeFactorLitter: years.changeFactorLitter })
+      .select({
+        name: years.name,
+        changeFactor: years.changeFactor,
+        changeFactorLitter: years.changeFactorLitter,
+        sekAdmin: years.sekAdmin,
+        adminFee: years.adminFee,
+        addition_1: years.addition_1,
+        addition_2: years.addition_2,
+        addition_3: years.addition_3,
+      })
       .from(years)
       .where(lte(years.name, new Date().getFullYear()))
       .orderBy(asc(years.name));
@@ -45,6 +59,11 @@ interface UpdateYear {
   name: number;
   changeFactor: number;
   changeFactorLitter: number;
+  adminFee: number;
+  sekAdmin: number;
+  addition_1: number;
+  addition_2: number;
+  addition_3: number;
 }
 
 export async function updateYear(args: UpdateYear): Promise<string | null> {
@@ -55,6 +74,11 @@ export async function updateYear(args: UpdateYear): Promise<string | null> {
       .set({
         changeFactor: args.changeFactor,
         changeFactorLitter: args.changeFactorLitter,
+        adminFee: args.adminFee,
+        sekAdmin: args.sekAdmin,
+        addition_1: args.addition_1,
+        addition_2: args.addition_2,
+        addition_3: args.addition_3,
       })
       .where(eq(years.name, args.name));
     await db.refreshMaterializedView(compensationView);

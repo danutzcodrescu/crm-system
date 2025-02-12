@@ -12,6 +12,7 @@ export interface GeneralInformationPerMunicipality {
   cleaningCost?: number;
   landSurface?: number;
   cleaningCostsPerInhabitant?: number;
+  inhabitantsPerKm2?: number;
   cleanedKg?: number;
   kgPerInhabitant?: number;
   epaMeasurement?: boolean;
@@ -29,6 +30,7 @@ export async function getGeneralInformationData(
         year: generalInformation.year,
         inhabitants: generalInformation.inhabitants,
         landSurface: generalInformation.landSurface,
+        inhabitantsPerKm2: sql`Round(SQRT((2 * (${generalInformation.landSurface} *1000000 / ${generalInformation.inhabitants}))/ SQRT(3)))`,
         cleaningCost: generalInformation.cleaningCost,
         cleaningCostsPerInhabitant: sql`CASE WHEN ${generalInformation.cleaningCost} is NOT NULL AND ${generalInformation.inhabitants} is NOT NULL THEN  ROUND(${generalInformation.cleaningCost} * 1.0 / ${generalInformation.inhabitants}) ELSE NULL END`,
         cleanedKg: generalInformation.cleanedKg,
@@ -86,6 +88,7 @@ export async function getGeneralInformationForCompany(
         inhabitants: generalInformation.inhabitants,
         landSurface: generalInformation.landSurface,
         cleaningCost: generalInformation.cleaningCost,
+        inhabitantsPerKm2: sql`Round(SQRT((2 * (${generalInformation.landSurface} *1000000 / ${generalInformation.inhabitants}))/ SQRT(3)))`,
         cleaningCostsPerInhabitant: sql`CASE WHEN ${generalInformation.cleaningCost} is NOT NULL AND ${generalInformation.inhabitants} is NOT NULL THEN  ROUND(${generalInformation.cleaningCost} * 1.0 / ${generalInformation.inhabitants}) ELSE NULL END`,
         cleanedKg: generalInformation.cleanedKg,
         kgPerInhabitant: sql`CASE WHEN ${generalInformation.inhabitants} is NOT NULL AND ${generalInformation.cleanedKg} is NOT NULL THEN ROUND(${generalInformation.cleanedKg} * 1.00 / ${generalInformation.inhabitants}, 10) ELSE NULL END`,

@@ -31,15 +31,34 @@ export async function action({ request }: ActionFunctionArgs) {
     const id = formData.get('name') as string;
     const changeFactor = formData.get('changeFactor') as string;
     const changeFactorLitter = formData.get('changeFactorLitter') as string;
+    const adminFee = formData.get('adminFee') as string;
+    const sekAdmin = formData.get('sekAdmin') as string;
+    const addition_1 = formData.get('addition_1') as string;
+    const addition_2 = formData.get('addition_2') as string;
+    const addition_3 = formData.get('addition_3') as string;
 
-    if (!id || !changeFactor || !changeFactorLitter) {
+    if (
+      !id ||
+      !changeFactor ||
+      !changeFactorLitter ||
+      !adminFee ||
+      !sekAdmin ||
+      !addition_1 ||
+      !addition_2 ||
+      !addition_3
+    ) {
       return json({ message: 'Missing parameters', severity: 'error', timeStamp: Date.now() }, { status: 400 });
     }
 
     const error = await updateYear({
       name: parseInt(id, 10),
-      changeFactor: parseFloat(formData.get('changeFactor') as string),
-      changeFactorLitter: parseFloat(formData.get('changeFactorLitter') as string),
+      changeFactor: parseFloat(changeFactor),
+      changeFactorLitter: parseFloat(changeFactorLitter),
+      adminFee: parseInt(adminFee),
+      sekAdmin: parseFloat(sekAdmin),
+      addition_1: parseInt(addition_1),
+      addition_2: parseInt(addition_2),
+      addition_3: parseInt(addition_3),
     });
     if (error) {
       return json({ message: 'Cold not update the year', severity: 'error', timeStamp: Date.now() }, { status: 500 });
@@ -79,6 +98,37 @@ export default function YearsPage() {
         inputProps: { step: '0.000001' },
         defaultValue: data.changeFactor as number,
       },
+      {
+        label: 'SEK admin',
+        name: 'sekAdmin',
+        type: 'number',
+        inputProps: { step: '0.000000000000001' },
+        defaultValue: data.sekAdmin as number,
+      },
+      {
+        label: 'Admin/kommun',
+        name: 'adminFee',
+        type: 'number',
+        defaultValue: data.adminFee as number,
+      },
+      {
+        label: 'Tillägg 1',
+        name: 'addition_1',
+        type: 'number',
+        defaultValue: data.addition_1 as number,
+      },
+      {
+        label: 'Tillägg 2',
+        name: 'addition_2',
+        type: 'number',
+        defaultValue: data.addition_2 as number,
+      },
+      {
+        label: 'Tillägg 3',
+        name: 'addition_3',
+        type: 'number',
+        defaultValue: data.addition_3 as number,
+      },
     ]);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -100,14 +150,57 @@ export default function YearsPage() {
             direction="row"
             alignItems="center"
             justifyContent="space-between"
+            flexWrap="wrap"
             gap={1.5}
           >
-            <Typography sx={{ fontWeight: 'bold', flex: 1, fontSize: '1.25rem', pr: 1.5 }}>{year.name}</Typography>
-            <Typography>Change factor: {year.changeFactor}</Typography>
-            <Typography>Change factor litter (old agreement): {year.changeFactorLitter}</Typography>
+            <Typography sx={{ fontWeight: 'bold', flex: '0 0 90%', fontSize: '1.5rem', pr: 1.5 }}>
+              {year.name}
+            </Typography>
             <IconButton size="small" aria-label={`Edit ${year.name}`} onClick={() => setEditableFields(year)}>
               <Edit />
             </IconButton>
+            <Typography>
+              <Box component="span" sx={{ fontWeight: 'bold' }}>
+                Change factor:
+              </Box>{' '}
+              {parseFloat(year.changeFactor as unknown as string).toFixed(5)}
+            </Typography>
+            <Typography>
+              <Box component="span" sx={{ fontWeight: 'bold' }}>
+                Change factor litter (old agreement):
+              </Box>{' '}
+              {parseFloat(year.changeFactorLitter as unknown as string).toFixed(5)}
+            </Typography>
+            <Typography>
+              <Box component="span" sx={{ fontWeight: 'bold' }}>
+                SEK admin:
+              </Box>{' '}
+              {parseFloat(year.sekAdmin as unknown as string).toFixed(15)}
+            </Typography>
+            <Typography>
+              <Box component="span" sx={{ fontWeight: 'bold' }}>
+                Admin/kommun:
+              </Box>{' '}
+              {year.adminFee}
+            </Typography>
+            <Typography>
+              <Box component="span" sx={{ fontWeight: 'bold' }}>
+                Tillägg 1:
+              </Box>{' '}
+              {year.addition_1}
+            </Typography>
+            <Typography>
+              <Box component="span" sx={{ fontWeight: 'bold' }}>
+                Tillägg 2:
+              </Box>{' '}
+              {year.addition_2}
+            </Typography>
+            <Typography>
+              <Box component="span" sx={{ fontWeight: 'bold' }}>
+                Tillägg 3:
+              </Box>{' '}
+              {year.addition_3}
+            </Typography>
           </Stack>
         ))}
       </Box>

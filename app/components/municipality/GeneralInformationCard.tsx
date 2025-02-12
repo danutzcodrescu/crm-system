@@ -119,6 +119,11 @@ export function GeneralInformationTable({
       render: renderNumber,
     },
     {
+      label: 'Inhabitants / km²',
+      key: 'inhabitantsPerKm2',
+      render: renderNumber,
+    },
+    {
       label: 'Cleaning costs',
       key: 'cleaningCost',
       render: renderNumber,
