@@ -267,11 +267,11 @@ export default function Dashboard() {
           <Card sx={{ bgcolor: 'background.paper', flex: 1 }}>
             <CardContent>
               <Typography variant="h6" gutterBottom sx={{ color: 'text.primary', fontWeight: 'bold' }}>
-                Companies with Recurring Consultations in {new Date().getFullYear()}
+                Municipalities with Recurring Consultations in {new Date().getFullYear()}
               </Typography>
               {data.recurringConsultations.length === 0 ? (
                 <Typography color="text.secondary">
-                  No companies found with recurring consultations in {new Date().getFullYear()}
+                  No municipalities found with recurring consultations in {new Date().getFullYear()}
                 </Typography>
               ) : (
                 <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(5, 3fr)' }}>

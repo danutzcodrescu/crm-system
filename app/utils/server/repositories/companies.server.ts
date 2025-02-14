@@ -1,30 +1,9 @@
-import { and, asc, eq, ilike, InferSelectModel, sql } from 'drizzle-orm';
+import { and, asc, eq, InferSelectModel, sql } from 'drizzle-orm';
 import { DatabaseError } from 'pg';
 
 import { logger } from '../logger.server';
 import { companies, recurringConsultation } from '../schema.server';
 import { db } from './db.server';
-
-export async function getCompanies(
-  name?: string,
-): Promise<[string | undefined, { id: string; name: string }[] | undefined]> {
-  try {
-    if (name) {
-      // TODO maybe convert it to use pgvector to account for wrong spelling
-      return [
-        undefined,
-        await db
-          .select({ id: companies.id, name: companies.name })
-          .from(companies)
-          .where(ilike(companies.name, `%${name}%`)),
-      ];
-    } else {
-      return [undefined, await db.select({ id: companies.id, name: companies.name }).from(companies)];
-    }
-  } catch (e) {
-    return [(e as DatabaseError).detail, undefined];
-  }
-}
 
 export type CompanyTable = Pick<InferSelectModel<typeof companies>, 'id' | 'name' | 'statusId'> & {
   statusName: string | null;
@@ -91,6 +70,16 @@ export async function getCompaniesWithConsultationInYear(
     ];
   } catch (e) {
     logger.error(e);
+    return [(e as DatabaseError).detail as string, null];
+  }
+}
+
+type CompanyWithCode = Pick<InferSelectModel<typeof companies>, 'id' | 'code'>;
+
+export async function getCompaniesWithCode(): Promise<[string | null, CompanyWithCode[] | null]> {
+  try {
+    return [null, await db.select({ id: companies.id, code: companies.code }).from(companies)];
+  } catch (e) {
     return [(e as DatabaseError).detail as string, null];
   }
 }

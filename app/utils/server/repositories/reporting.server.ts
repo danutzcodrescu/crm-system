@@ -126,3 +126,23 @@ export async function getReportingForCompany(
     return ['could not fetch reporting data for company', null];
   }
 }
+
+export async function bulkImportReporting(values: (typeof reporting.$inferInsert)[]): Promise<string | null> {
+  try {
+    await db
+      .insert(reporting)
+      .values(values)
+      .onConflictDoUpdate({
+        target: [reporting.companyId, reporting.year],
+        set: {
+          reportingDate: sql.raw(`excluded.reporting_date`),
+          cigaretteButts: sql.raw(`excluded.cigarette_butts`),
+          motivation: sql.raw(`excluded.${reporting.motivation.name}`),
+        },
+      });
+    return null;
+  } catch (e) {
+    logger.error(e);
+    return 'could not import reporting data';
+  }
+}

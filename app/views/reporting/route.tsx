@@ -1,11 +1,23 @@
 import Cancel from '@mui/icons-material/Cancel';
 import CheckBox from '@mui/icons-material/CheckBox';
-import { FormControl, InputLabel, Link, MenuItem, Select, Typography } from '@mui/material';
+import CloudUploadIcon from '@mui/icons-material/CloudUpload';
+import {
+  Box,
+  FormControl,
+  IconButton,
+  InputLabel,
+  Link,
+  MenuItem,
+  Select,
+  Stack,
+  Tooltip,
+  Typography,
+} from '@mui/material';
 import { ActionFunctionArgs, json, LoaderFunctionArgs, MetaFunction, redirect } from '@remix-run/node';
 import { Link as RLink, useFetcher, useLoaderData, useLocation, useNavigate } from '@remix-run/react';
 import { ColumnDef } from '@tanstack/react-table';
 import { getYear } from 'date-fns';
-import { useCallback, useMemo } from 'react';
+import { ChangeEvent, useCallback, useMemo } from 'react';
 import { ClientOnly } from 'remix-utils/client-only';
 
 import { EditDialog } from '~/components/shared/EditDialog.client';
@@ -269,25 +281,66 @@ export default function Reporting() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  const handleSubmit = useCallback(
+    (e: ChangeEvent<HTMLInputElement>) => {
+      if (e.target.files?.[0]) {
+        const formData = new FormData();
+        formData.append('file', e.target.files?.[0] as File);
+        formData.append('year', new URLSearchParams(location.search).get('year') as string);
+        fetcher.submit(formData, {
+          method: 'POST',
+          action: '/api/reporting/import',
+          relative: 'path',
+          encType: 'multipart/form-data',
+        });
+      }
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    },
+    [fetcher, location.search],
+  );
+
   return (
     <PageContainer
       title="Reporting"
       additionalTitleElement={
-        <FormControl>
-          <InputLabel id="years-selector">Select the year</InputLabel>
-          <Select
-            labelId="years-selector"
-            value={new URLSearchParams(location.search).get('year')}
-            label="Select the year"
-            onChange={(e) => navigate({ search: `?year=${e.target.value}` })}
-          >
-            {(data as unknown as LoaderResponse).yearsData.map((year) => (
-              <MenuItem key={year} value={year}>
-                {year}
-              </MenuItem>
-            ))}
-          </Select>
-        </FormControl>
+        <Stack direction="row" alignItems="center" gap={1}>
+          <Tooltip title={`Upload reporting data for ${new URLSearchParams(location.search).get('year')}`}>
+            <IconButton role={undefined} tabIndex={-1} component="label">
+              <CloudUploadIcon />
+              <Box
+                component="input"
+                type="file"
+                onChange={handleSubmit}
+                sx={{
+                  clip: 'rect(0 0 0 0)',
+                  clipPath: 'inset(50%)',
+                  height: 1,
+                  overflow: 'hidden',
+                  position: 'absolute',
+                  bottom: 0,
+                  left: 0,
+                  whiteSpace: 'nowrap',
+                  width: 1,
+                }}
+              />
+            </IconButton>
+          </Tooltip>
+          <FormControl>
+            <InputLabel id="years-selector">Select the year</InputLabel>
+            <Select
+              labelId="years-selector"
+              value={new URLSearchParams(location.search).get('year')}
+              label="Select the year"
+              onChange={(e) => navigate({ search: `?year=${e.target.value}` })}
+            >
+              {(data as unknown as LoaderResponse).yearsData.map((year) => (
+                <MenuItem key={year} value={year}>
+                  {year}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+        </Stack>
       }
       actionData={fetcher.data as { message: string; severity: string } | undefined}
     >
