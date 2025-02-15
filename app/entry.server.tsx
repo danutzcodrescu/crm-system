@@ -18,7 +18,6 @@ import { isbot } from 'isbot';
 import { renderToPipeableStream, renderToString } from 'react-dom/server';
 
 import { createEmotion } from './emotion/emotion-server';
-import { logger } from './utils/server/logger.server';
 import { handlePDFRequest } from './utils/server/pdf.server';
 import { theme } from './utils/theme';
 
@@ -34,8 +33,6 @@ export default async function handleRequest(
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   loadContext: AppLoadContext,
 ) {
-  logger.info(`${request.method} ${request.url} `);
-
   if (new URL(request.url).pathname.endsWith('.pdf')) {
     return handlePDFRequest(request, responseHeaders);
   }

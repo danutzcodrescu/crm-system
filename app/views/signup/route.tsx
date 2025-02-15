@@ -6,8 +6,15 @@ import { SpamError } from 'remix-utils/honeypot/server';
 
 import { auth } from '~/utils/server/auth.server';
 import { honeypot } from '~/utils/server/honeypot.server';
+import { getSecret } from '~/utils/server/infisical.server';
+import { logger } from '~/utils/server/logger.server';
 
-export const loader = () => {
+export const loader = async () => {
+  const signupEnabled = await getSecret('SIGNUP_ENABLED');
+  if (signupEnabled.secretValue.toLocaleLowerCase() === 'false') {
+    logger.info('Signup is disabled');
+    return redirect('/signin');
+  }
   return json({ honeypotInputProps: honeypot.getInputProps() });
 };
 
@@ -50,7 +57,7 @@ export async function action({ request }: ActionFunctionArgs) {
   });
 }
 
-export default function LoginPage() {
+export default function SignUpPage() {
   const data = useActionData<typeof action>();
   const { honeypotInputProps } = useLoaderData<typeof loader>();
 
@@ -59,7 +66,7 @@ export default function LoginPage() {
       <Box sx={{ display: 'grid', placeContent: 'center', width: '100vw', height: '100svh' }}>
         <Card>
           <CardHeader
-            title="Sign in to crm"
+            title="Sign up to crm"
             subheader="Welcome back! Please sign in to continue"
             titleTypographyProps={{
               sx: { textAlign: 'center', fontSize: '1.25rem', fontWeight: 'bold', marginBottom: 1.5 },
