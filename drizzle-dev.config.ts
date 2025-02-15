@@ -10,11 +10,11 @@ export default defineConfig({
   verbose: true,
   casing: 'snake_case',
   dbCredentials: {
-    database: 'test_db',
-    host: 'localhost',
+    database: process.env.DB_NAME as string,
+    host: process.env.DB_HOST as string,
     port: 5432,
-    user: 'admin',
-    password: 'root',
+    user: process.env.DB_USER as string,
+    password: process.env.DB_PASSWORD as string,
     ssl: false,
   },
 });
