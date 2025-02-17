@@ -15,17 +15,17 @@ export const loader = async () => {
     logger.info('Signup is disabled');
     return redirect('/signin');
   }
-  return json({ honeypotInputProps: honeypot.getInputProps() });
+  return json({ honeypotInputProps: await honeypot.getInputProps() });
 };
 
 export const meta: MetaFunction = () => {
   return [{ title: 'CRM System - Sign up' }, { name: 'description', content: 'Sign up page for the CRM System' }];
 };
 
-export async function action({ request }: ActionFunctionArgs) {
+export const action = async ({ request }: ActionFunctionArgs) => {
   const formData = await request.formData();
   try {
-    honeypot.check(formData);
+    await honeypot.check(formData);
   } catch (error) {
     if (error instanceof SpamError) {
       throw json({ error: 'You seem to spam' }, { status: 451 });
@@ -55,7 +55,7 @@ export async function action({ request }: ActionFunctionArgs) {
     },
     status: 301,
   });
-}
+};
 
 export default function SignUpPage() {
   const data = useActionData<typeof action>();

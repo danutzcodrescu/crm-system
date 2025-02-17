@@ -32,12 +32,12 @@
     "@mui/icons-material": "^6.4.4",
     "@mui/lab": "6.0.0-beta.27",
     "@mui/material": "^6.4.4",
-    "@mui/x-date-pickers": "^7.26.0",
+    "@mui/x-date-pickers": "^7.27.0",
     "@node-rs/argon2": "^2.0.0",
     "@oslojs/crypto": "^1.0.1",
     "@oslojs/encoding": "^1.1.0",
     "@react-hookz/web": "^25.0.1",
-    "@react-pdf/renderer": "^4.2.1",
+    "@react-pdf/renderer": "^4.2.2",
     "@remix-run/dev": "^2.15.3",
     "@remix-run/express": "^2.15.3",
     "@remix-run/node": "^2.15.3",
@@ -60,7 +60,7 @@
     "pino-pretty": "^13.0.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
-    "remix-utils": "^7.7.0",
+    "remix-utils": "^8.1.0",
     "xlsx": "^0.18.5"
   },
   "devDependencies": {
