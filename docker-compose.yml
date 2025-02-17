@@ -1,4 +1,12 @@
 services:
+  # used for testing the docker file
+  # uncomment to test
+  # app:
+  #   image: crm-system
+  #   ports:
+  #     - '4200:4200'
+  #   env_file:
+  #     - .env.staging
   db:
     image: postgres
     ports:

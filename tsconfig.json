@@ -6,13 +6,15 @@
     "**/.server/**/*.tsx",
     "**/.client/**/*.ts",
     "**/.client/**/*.tsx",
-    "app/components/Topbar.clienttsx"
+  ],
+  "exclude": [
+    "scripts/*.ts"
   ],
   "compilerOptions": {
     "lib": [
       "DOM",
       "DOM.Iterable",
-      "ES2023"
+      "ESNext"
     ],
     "types": [
       "@remix-run/node",

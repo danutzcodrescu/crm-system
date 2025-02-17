@@ -1,9 +1,9 @@
 import { createRequestHandler } from '@remix-run/express';
 import compression from 'compression';
 import express from 'express';
-// import helmet from 'helmet';
-import pino from 'pino-http';
-import { cleanExpiredSessions } from './cron';
+import { join } from 'path';
+import { pinoHttp } from 'pino-http';
+import { cleanExpiredSessions } from './cron.js';
 
 const viteDevServer =
   process.env.NODE_ENV === 'production'
@@ -15,10 +15,11 @@ const viteDevServer =
       );
 
 const remixHandler = createRequestHandler({
-  // @ts-expect-error it works
+  // @ts-ignore server packing
   build: viteDevServer
     ? () => viteDevServer.ssrLoadModule('virtual:remix/server-build')
-    : await import('../build/server/index.js'),
+    : // @ts-ignore server packing
+      await import('../server/index.js'),
 });
 
 cleanExpiredSessions.start();
@@ -29,7 +30,7 @@ app.use(compression());
 
 // app.use(helmet());
 app.use(
-  pino({
+  pinoHttp({
     quietReqLogger: true, // turn off the default logging output
     transport: {
       target: 'pino-http-print', // use the pino-http-print transport and its formatting output
@@ -50,12 +51,12 @@ if (viteDevServer) {
   app.use(viteDevServer.middlewares);
 } else {
   // Vite fingerprints its assets so we can cache forever.
-  app.use('/assets', express.static('build/client/assets', { immutable: true, maxAge: '1y' }));
+  app.use('/assets', express.static(join(process.cwd(), '/dist/client/assets'), { immutable: true, maxAge: '1y' }));
 }
 
 // Everything else (like favicon.ico) is cached for an hour. You may want to be
 // more aggressive with this caching.
-app.use(express.static('build/client', { maxAge: '1h' }));
+app.use(express.static(join(process.cwd(), '/dist/client'), { maxAge: '300h' }));
 
 app.get('/health', (req, res) => {
   res.status(200).send('OK');

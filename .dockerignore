@@ -1,11 +1,14 @@
 node_modules
 README.md
 LICENSE
+dist
+.git
 .env
 .env.local
-scripts
-e2e
-crm_system
+.env.staging
+scripts/
+e2e/
+crm system/
 .vscode
 .github
 playwright.config.ts
@@ -14,3 +17,7 @@ docker-compose.yml
 .eslintrc.cjs
 .editorconfig
 .prettierrc
+Dockerfile
+.DS_Store
+.gitignore
+.npmrc

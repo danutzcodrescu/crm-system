@@ -166,6 +166,7 @@ export default function Companies() {
           name: 'statusId',
           select: true,
           type: 'text',
+          // @ts-expect-error it works for now TO DO: fix it
           options: statuses.map((status) => ({
             label: status.name,
             value: status.id,

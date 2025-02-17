@@ -51,6 +51,7 @@ export async function action({ request }: ActionFunctionArgs) {
 export default function LoginPage() {
   const data = useActionData<typeof action>();
   const { honeypotInputProps } = useLoaderData<typeof loader>();
+  console.log(honeypotInputProps);
 
   return (
     <HoneypotProvider {...honeypotInputProps}>

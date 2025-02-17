@@ -1,6 +1,8 @@
 import { vitePlugin as remix } from '@remix-run/dev';
 import { defineConfig } from 'vite';
+import { sentryVitePlugin } from '@sentry/vite-plugin';
 import tsconfigPaths from 'vite-tsconfig-paths';
+import pkg from './package.json';
 
 export default defineConfig(({ isSsrBuild }) => ({
   ssr: {
@@ -19,6 +21,7 @@ export default defineConfig(({ isSsrBuild }) => ({
   },
   plugins: [
     remix({
+      buildDirectory: 'dist',
       future: {
         v3_fetcherPersist: true,
         v3_relativeSplatPath: true,
@@ -59,6 +62,14 @@ export default defineConfig(({ isSsrBuild }) => ({
       },
     }),
     tsconfigPaths(),
+    sentryVitePlugin({
+      authToken: process.env.SENTRY_AUTH_TOKEN,
+      org: process.env.SENTRY_ORG,
+      project: process.env.SENTRY_PROJECT,
+      release: {
+        name: `crm-system@${pkg.version}`,
+      },
+    }),
   ],
-  build: isSsrBuild ? { target: 'ESNext' } : {},
+  build: { sourcemap: true, ...(isSsrBuild ? { target: 'ESNext' } : {}) },
 }));

@@ -51,6 +51,7 @@ export function MunicipalityTitle({ municipality, fetcher, statusList }: Props) 
         name: 'statusId',
         type: 'text',
         select: true,
+        // @ts-expect-error it works for now TO DO: fix it
         options: statusList.map((status) => ({ label: status.name, value: status.id })),
         defaultValue: municipality.statusId,
       },

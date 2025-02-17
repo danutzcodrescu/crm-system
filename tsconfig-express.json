@@ -1,0 +1,49 @@
+{
+  "compilerOptions": {
+    "isolatedModules": true,
+    "outDir": "./dist",
+    "rootDir": "./",
+    "lib": [
+      "ESNext"
+    ],
+    "paths": {
+      "~/*": [
+        "./app/*"
+      ]
+    },
+    "module": "NodeNext",
+    "target": "ESNext",
+    "strict": true, // Enable all strict type-checking options
+    "noImplicitAny": true, // Raise error on expressions and declarations with implied 'any' type
+    "strictNullChecks": true, // Enable strict null checks
+    "strictFunctionTypes": true, // Enable strict checking of function types
+    "strictBindCallApply": true, // Enable strict 'bind', 'call', and 'apply' methods on functions
+    // Module Resolution Options
+    "moduleResolution": "nodenext",
+    "baseUrl": "./",
+    "allowSyntheticDefaultImports": true,
+    "esModuleInterop": true, // Enables compatibility with Babel-style module imports
+    "resolveJsonModule": true, // Allow importing .json files
+    // Source Map Options
+    "sourceMap": true, // Generate corresponding .map files
+    // Additional Options
+    "removeComments": true, // Remove comments in output files
+    "allowJs": true, // Allow JavaScript files to be compiled
+    "skipLibCheck": true, // Skip type checking of declaration files
+    "forceConsistentCasingInFileNames": true, // Ensure consistent casing in file names
+    // Experimental Options
+    "experimentalDecorators": true, // Enable experimental support for decorators
+    "emitDecoratorMetadata": true,
+  },
+  "include": [
+    "cmd/server.ts",
+    "apps/utils/schema.server.ts",
+    "apps/utils/logger.server.ts",
+    "apps/utils/server/repositories/db.server.ts"
+  ],
+  "exclude": [
+    "node_modules", // Exclude node_modules directory
+    "**/*.spec.ts", // Exclude test files
+    "dist" // Exclude output directory
+  ]
+}
