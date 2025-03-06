@@ -56,6 +56,15 @@ export const auth = {
     return false;
   },
 
+  getUserFromSession: async function (request: Request): Promise<User | null> {
+    const sessionDetails = await getSession(request.headers.get('Cookie'));
+    if (!sessionDetails.has('session')) {
+      return null;
+    }
+    const { user } = await validateSessionToken(sessionDetails.get('session') as string);
+    return user;
+  },
+
   signUp: async function (
     username: string,
     password: string,
@@ -110,7 +119,7 @@ async function createSession(token: string, userId: number): Promise<Session> {
   return session;
 }
 
-async function validateSessionToken(token: string): Promise<SessionValidationResult> {
+export async function validateSessionToken(token: string): Promise<SessionValidationResult> {
   const sessionId = fromSessionTokenToSessionId(token);
   const result = await db
     .select({ user: users, session: sessions })
@@ -156,11 +165,19 @@ const verifyPasswordHash = async (hash: string, password: string) => {
 
 async function setSession(req: Request, userId: number) {
   const cookie = await getRequestSession(req);
-  logger.info(`SetSession -> Setting sessionToken for user ${userId}`);
+  logger.debug(`SetSession -> Setting sessionToken for user ${userId}`);
   const sessionToken = generateSessionToken();
-  logger.info(`SetSession -> Creating session for user ${userId}`);
+  logger.debug(`SetSession -> Creating session for user ${userId}`);
   await createSession(sessionToken, userId);
-  logger.info(`SetSession -> created for user ${userId}`);
+  logger.debug(`SetSession -> created for user ${userId}`);
   cookie.set('session', sessionToken);
   return commitSession(cookie);
+}
+
+export async function storeRefreshToken(userId: number, token: string) {
+  try {
+    await db.update(users).set({ gmailRefreshToken: token }).where(eq(users.id, userId));
+  } catch (e) {
+    logger.error(e);
+  }
 }

@@ -1,6 +1,7 @@
 import ExitToApp from '@mui/icons-material/ExitToApp';
+import WifiIcon from '@mui/icons-material/Wifi';
 import MenuIcon from '@mui/icons-material/Menu';
-import { AppBar, Box, IconButton, Menu, MenuItem, Toolbar, Typography } from '@mui/material';
+import { AppBar, Box, IconButton, Link, Menu, MenuItem, Stack, Toolbar, Typography } from '@mui/material';
 import { Form, Link as RLink } from '@remix-run/react';
 import { getYear } from 'date-fns';
 import { useCallback, useState } from 'react';
@@ -21,7 +22,11 @@ const links = [
   { title: 'Recent logs', href: '/logs' },
 ];
 
-export function Topbar() {
+interface Props {
+  redirectUrl?: string;
+}
+
+export function Topbar({ redirectUrl }: Props) {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
 
   const handleClose = useCallback(() => {
@@ -50,22 +55,22 @@ export function Topbar() {
             </Typography>
           </Box>
           <SearchBox />
-          <Form method="delete" action="/api/auth">
-            <IconButton type="submit" color="inherit" aria-label="logout" sx={{ ml: 'auto' }}>
-              <ExitToApp />
-            </IconButton>
-          </Form>
+          <Stack direction="row" spacing={2}>
+            {redirectUrl ? (
+              <IconButton href={redirectUrl} color="inherit" aria-label="authenticate against google services">
+                <WifiIcon />
+              </IconButton>
+            ) : null}
+
+            <Form method="delete" action="/api/auth">
+              <IconButton type="submit" color="inherit" aria-label="logout" sx={{ ml: 'auto' }}>
+                <ExitToApp />
+              </IconButton>
+            </Form>
+          </Stack>
         </Toolbar>
       </AppBar>
-      <Menu
-        id="basic-menu"
-        anchorEl={anchorEl}
-        open={!!anchorEl}
-        onClose={handleClose}
-        MenuListProps={{
-          'aria-labelledby': 'basic-button',
-        }}
-      >
+      <Menu id="basic-menu" anchorEl={anchorEl} open={!!anchorEl} onClose={handleClose}>
         {links.map((link) => (
           <MenuItem
             key={link.title}

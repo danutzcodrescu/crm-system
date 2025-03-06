@@ -115,7 +115,9 @@ export const agreement = pgTable('agreements', {
 export const recurringConsultation = pgTable(
   'recurring_consultations',
   {
-    companyId: uuid(),
+    companyId: uuid()
+      .notNull()
+      .references(() => companies.id),
     year: smallint()
       .notNull()
       .references(() => years.name),
@@ -204,6 +206,7 @@ export const users = authSchema.table('users', {
   id: serial().primaryKey(),
   username: text().notNull().unique(),
   password: text().notNull(),
+  gmailRefreshToken: text(),
   createdAt: timestamp({ withTimezone: true, mode: 'date' }).notNull().defaultNow(),
   updatedAt: timestamp({ mode: 'date', withTimezone: true }).$onUpdate(() => new Date()),
 });

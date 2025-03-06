@@ -31,6 +31,9 @@ export default defineConfig(({ isSsrBuild }) => ({
         return defineRoutes((route) => {
           route('/signin', 'views/login/route.tsx');
           route('/signup', 'views/signup/route.tsx');
+          route('/api/emails', 'api/emails/route.tsx', () => {
+            route('/api/emails/:messageId/attachments/:attachmentId', 'api/emails/attachment.ts');
+          });
           route('/api/auth', 'api/auth/route.ts');
           route('/api/reporting/import', 'api/reporting/import.ts');
           route('/api/general-information/import', 'api/general-information/import.ts');
@@ -62,6 +65,7 @@ export default defineConfig(({ isSsrBuild }) => ({
             route('/statuses', 'views/statuses/route.tsx');
             route('/years', 'views/years/route.tsx');
           });
+          route('/gmail-auth-redirect', 'views/gmail/route.tsx');
         });
       },
     }),

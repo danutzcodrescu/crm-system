@@ -1,14 +1,22 @@
 import { Box } from '@mui/material';
 import { ActionFunctionArgs, json, LoaderFunctionArgs, MetaFunction, redirect } from '@remix-run/node';
-import { Outlet } from '@remix-run/react';
+import { Outlet, useLoaderData } from '@remix-run/react';
 
 import { Topbar } from '~/components/Topbar';
 import { auth } from '~/utils/server/auth.server';
+import { gmail } from '~/utils/server/services/gmail.server';
 
 export async function loader({ request }: LoaderFunctionArgs) {
   const isLoggedIn = await auth.isLoggedIn(request);
   if (!isLoggedIn) return redirect('/signin');
-  return json({});
+  const isTokenSet = gmail.isTokenSet();
+
+  if (!isTokenSet) {
+    const token = await gmail.getRedirectUrlIfThereIsNoToken(request);
+    return json({ redirectUrl: token });
+  }
+  setImmediate(() => gmail.clearRefreshToken());
+  return json({ redirectUrl: undefined });
 }
 
 export async function action({ request }: ActionFunctionArgs) {
@@ -23,9 +31,10 @@ export const meta: MetaFunction = () => {
 };
 
 export default function AppLayout() {
+  const data = useLoaderData<typeof loader>();
   return (
     <>
-      <Topbar />
+      <Topbar redirectUrl={data.redirectUrl} />
 
       <Box sx={{ backgroundColor: (theme) => theme.palette.primary.dark }}>
         <Outlet />
