@@ -4,7 +4,7 @@ import express from 'express';
 import { join } from 'path';
 import { pinoHttp } from 'pino-http';
 import { cleanExpiredSessions } from './cron.js';
-import helmet from 'helmet';
+// import helmet from 'helmet';
 
 const viteDevServer =
   process.env.NODE_ENV === 'production'
@@ -29,7 +29,7 @@ const app = express();
 
 app.use(compression());
 
-app.use(helmet());
+// app.use(helmet());
 app.use(
   pinoHttp({
     quietReqLogger: true, // turn off the default logging output
