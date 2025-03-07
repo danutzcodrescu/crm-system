@@ -13,6 +13,7 @@ import { PageContainer } from '~/components/shared/PageContainer';
 import { booleanFilterFn } from '~/components/shared/table/filters';
 import { PaginatedTable } from '~/components/shared/table/PaginatedTable';
 import { TableActionsCell } from '~/components/shared/table/TableActionsCell';
+import { UploadButton } from '~/components/shared/UploadButton.client';
 import { useEditFields } from '~/hooks/editFields';
 import { formatDate } from '~/utils/client/dates';
 import { auth } from '~/utils/server/auth.server';
@@ -299,21 +300,34 @@ export default function Invoicing() {
     <PageContainer
       title="Invoicing"
       additionalTitleElement={
-        <FormControl>
-          <InputLabel id="years-selector">Select the year</InputLabel>
-          <Select
-            labelId="years-selector"
-            value={new URLSearchParams(location.search).get('year')}
-            label="Select the year"
-            onChange={(e) => navigate({ search: `?year=${e.target.value}` })}
-          >
-            {(data as unknown as LoaderResponse).yearsData.map((year) => (
-              <MenuItem key={year} value={year}>
-                {year}
-              </MenuItem>
-            ))}
-          </Select>
-        </FormControl>
+        <>
+          <ClientOnly>
+            {() => (
+              <UploadButton
+                search={location.search}
+                title={`Upload invoicing data for ${new URLSearchParams(location.search).get('year')}}`}
+                fetcher={fetcher}
+                path="/api/invoicing/import"
+              />
+            )}
+          </ClientOnly>
+          <FormControl>
+            <InputLabel id="years-selector">Select the year</InputLabel>
+            <Select
+              labelId="years-selector"
+              value={new URLSearchParams(location.search).get('year')}
+              label="Select the year"
+              onChange={(e) => navigate({ search: `?year=${e.target.value}` })}
+              size="small"
+            >
+              {(data as unknown as LoaderResponse).yearsData.map((year) => (
+                <MenuItem key={year} value={year}>
+                  {year}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+        </>
       }
       actionData={fetcher.data as { message: string; severity: string } | undefined}
     >

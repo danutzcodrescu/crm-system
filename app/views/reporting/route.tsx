@@ -24,6 +24,7 @@ import { EditDialog } from '~/components/shared/EditDialog.client';
 import { PageContainer } from '~/components/shared/PageContainer';
 import { PaginatedTable } from '~/components/shared/table/PaginatedTable';
 import { TableActionsCell } from '~/components/shared/table/TableActionsCell';
+import { UploadButton } from '~/components/shared/UploadButton.client';
 import { useEditFields } from '~/hooks/editFields';
 import { formatDate } from '~/utils/client/dates';
 import { auth } from '~/utils/server/auth.server';
@@ -281,50 +282,21 @@ export default function Reporting() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const handleSubmit = useCallback(
-    (e: ChangeEvent<HTMLInputElement>) => {
-      if (e.target.files?.[0]) {
-        const formData = new FormData();
-        formData.append('file', e.target.files?.[0] as File);
-        formData.append('year', new URLSearchParams(location.search).get('year') as string);
-        fetcher.submit(formData, {
-          method: 'POST',
-          action: '/api/reporting/import',
-          relative: 'path',
-          encType: 'multipart/form-data',
-        });
-      }
-      // eslint-disable-next-line react-hooks/exhaustive-deps
-    },
-    [fetcher, location.search],
-  );
-
   return (
     <PageContainer
       title="Reporting"
       additionalTitleElement={
         <Stack direction="row" alignItems="center" gap={1}>
-          <Tooltip title={`Upload reporting data for ${new URLSearchParams(location.search).get('year')}`}>
-            <IconButton role={undefined} tabIndex={-1} component="label">
-              <CloudUploadIcon />
-              <Box
-                component="input"
-                type="file"
-                onChange={handleSubmit}
-                sx={{
-                  clip: 'rect(0 0 0 0)',
-                  clipPath: 'inset(50%)',
-                  height: 1,
-                  overflow: 'hidden',
-                  position: 'absolute',
-                  bottom: 0,
-                  left: 0,
-                  whiteSpace: 'nowrap',
-                  width: 1,
-                }}
+          <ClientOnly>
+            {() => (
+              <UploadButton
+                search={location.search}
+                title={`Upload reporting data for ${new URLSearchParams(location.search).get('year')}`}
+                fetcher={fetcher}
+                path="/api/reporting/import"
               />
-            </IconButton>
-          </Tooltip>
+            )}
+          </ClientOnly>
           <FormControl>
             <InputLabel id="years-selector">Select the year</InputLabel>
             <Select
@@ -332,6 +304,7 @@ export default function Reporting() {
               value={new URLSearchParams(location.search).get('year')}
               label="Select the year"
               onChange={(e) => navigate({ search: `?year=${e.target.value}` })}
+              size="small"
             >
               {(data as unknown as LoaderResponse).yearsData.map((year) => (
                 <MenuItem key={year} value={year}>

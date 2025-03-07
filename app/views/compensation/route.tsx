@@ -164,6 +164,7 @@ export default function Compensation() {
             value={new URLSearchParams(location.search).get('year')}
             label="Select the year"
             onChange={(e) => navigate({ search: `?year=${e.target.value}` })}
+            size="small"
           >
             {(data as LoaderResponse).yearsData.map((year) => (
               <MenuItem key={year} value={year}>

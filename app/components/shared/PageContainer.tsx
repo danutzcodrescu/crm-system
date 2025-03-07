@@ -29,6 +29,9 @@ export function PageContainer({ children, title, additionalTitleElement, actionD
         p: 1.5,
         overflow: 'hidden',
         minHeight: 'calc(100vh - 49px)',
+        '&:has(#years-selector) .MuiTableContainer-root': {
+          maxHeight: 'calc(100vh - 200px - 20px)',
+        },
         ...sx,
       }}
     >

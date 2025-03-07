@@ -33,7 +33,7 @@ import {
   RowData,
   useReactTable,
 } from '@tanstack/react-table';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 import { ColumnVisibility } from './ColumnVisibility';
 import { Filter } from './Filter';
@@ -92,6 +92,7 @@ export function PaginatedTable<T extends { id: string; warning?: boolean }>({
   disablePagination,
   defaultSorting,
 }: Props<T>) {
+  const tableContainer = useRef<HTMLDivElement>(null);
   const [dt, setDt] = useState(data);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
 
@@ -166,7 +167,7 @@ export function PaginatedTable<T extends { id: string; warning?: boolean }>({
         <Typography component="p">Rows: {table.getFilteredRowModel().rows.length}</Typography>
         {additionalHeader ? additionalHeader(table.getFilteredRowModel().rows) : undefined}
       </Stack>
-      <TableContainer component={Paper} sx={{ maxWidth: '100%', maxHeight: 'calc(100vh - 200px)', overflow: 'auto' }}>
+      <TableContainer ref={tableContainer} component={Paper} sx={{ maxWidth: '100%', maxHeight: 'calc(100vh - 200px)', overflow: 'auto' }}>
         <Table sx={{ minWidth: 650 }} stickyHeader>
           <TableHead>
             {table.getHeaderGroups().map((headerGroup) => (
@@ -250,7 +251,7 @@ export function PaginatedTable<T extends { id: string; warning?: boolean }>({
       </TableContainer>
       {!disablePagination ? (
         <TablePagination
-          rowsPerPageOptions={[50, 100, 200]}
+          rowsPerPageOptions={[50, 100, 200, 290]}
           component="div"
           count={table.getFilteredRowModel().rows.length}
           rowsPerPage={pageSize}
@@ -263,10 +264,13 @@ export function PaginatedTable<T extends { id: string; warning?: boolean }>({
           }}
           onPageChange={(_, page) => {
             table.setPageIndex(page);
+            tableContainer.current?.scrollTo({ top: 0, behavior: 'smooth' });
+
           }}
           onRowsPerPageChange={(e) => {
             const size = e.target.value ? Number(e.target.value) : 10;
             table.setPageSize(size);
+            tableContainer.current?.scrollTo({ top: 0, behavior: 'smooth' });
           }}
         />
       ) : null}
