@@ -106,7 +106,7 @@ export async function getInitialConsultationForMunicipality(
     const data = await db
       .select({
         documentSent: initialConsultation.documentSent,
-        isSigned: initialConsultation.documentSent,
+        isSigned: sql<boolean>`CASE WHEN ${initialConsultation.dateSigned} IS NOT NULL THEN TRUE ELSE FALSE END`,
         dateSigned: initialConsultation.dateSigned,
         isShared: initialConsultation.dateShared,
         dateShared: initialConsultation.dateShared,
