@@ -73,3 +73,23 @@ export async function getResponsiblesForMunicipality(
     return ['could not delete responsible', null];
   }
 }
+
+export async function bulkImportResponsibles(
+  data: Record<string, (typeof responsibles.$inferInsert)[]>,
+): Promise<string | null> {
+  try {
+    logger.info('Importing responsibles');
+    await Promise.all(
+      Object.entries(data).map((entry) => {
+        return db.transaction(async (trx) => {
+          await trx.delete(responsibles).where(eq(responsibles.companyId, entry[0]));
+          await trx.insert(responsibles).values(entry[1]);
+        });
+      }),
+    );
+    return null;
+  } catch (e) {
+    logger.error(e);
+    return 'could not import reporting data';
+  }
+}

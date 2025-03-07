@@ -10,6 +10,7 @@ import { EditDialog } from '~/components/shared/EditDialog.client';
 import { PageContainer } from '~/components/shared/PageContainer';
 import { PaginatedTable } from '~/components/shared/table/PaginatedTable';
 import { TableActionsCell } from '~/components/shared/table/TableActionsCell';
+import { UploadButton } from '~/components/shared/UploadButton.client';
 import { useEditFields } from '~/hooks/editFields';
 import { auth } from '~/utils/server/auth.server';
 import { getMunicipalitiesData, MunicipalityData } from '~/utils/server/repositories/municipalities.server';
@@ -219,7 +220,18 @@ export default function Companies() {
   return (
     <PageContainer
       title="Municipalities"
-      additionalTitleElement={null}
+      additionalTitleElement={
+        <ClientOnly>
+          {() => (
+            <UploadButton
+              search={location.search}
+              title="Import responsibles for municipalities"
+              fetcher={fetcher}
+              path="/api/responsibles/import"
+            />
+          )}
+        </ClientOnly>
+      }
       actionData={fetcher.data as { message: string; severity: 'string' }}
     >
       <Box sx={{ mt: 2 }}>

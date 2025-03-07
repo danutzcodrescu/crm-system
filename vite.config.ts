@@ -35,6 +35,7 @@ export default defineConfig(({ isSsrBuild }) => ({
           route('/api/reporting/import', 'api/reporting/import.ts');
           route('/api/general-information/import', 'api/general-information/import.ts');
           route('/api/invoicing/import', 'api/invoicing/import.ts');
+          route('/api/responsibles/import', 'api/responsibles/import.ts');
           route('/api/municipalities', 'api/municipalities/layout.tsx', () => {
             route('/api/municipalities/:companyId', 'api/municipalities/route.ts');
             route('/api/municipalities/:companyId/responsibles', 'api/municipalities/responsibles.ts');
