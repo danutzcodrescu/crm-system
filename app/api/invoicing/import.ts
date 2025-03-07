@@ -8,31 +8,22 @@ import {
 } from '@remix-run/node';
 import { read, utils } from 'xlsx';
 import { auth } from '~/utils/server/auth.server';
-
 import { logger } from '~/utils/server/logger.server';
 import { getCompaniesWithCode } from '~/utils/server/repositories/companies.server';
-import { bulkImportReporting } from '~/utils/server/repositories/reporting.server';
+import { bulkImportInvoicing } from '~/utils/server/repositories/invoicing.server';
 
-interface ReportingData {
+interface InvoicingData {
   code: string;
-  reportingDate?: string;
-  cigaretteButts?: string;
-  motivation?: string;
-}
-
-function formatDate(date: string) {
-  if (!date) {
-    return undefined;
-  }
-  const [month, day, year] = date.split('/');
-  // @ts-expect-error it works
-  return new Date(`20${year}`, month - 1, day);
+  invoiceDate?: string;
+  datePaid?: string;
+  invoiceAmount?: string;
+  vat?: string;
 }
 
 export async function action({ request }: ActionFunctionArgs) {
   const isLoggedIn = await auth.isLoggedIn(request);
   if (!isLoggedIn) return redirect('/signin');
-  let dt: ReportingData[] = [];
+  let dt: InvoicingData[] = [];
   const uploadHandler = unstable_composeUploadHandlers(
     async ({ name, data }) => {
       if (name !== 'file') {
@@ -45,13 +36,12 @@ export async function action({ request }: ActionFunctionArgs) {
       try {
         const workbook = read(Buffer.concat(chunks), { type: 'buffer' });
         dt = utils
-          .sheet_to_json(workbook.Sheets[workbook.SheetNames[0]], {
-            header: ['code', 'reportingDate', 'cigaretteButts', 'motivation'],
+          .sheet_to_json(workbook.Sheets[workbook.SheetNames[2]], {
+            header: ['code', 'invoiceDate', 'datePaid', 'invoiceAmount', 'vat'],
             raw: false,
-            dateNF: 'dd/mm/yyyy',
             defval: undefined,
           })
-          .slice(1) as ReportingData[];
+          .slice(1) as InvoicingData[];
         return 'parsed';
       } catch (e) {
         logger.error(e);
@@ -78,22 +68,27 @@ export async function action({ request }: ActionFunctionArgs) {
   }
   const codeMap = new Map(data?.map((comp) => [comp.code, comp.id]));
 
-  const err = await bulkImportReporting(
-    dt.map((report) => ({
-      companyId: codeMap.get(report.code) as string,
+  const err = await bulkImportInvoicing(
+    dt.map((info) => ({
+      companyId: codeMap.get(info.code) as string,
       year: parseInt(year),
-      reportingDate: report.reportingDate ? formatDate(report.reportingDate) : undefined,
-      cigaretteButts: report.cigaretteButts ? parseFloat(report.cigaretteButts) : undefined,
-      motivation: report.motivation,
+      invoiceAmount: info.invoiceAmount ? parseInt(info.invoiceAmount.replace(',', '')) : undefined,
+      vat: info.vat ? parseInt(info.vat.replaceAll(',', '')) : undefined,
+      datePaid: info.datePaid ? new Date(info.datePaid) : undefined,
+      invoiceDate: info.invoiceDate ? new Date(info.invoiceDate) : undefined,
     })),
   );
 
   if (err) {
     return json(
-      { message: 'Could not import the reporting', severity: 'error', timeStamp: Date.now() },
+      { message: 'Could not import the invoicing data', severity: 'error', timeStamp: Date.now() },
       { status: 500 },
     );
   }
 
-  return json({ message: 'Reporting data imported successfully', severity: 'success', timeStamp: Date.now() });
+  return json({
+    message: 'Invoicing data imported successfully',
+    severity: 'success',
+    timeStamp: Date.now(),
+  });
 }

@@ -180,3 +180,25 @@ export async function getInvoicingAggregatedPerYear(
     return ['could not fetch aggregated invoicing per year', null];
   }
 }
+
+export async function bulkImportInvoicing(values: (typeof invoicing.$inferInsert)[]): Promise<string | null> {
+  try {
+    await db
+      .insert(invoicing)
+      .values(values)
+      .onConflictDoUpdate({
+        target: [invoicing.companyId, invoicing.year],
+        set: {
+          invoiceDate: sql.raw(`excluded.invoice_date`),
+          datePaid: sql.raw(`excluded.date_paid`),
+          invoiceAmount: sql.raw(`excluded.invoice_amount`),
+          vat: sql.raw(`excluded.vat`),
+        },
+      });
+    return null;
+  } catch (e) {
+    logger.error(e);
+    return 'could not import reporting data';
+  }
+}
+

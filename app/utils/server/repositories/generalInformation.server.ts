@@ -105,3 +105,25 @@ export async function getGeneralInformationForCompany(
     return ['could not fetch general information data for company', null];
   }
 }
+
+export async function bulkImportGeneralInformation(values: (typeof generalInformation.$inferInsert)[]): Promise<string | null> {
+  try {
+    await db
+      .insert(generalInformation)
+      .values(values)
+      .onConflictDoUpdate({
+        target: [generalInformation.companyId, generalInformation.year],
+        set: {
+          inhabitants: sql.raw(`excluded.inhabitants`),
+          landSurface: sql.raw(`excluded.land_surface`),
+          cleaningCost: sql.raw(`excluded.cleaning_cost`),
+          cleanedKg: sql.raw(`excluded.cleaned_kg`),
+          epaLitterMeasurement: sql.raw(`excluded.epa_litter_measurement`),
+        },
+      });
+    return null;
+  } catch (e) {
+    logger.error(e);
+    return 'could not import reporting data';
+  }
+}

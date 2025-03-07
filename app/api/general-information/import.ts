@@ -11,28 +11,22 @@ import { auth } from '~/utils/server/auth.server';
 
 import { logger } from '~/utils/server/logger.server';
 import { getCompaniesWithCode } from '~/utils/server/repositories/companies.server';
-import { bulkImportReporting } from '~/utils/server/repositories/reporting.server';
+import { bulkImportGeneralInformation } from '~/utils/server/repositories/generalInformation.server';
 
-interface ReportingData {
+interface GeneralInformationData {
   code: string;
-  reportingDate?: string;
-  cigaretteButts?: string;
-  motivation?: string;
-}
-
-function formatDate(date: string) {
-  if (!date) {
-    return undefined;
-  }
-  const [month, day, year] = date.split('/');
-  // @ts-expect-error it works
-  return new Date(`20${year}`, month - 1, day);
+  inhabitants?: string;
+  landSurface?: string;
+  cleaningCost?: string;
+  cleanedKg?: string;
+  epaLitterMeasurement?: string;
 }
 
 export async function action({ request }: ActionFunctionArgs) {
   const isLoggedIn = await auth.isLoggedIn(request);
   if (!isLoggedIn) return redirect('/signin');
-  let dt: ReportingData[] = [];
+  let dt: GeneralInformationData[] = [];
+  console.log('test');
   const uploadHandler = unstable_composeUploadHandlers(
     async ({ name, data }) => {
       if (name !== 'file') {
@@ -45,13 +39,12 @@ export async function action({ request }: ActionFunctionArgs) {
       try {
         const workbook = read(Buffer.concat(chunks), { type: 'buffer' });
         dt = utils
-          .sheet_to_json(workbook.Sheets[workbook.SheetNames[0]], {
-            header: ['code', 'reportingDate', 'cigaretteButts', 'motivation'],
+          .sheet_to_json(workbook.Sheets[workbook.SheetNames[1]], {
+            header: ['code', 'inhabitants', 'landSurface', 'cleaningCost', 'cleanedKg', 'epaLitterMeasurement'],
             raw: false,
-            dateNF: 'dd/mm/yyyy',
             defval: undefined,
           })
-          .slice(1) as ReportingData[];
+          .slice(1) as GeneralInformationData[];
         return 'parsed';
       } catch (e) {
         logger.error(e);
@@ -78,22 +71,28 @@ export async function action({ request }: ActionFunctionArgs) {
   }
   const codeMap = new Map(data?.map((comp) => [comp.code, comp.id]));
 
-  const err = await bulkImportReporting(
-    dt.map((report) => ({
-      companyId: codeMap.get(report.code) as string,
+  const err = await bulkImportGeneralInformation(
+    dt.map((info) => ({
+      companyId: codeMap.get(info.code) as string,
       year: parseInt(year),
-      reportingDate: report.reportingDate ? formatDate(report.reportingDate) : undefined,
-      cigaretteButts: report.cigaretteButts ? parseFloat(report.cigaretteButts) : undefined,
-      motivation: report.motivation,
+      inhabitants: parseInt((info.inhabitants as string).replaceAll(',', '')),
+      landSurface: parseFloat(info.landSurface as string),
+      cleaningCost: parseInt((info.cleaningCost as string).replaceAll(',', '')),
+      cleanedKg: info.cleanedKg ? parseInt((info.cleanedKg as string).replaceAll(',', '')) : undefined,
+      epaLitterMeasurement: info.epaLitterMeasurement?.toLocaleLowerCase() === 'yes' ? true : undefined,
     })),
   );
 
   if (err) {
     return json(
-      { message: 'Could not import the reporting', severity: 'error', timeStamp: Date.now() },
+      { message: 'Could not import the general information', severity: 'error', timeStamp: Date.now() },
       { status: 500 },
     );
   }
 
-  return json({ message: 'Reporting data imported successfully', severity: 'success', timeStamp: Date.now() });
+  return json({
+    message: 'General information data imported successfully',
+    severity: 'success',
+    timeStamp: Date.now(),
+  });
 }
