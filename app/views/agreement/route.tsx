@@ -251,6 +251,7 @@ export default function Agreement() {
             { label: 'No', value: false },
           ],
           filterOptionsLabel: 'Agreement sent',
+          defaultHidden: true,
         },
         cell: ({ getValue }) =>
           getValue() ? (
@@ -277,6 +278,7 @@ export default function Agreement() {
             { label: 'No', value: false },
           ],
           filterOptionsLabel: 'Old agreement signed',
+          defaultHidden: true,
         },
       },
       {
@@ -287,6 +289,7 @@ export default function Agreement() {
         meta: {
           filterOptionsLabel: '==Old agreement agreement signed date',
           filterByDate: true,
+          defaultHidden: true,
         },
         enableSorting: false,
         cell: ({ getValue }) => (getValue() ? formatDate(getValue() as string) : ''),
@@ -309,6 +312,7 @@ export default function Agreement() {
             { label: 'No', value: false },
           ],
           filterOptionsLabel: 'Old agreement shared with EPA',
+          defaultHidden: true,
         },
       },
       {
@@ -320,6 +324,7 @@ export default function Agreement() {
         meta: {
           filterOptionsLabel: 'Filter Old agreement shared date with EPA',
           filterByDate: true,
+          defaultHidden: true,
         },
         cell: ({ getValue }) => (getValue() ? formatDate(getValue() as string) : ''),
       },

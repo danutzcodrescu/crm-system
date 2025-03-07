@@ -45,6 +45,7 @@ declare module '@tanstack/react-table' {
     filterOptions?: { label: string; value: unknown }[];
     filterOptionsLabel?: string;
     filterByDate?: true;
+    defaultHidden?: boolean;
   }
 
   interface FilterFns {
@@ -100,6 +101,10 @@ export function PaginatedTable<T extends { id: string; warning?: boolean }>({
     columns.reduce(
       (acc, col) => {
         if (col.id === 'actions') return acc;
+        if (col.meta?.defaultHidden) {
+          acc[col.id as string] = false;
+          return acc
+        }
         acc[col.id as string] = true;
         return acc;
       },
