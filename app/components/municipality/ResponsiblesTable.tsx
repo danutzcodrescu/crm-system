@@ -1,6 +1,6 @@
 import PersonAdd from '@mui/icons-material/PersonAdd';
 import { Box, IconButton, Link, Stack, Typography } from '@mui/material';
-import { useFetcher } from '@remix-run/react';
+import { FetcherWithComponents, useFetcher } from '@remix-run/react';
 import { ColumnDef } from '@tanstack/react-table';
 import { useCallback, useMemo } from 'react';
 import { ClientOnly } from 'remix-utils/client-only';
@@ -15,10 +15,10 @@ import { TableActionsCell } from '../shared/table/TableActionsCell';
 interface Props {
   data: ResponsibleData[];
   companyId: string;
+  fetcher: FetcherWithComponents<unknown>;
 }
 
-export function ResponsiblesTable({ data, companyId }: Props) {
-  const fetcher = useFetcher();
+export function ResponsiblesTable({ data, companyId, fetcher }: Props) {
   const { setEditableData, fields, setFields } = useEditFields(fetcher);
 
   const columns = useMemo<ColumnDef<ResponsibleData>[]>(
@@ -64,6 +64,9 @@ export function ResponsiblesTable({ data, companyId }: Props) {
               id={row.original.id as string}
               isEditable
               onEdit={() => setEditableFields(row.original)}
+              onDelete={(id) =>
+                fetcher.submit({}, { method: 'DELETE', action: `/api/municipalities/${companyId}/responsibles/${id}` })
+              }
             />
           );
         },

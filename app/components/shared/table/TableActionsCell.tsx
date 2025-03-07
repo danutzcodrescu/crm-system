@@ -4,6 +4,7 @@ import Preview from '@mui/icons-material/Preview';
 import { Box, IconButton, Stack, Tooltip } from '@mui/material';
 import { Link } from '@remix-run/react';
 import { ReactNode } from 'react';
+import { DeleteButton } from '../DeleteButton';
 
 type Props = {
   name: string;
@@ -12,9 +13,10 @@ type Props = {
   isEditable: boolean;
   link?: string;
   onEdit: (id: string) => void;
+  onDelete?: (id: string) => void;
 };
 
-export function TableActionsCell({ name, id, additionalElement, isEditable, link, onEdit }: Props) {
+export function TableActionsCell({ name, id, additionalElement, isEditable, link, onEdit, onDelete }: Props) {
   return (
     <Stack direction="row" gap={0.5}>
       {additionalElement || <Box sx={{ width: 40, height: 40 }}></Box>}
@@ -33,7 +35,7 @@ export function TableActionsCell({ name, id, additionalElement, isEditable, link
         </Tooltip>
       ) : null}
 
-      {/* <DeleteButton title={name} onClick={() => onDelete(id)} /> */}
+      {onDelete ? <DeleteButton title={name} onClick={() => onDelete(id)} /> : null}
     </Stack>
   );
 }

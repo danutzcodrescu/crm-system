@@ -27,7 +27,7 @@ export async function action({ request, params }: ActionFunctionArgs) {
       return json({ message: 'Could not update commune', severity: 'error', timeStamp: Date.now() }, { status: 500 });
     }
 
-    return json({ message: 'Municipality updated successfully', severity: 'success', timeStamp: Date.now() });
+    return json({ message: 'Responsible created succesfully', severity: 'success', timeStamp: Date.now() });
   }
 
   return json({ status: 405 });

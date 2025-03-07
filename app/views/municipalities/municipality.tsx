@@ -156,7 +156,7 @@ export default function Municipality() {
       <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 3 }}>
         <Card>
           <CardContent>
-            <ResponsiblesTable data={municipalityData.responsibles} companyId={municipalityData.municipality.id} />
+            <ResponsiblesTable data={municipalityData.responsibles} companyId={municipalityData.municipality.id} fetcher={fetcher} />
           </CardContent>
         </Card>
 
