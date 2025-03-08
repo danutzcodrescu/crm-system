@@ -31,7 +31,7 @@ export function PDF(data: CompensationDataPerCompanyPerYear) {
           <Text style={{ marginBottom: 24, textAlign: 'justify' }}>
             Enligt avtal med SUP Filter är er kommun berättigad till årlig ersättning för insamling av fimpar. I
             avtalets kapitel 8 och bilaga 8.1 framgår vilka ersättningsbelopp som gäller, hur de justeras varje år och
-            vilka antaganden de grundas på. Information om betalningsvillkor och fakturering återfinns i bilaga 8.2.
+            vilka faktorer de grundas på. Information om betalningsvillkor och fakturering återfinns i bilaga 8.2.
           </Text>
         </View>
 
@@ -51,7 +51,7 @@ export function PDF(data: CompensationDataPerCompanyPerYear) {
             <Text style={{ fontFamily: 'Helvetica-Bold' }}>
               {Intl.NumberFormat('sv-SE').format(data?.variableCompensation as number)} kronor
             </Text>
-            (&nbsp;{Intl.NumberFormat('sv-SE', { minimumFractionDigits: 15 }).format(data.yearSekAdmin)} SEK x &nbsp;
+            &nbsp;(&nbsp;{Intl.NumberFormat('sv-SE', { minimumFractionDigits: 15 }).format(data.yearSekAdmin)} SEK x &nbsp;
             {Intl.NumberFormat('sv-SE').format(data.inhabitants as number)}&nbsp;inhabitants&nbsp;)
           </Text>
           <Text style={{ marginBottom: 8 }}>
@@ -67,17 +67,17 @@ export function PDF(data: CompensationDataPerCompanyPerYear) {
             </Text>
           </Text>
           <Text style={{ marginBottom: 8 }}>
-            D) Förändringsfaktor med KPI::&nbsp;
+            D) Förändringsfaktor med KPI:&nbsp;
             <Text style={{ fontFamily: 'Helvetica-Bold' }}>
               {Intl.NumberFormat('sv-SE', { minimumFractionDigits: 6 }).format(data?.changeFactor as number)}
             </Text>
           </Text>
-          <Text style={{ marginBottom: 8 }}>
+          {/* <Text style={{ marginBottom: 8 }}>
             E) Change factor littering rate:&nbsp;
             <Text style={{ fontFamily: 'Helvetica-Bold' }}>
               {Intl.NumberFormat('sv-SE', { minimumFractionDigits: 6 }).format(data?.changeFactorLitter as number)}
             </Text>
-          </Text>
+          </Text> */}
         </View>
 
         <View style={{ marginTop: 'auto', fontSize: 8 }}>
