@@ -17,12 +17,18 @@ export async function action({ request, params }: ActionFunctionArgs) {
         { status: 400 },
       );
     }
+
     const [error] = await updateMunicipality({
       statusId: parseInt(data.get('statusId') as string),
       companyId: id as string,
       email: data.get('email') as string,
       code: data.get('code') as string,
       name: data.get('name') as string,
+      // @ts-expect-error it is the only way to set the user to null if selected
+      responsibleId:
+        data.get('responsibleId') && data.get('responsibleId') !== '0'
+          ? parseInt(data.get('responsibleId') as string)
+          : null,
     });
     if (error) {
       return json({ message: 'Could not update commune', severity: 'error', timeStamp: Date.now() }, { status: 500 });

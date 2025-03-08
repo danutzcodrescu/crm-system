@@ -103,7 +103,6 @@ async function main() {
     await drizzle.delete(logs);
 
     const municipalitiesData = readCommunes();
-    // @ts-expect-error it works
     data = await drizzle
       .insert(companies)
       .values(
@@ -118,7 +117,6 @@ async function main() {
       .returning({ id: companies.id, code: companies.code });
     // @ts-expect-error it works
     data = data.reduce(
-      // @ts-expect-error it works
       (acc, val) => {
         acc[val.code] = val.id;
         return acc;

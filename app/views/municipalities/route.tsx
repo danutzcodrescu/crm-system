@@ -15,21 +15,27 @@ import { useEditFields } from '~/hooks/editFields';
 import { auth } from '~/utils/server/auth.server';
 import { getMunicipalitiesData, MunicipalityData } from '~/utils/server/repositories/municipalities.server';
 import { getAllStatuses, Status } from '~/utils/server/repositories/status.server';
+import { getAllUsers, User } from '~/utils/server/repositories/users.server';
 
 interface LoaderResponse {
   statuses: Status[];
   municipalities: MunicipalityData[];
+  users: User[];
 }
 
 export async function loader({ request }: LoaderFunctionArgs) {
   const isLoggedIn = await auth.isLoggedIn(request);
   if (!isLoggedIn) return redirect('/signin');
 
-  const [statusData, municipalities] = await Promise.all([getAllStatuses(), getMunicipalitiesData()]);
-  if (municipalities[0] || statusData[0]) {
+  const [statusData, municipalities, users] = await Promise.all([
+    getAllStatuses(),
+    getMunicipalitiesData(),
+    getAllUsers(),
+  ]);
+  if (municipalities[0] || statusData[0] || users[0]) {
     return json({ message: 'Could not fetch municipalities data', severity: 'error' }, { status: 500 });
   }
-  return json({ municipalities: municipalities[1], statuses: statusData[1] });
+  return json({ municipalities: municipalities[1], statuses: statusData[1], users: users[1] });
 }
 
 export default function Companies() {
@@ -104,6 +110,17 @@ export default function Companies() {
         ),
       },
       {
+        header: 'SUP responsible',
+        accessorKey: 'responsibleName',
+        id: 'responsibleName',
+        meta: {
+          filterOptions: (data as unknown as LoaderResponse).users.map((user) => {
+            return { label: user.name, value: user.id };
+          }),
+        },
+        filterFn: 'boolean',
+      },
+      {
         id: 'actions',
         header: 'Actions',
         enableSorting: false,
@@ -120,7 +137,13 @@ export default function Companies() {
               name={`${row.original.name} municipality`}
               id={row.original.id as string}
               isEditable
-              onEdit={() => setMunicipalityFields(row.original, (data as unknown as LoaderResponse).statuses)}
+              onEdit={() =>
+                setMunicipalityFields(
+                  row.original,
+                  (data as unknown as LoaderResponse).statuses,
+                  (data as unknown as LoaderResponse).users,
+                )
+              }
               link={`/municipalities/${row.original.id}`}
             />
           );
@@ -132,7 +155,7 @@ export default function Companies() {
   );
 
   const setMunicipalityFields = useCallback(
-    (data: MunicipalityData, statuses: Status[]) => {
+    (data: MunicipalityData, statuses: Status[], users: User[]) => {
       setEditableData([
         {
           label: 'id',
@@ -172,6 +195,20 @@ export default function Companies() {
             label: status.name,
             value: status.id,
           })),
+          defaultValue: data.statusId,
+        },
+        {
+          label: 'SUP responsible',
+          name: 'responsibleId',
+          select: true,
+          type: 'text',
+          // @ts-expect-error it works for now TO DO: fix it
+          options: users
+            .map((user) => ({
+              label: user.name,
+              value: user.id,
+            }))
+            .concat({ label: 'None', value: 0 }),
           defaultValue: data.statusId,
         },
       ]);

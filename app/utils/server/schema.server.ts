@@ -52,7 +52,8 @@ export const companies = pgTable('companies', {
   id: uuid().primaryKey().defaultRandom(),
   name: text().notNull().unique(),
   code: text().notNull().unique(),
-  statusId: serial().references(() => status.id, { onDelete: 'set null', onUpdate: 'no action' }),
+  statusId: integer().references(() => status.id, { onDelete: 'set null', onUpdate: 'no action' }),
+  responsibleId: integer().references(() => users.id, { onDelete: 'set null', onUpdate: 'no action' }),
   consultations: smallint()
     .array()
     .default(sql`ARRAY[]::smallint[]`),

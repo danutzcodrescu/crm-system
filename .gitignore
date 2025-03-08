@@ -166,6 +166,7 @@ Temporary Items
 *.xlsx
 crm system/
 .env.staging
+.env.production
 
 # Sentry Config File
 .env.sentry-build-plugin

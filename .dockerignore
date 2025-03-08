@@ -6,6 +6,7 @@ dist
 .env
 .env.local
 .env.staging
+.env.production
 scripts/
 e2e/
 crm system/
@@ -21,3 +22,4 @@ Dockerfile
 .DS_Store
 .gitignore
 .npmrc
+db/

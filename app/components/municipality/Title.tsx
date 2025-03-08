@@ -1,5 +1,5 @@
 import EditIcon from '@mui/icons-material/Edit';
-import { Box, Chip, IconButton, Typography } from '@mui/material';
+import { Box, Chip, IconButton, Tooltip, Typography } from '@mui/material';
 import { FetcherWithComponents } from '@remix-run/react';
 import { useCallback } from 'react';
 import { ClientOnly } from 'remix-utils/client-only';
@@ -9,14 +9,16 @@ import { MunicipalityData } from '~/utils/server/repositories/municipalities.ser
 import { Status } from '~/utils/server/repositories/status.server';
 
 import { EditDialog } from '../shared/EditDialog.client';
+import { User } from '~/utils/server/repositories/users.server';
 
 interface Props {
   municipality: MunicipalityData;
   fetcher: FetcherWithComponents<unknown>;
   statusList: Status[];
+  users: User[];
 }
 
-export function MunicipalityTitle({ municipality, fetcher, statusList }: Props) {
+export function MunicipalityTitle({ municipality, fetcher, statusList, users }: Props) {
   const { setEditableData, fields, setFields } = useEditFields(fetcher);
 
   const handleEdit = useCallback(() => {
@@ -55,13 +57,22 @@ export function MunicipalityTitle({ municipality, fetcher, statusList }: Props) 
         options: statusList.map((status) => ({ label: status.name, value: status.id })),
         defaultValue: municipality.statusId,
       },
+      {
+        label: 'SUP responsible',
+        name: 'responsibleId',
+        type: 'text',
+        select: true,
+        // @ts-expect-error it works for now TO DO: fix it
+        options: users.map((user) => ({ label: user.name, value: user.id })).concat({ label: 'None', value: 0 }),
+        defaultValue: municipality.responsibleId,
+      },
     ]);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [municipality]);
 
   return (
     <>
-      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, width: '100%' }}>
         <Typography
           variant="h5"
           component="h1"
@@ -73,9 +84,21 @@ export function MunicipalityTitle({ municipality, fetcher, statusList }: Props) 
             General email {municipality.email}
           </Box>
         </Typography>
-        <IconButton onClick={handleEdit} color="primary" size="small">
-          <EditIcon />
-        </IconButton>
+        <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
+          {municipality.responsibleId ? (
+            <Typography variant="body2" component="p">
+              SUP responsible:{' '}
+              <Box component="span" sx={{ fontWeight: 'bold' }}>
+                {municipality.responsibleName}
+              </Box>
+            </Typography>
+          ) : null}
+          <Tooltip title="Edit municipality data">
+            <IconButton onClick={handleEdit} color="primary" size="small">
+              <EditIcon />
+            </IconButton>
+          </Tooltip>
+        </Box>
       </Box>
       <ClientOnly>
         {() => (

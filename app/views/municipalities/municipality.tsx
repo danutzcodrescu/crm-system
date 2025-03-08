@@ -32,6 +32,7 @@ import {
 import { getReportingForCompany, ReportingData } from '~/utils/server/repositories/reporting.server';
 import { getResponsiblesForMunicipality, ResponsibleData } from '~/utils/server/repositories/responsibles.server';
 import { getAllStatuses, Status } from '~/utils/server/repositories/status.server';
+import { getAllUsers, User } from '~/utils/server/repositories/users.server';
 
 interface LoaderResponse {
   logs: LogForCompany[];
@@ -56,6 +57,7 @@ interface LoaderResponse {
   generalInformation: GeneralInformationPerMunicipality[];
   compensation: CompensationDataPerCompany[];
   invoicing: InvoicingData[];
+  users: User[];
 }
 
 export async function loader({ request, params }: LoaderFunctionArgs) {
@@ -75,6 +77,7 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
     generalInformationResp,
     compensationResp,
     invoicingResp,
+    usersResp,
   ] = await Promise.all([
     getLogsForCompany(id),
     getAllStatuses(),
@@ -86,19 +89,21 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
     getGeneralInformationForCompany(id, currentYear),
     getCompensationForCompany(id, currentYear),
     getInvoicingForCompany(id, currentYear),
+    getAllUsers(),
   ]);
 
   if (
-    logsResp[0] ||
-    statusesResp[0] ||
-    municipalityResp[0] ||
-    responsiblesResp[0] ||
-    initialConsultationResp[0] ||
-    agreementResp[0] ||
-    reportingResp[0] ||
-    generalInformationResp[0] ||
-    compensationResp[0] ||
-    invoicingResp[0]
+    (logsResp[0] ||
+      statusesResp[0] ||
+      municipalityResp[0] ||
+      responsiblesResp[0] ||
+      initialConsultationResp[0] ||
+      agreementResp[0] ||
+      reportingResp[0] ||
+      generalInformationResp[0] ||
+      compensationResp[0] ||
+      invoicingResp[0],
+    usersResp[0])
   ) {
     return json({ message: 'Could not fetch data for company', severity: 'error' }, { status: 500 });
   }
@@ -115,6 +120,7 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
 
   return json({
     message: {
+      users: usersResp[1],
       logs: logsResp[1],
       municipality: municipalityResp[1],
       statuses: statusesResp[1],
@@ -148,6 +154,7 @@ export default function Municipality() {
           municipality={municipalityData.municipality}
           fetcher={fetcher}
           statusList={municipalityData.statuses}
+          users={municipalityData.users}
         />
       }
       additionalTitleElement={null}
@@ -156,7 +163,11 @@ export default function Municipality() {
       <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 3 }}>
         <Card>
           <CardContent>
-            <ResponsiblesTable data={municipalityData.responsibles} companyId={municipalityData.municipality.id} fetcher={fetcher} />
+            <ResponsiblesTable
+              data={municipalityData.responsibles}
+              companyId={municipalityData.municipality.id}
+              fetcher={fetcher}
+            />
           </CardContent>
         </Card>
 

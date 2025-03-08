@@ -1,7 +1,7 @@
 import { asc, eq, sql } from 'drizzle-orm';
 
 import { logger } from '../logger.server';
-import { companies, responsibles, status } from '../schema.server';
+import { companies, responsibles, status, users } from '../schema.server';
 import { db } from './db.server';
 
 export interface MunicipalityData {
@@ -13,6 +13,8 @@ export interface MunicipalityData {
   email: string;
   responsibles: Responsible[];
   consultations: number[];
+  responsibleName?: string;
+  responsibleId?: number;
 }
 
 type Responsible = { name: string; email: string; phoneNumber: string; title: string; id: string };
@@ -29,6 +31,8 @@ export async function getMunicipalitiesData(): Promise<[null, MunicipalityData[]
         statusName: status.name,
         email: companies.email,
         consultations: companies.consultations,
+        responsibleName: users.username,
+        responsibleId: users.id,
         responsibles: sql<
           Responsible[]
         >`JSON_AGG(JSON_BUILD_OBJECT('name', responsibles.name, 'email', responsibles.email, 'phone', responsibles.phone_number, 'title', responsibles.title, 'id', responsibles.id))`,
@@ -36,7 +40,8 @@ export async function getMunicipalitiesData(): Promise<[null, MunicipalityData[]
       .from(companies)
       .leftJoin(status, eq(companies.statusId, status.id))
       .leftJoin(responsibles, eq(companies.id, responsibles.companyId))
-      .groupBy(companies.id, status.name)
+      .leftJoin(users, eq(companies.responsibleId, users.id))
+      .groupBy(companies.id, status.name, users.username, users.id)
       .orderBy(asc(companies.name));
     logger.info('Municipalities data fetched');
     return [
@@ -50,6 +55,8 @@ export async function getMunicipalitiesData(): Promise<[null, MunicipalityData[]
         email: item.email,
         responsibles: item.responsibles,
         consultations: item.consultations || [],
+        responsibleId: item.responsibleId,
+        responsibleName: item.responsibleName,
       })) as MunicipalityData[],
     ];
   } catch (e) {
@@ -70,11 +77,14 @@ export async function getMunicipalityData(companyId: string): Promise<[null, Mun
         statusName: status.name,
         email: companies.email,
         consultations: companies.consultations,
+        responsibleName: users.username,
+        responsibleId: users.id,
       })
       .from(companies)
       .leftJoin(status, eq(companies.statusId, status.id))
+      .leftJoin(users, eq(companies.responsibleId, users.id))
       .where(eq(companies.id, companyId))
-      .groupBy(companies.id, status.name);
+      .groupBy(companies.id, status.name, users.username, users.id);
     return [null, { ...data[0], consultations: data[0].consultations || [] } as MunicipalityData];
   } catch (e) {
     logger.error(e);
@@ -88,9 +98,11 @@ interface UpdateMunicipalityArgs {
   statusId: number;
   code: string;
   name: string;
+  responsibleId?: number;
 }
 
 export async function updateMunicipality(args: UpdateMunicipalityArgs): Promise<[null, string] | [string, null]> {
+  console.log('test', args.responsibleId);
   try {
     logger.info('Updating municipalities data');
     await db.update(companies).set(args).where(eq(companies.id, args.companyId));

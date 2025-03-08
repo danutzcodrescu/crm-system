@@ -1,6 +1,6 @@
 {
   "name": "crm",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "private": true,
   "sideEffects": false,
   "type": "module",
@@ -17,8 +17,11 @@
     "typecheck-remix": "tsc",
     "typecheck:server": "tsc -p ./tsconfig-express.json --noEmit",
     "db:push": "env-cmd -f .env.local drizzle-kit push --config=drizzle-dev.config.ts ",
+    "db:generate": "env-cmd -f .env.local drizzle-kit generate --config=drizzle-dev.config.ts ",
+    "db:migrate": "env-cmd -f .env.local drizzle-kit migrate --config=drizzle-dev.config.ts ",
+    "db:up": "env-cmd -f .env.local drizzle-kit up --config=drizzle-dev.config.ts ",
     "db:seed": "env-cmd -f .env.local tsx ./scripts/seed.ts",
-    "build-image": "env-cmd -f .env.staging tsx ./scripts/build.ts"
+    "build-image": "env-cmd -f .env.production tsx ./scripts/build.ts"
   },
   "dependencies": {
     "@date-fns/tz": "^1.2.0",
