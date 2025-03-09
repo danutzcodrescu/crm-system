@@ -1,6 +1,31 @@
 import { createTheme } from '@mui/material';
 
+declare module '@mui/material/styles' {
+  interface BreakpointOverrides {
+    xs: true;
+    sm: true;
+    md: true;
+    lg: true;
+    xl: true;
+    '2k': true;
+    '2k-wide': true;
+    '4k': true;
+  }
+}
+
 export const theme = createTheme({
+  breakpoints: {
+    values: {
+      xs: 0,
+      sm: 600,
+      md: 900,
+      lg: 1300,
+      xl: 1536,
+      '2k': 2559,
+      '2k-wide': 3439,
+      '4k': 3839,
+    },
+  },
   palette: {
     mode: 'light',
     primary: {

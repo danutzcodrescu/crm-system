@@ -271,7 +271,7 @@ export default function Companies() {
       }
       actionData={fetcher.data as { message: string; severity: 'string' }}
     >
-      <Box sx={{ mt: 2 }}>
+      <Box sx={{ mt: 2, '& .MuiTableContainer-root': { maxHeight: 'calc(100vh - 215px)' } }}>
         <PaginatedTable data={(data as unknown as LoaderResponse).municipalities} columns={columns} />
       </Box>
       <ClientOnly>

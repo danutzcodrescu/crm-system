@@ -103,7 +103,7 @@ export function PaginatedTable<T extends { id: string; warning?: boolean }>({
         if (col.id === 'actions') return acc;
         if (col.meta?.defaultHidden) {
           acc[col.id as string] = false;
-          return acc
+          return acc;
         }
         acc[col.id as string] = true;
         return acc;
@@ -135,7 +135,7 @@ export function PaginatedTable<T extends { id: string; warning?: boolean }>({
     },
     defaultColumn: {
       size: 200,
-      minSize: 100,
+      minSize: 50,
       maxSize: Number.MAX_SAFE_INTEGER,
     },
     maxMultiSortColCount: 1,
@@ -172,7 +172,11 @@ export function PaginatedTable<T extends { id: string; warning?: boolean }>({
         <Typography component="p">Rows: {table.getFilteredRowModel().rows.length}</Typography>
         {additionalHeader ? additionalHeader(table.getFilteredRowModel().rows) : undefined}
       </Stack>
-      <TableContainer ref={tableContainer} component={Paper} sx={{ maxWidth: '100%', maxHeight: 'calc(100vh - 200px)', overflow: 'auto' }}>
+      <TableContainer
+        ref={tableContainer}
+        component={Paper}
+        sx={{ maxWidth: '100%', maxHeight: 'calc(100vh - 200px)', overflow: 'auto' }}
+      >
         <Table sx={{ minWidth: 650 }} stickyHeader>
           <TableHead>
             {table.getHeaderGroups().map((headerGroup) => (
@@ -270,7 +274,6 @@ export function PaginatedTable<T extends { id: string; warning?: boolean }>({
           onPageChange={(_, page) => {
             table.setPageIndex(page);
             tableContainer.current?.scrollTo({ top: 0, behavior: 'smooth' });
-
           }}
           onRowsPerPageChange={(e) => {
             const size = e.target.value ? Number(e.target.value) : 10;

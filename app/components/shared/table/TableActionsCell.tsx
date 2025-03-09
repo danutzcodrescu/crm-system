@@ -13,10 +13,9 @@ type Props = {
   isEditable: boolean;
   link?: string;
   onEdit: (id: string) => void;
-  onDelete?: (id: string) => void;
 };
 
-export function TableActionsCell({ name, id, additionalElement, isEditable, link, onEdit, onDelete }: Props) {
+export function TableActionsCell({ name, id, additionalElement, isEditable, link, onEdit }: Props) {
   return (
     <Stack direction="row" gap={0.5}>
       {additionalElement || <Box sx={{ width: 40, height: 40 }}></Box>}
@@ -34,8 +33,6 @@ export function TableActionsCell({ name, id, additionalElement, isEditable, link
           </IconButton>
         </Tooltip>
       ) : null}
-
-      {onDelete ? <DeleteButton title={name} onClick={() => onDelete(id)} /> : null}
     </Stack>
   );
 }

@@ -160,7 +160,13 @@ export default function Municipality() {
       additionalTitleElement={null}
       sx={{ overflow: 'auto', maxHeight: 'none', minHeight: 'none' }}
     >
-      <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 3 }}>
+      <Box
+        sx={{
+          display: 'grid',
+          gridTemplateColumns: { lg: '1fr 1fr', xs: '1fr', '2k': 'repeat(3, 1fr)', '2k-wide': 'repeat(4, 1fr)' },
+          gap: 3,
+        }}
+      >
         <Card>
           <CardContent>
             <ResponsiblesTable

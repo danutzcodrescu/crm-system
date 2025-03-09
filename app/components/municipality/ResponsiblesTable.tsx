@@ -11,6 +11,7 @@ import { ResponsibleData } from '~/utils/server/repositories/responsibles.server
 import { EditDialog } from '../shared/EditDialog.client';
 import { PaginatedTable } from '../shared/table/PaginatedTable';
 import { TableActionsCell } from '../shared/table/TableActionsCell';
+import { DeleteButton } from '../shared/DeleteButton';
 
 interface Props {
   data: ResponsibleData[];
@@ -35,6 +36,7 @@ export function ResponsiblesTable({ data, companyId, fetcher }: Props) {
         id: 'title',
         enableColumnFilter: false,
         enableSorting: false,
+        size: 140,
       },
       {
         header: 'Email',
@@ -50,6 +52,7 @@ export function ResponsiblesTable({ data, companyId, fetcher }: Props) {
         enableSorting: false,
         accessorKey: 'phoneNumber',
         id: 'phoneNumber',
+        size: 130,
       },
       {
         id: 'actions',
@@ -64,8 +67,16 @@ export function ResponsiblesTable({ data, companyId, fetcher }: Props) {
               id={row.original.id as string}
               isEditable
               onEdit={() => setEditableFields(row.original)}
-              onDelete={(id) =>
-                fetcher.submit({}, { method: 'DELETE', action: `/api/municipalities/${companyId}/responsibles/${id}` })
+              additionalElement={
+                <DeleteButton
+                  title="responsible"
+                  onClick={() =>
+                    fetcher.submit(
+                      {},
+                      { method: 'DELETE', action: `/api/municipalities/${companyId}/responsibles/${row.original.id}` },
+                    )
+                  }
+                />
               }
             />
           );
