@@ -26,7 +26,6 @@ export async function action({ request }: ActionFunctionArgs) {
   const isLoggedIn = await auth.isLoggedIn(request);
   if (!isLoggedIn) return redirect('/signin');
   let dt: GeneralInformationData[] = [];
-  console.log('test');
   const uploadHandler = unstable_composeUploadHandlers(
     async ({ name, data }) => {
       if (name !== 'file') {
@@ -62,6 +61,7 @@ export async function action({ request }: ActionFunctionArgs) {
   if (!year || formData.get('file') !== 'parsed') {
     return json({ message: 'Invalid file', severity: 'error', timeStamp: Date.now() }, { status: 400 });
   }
+
   const [error, data] = await getCompaniesWithCode();
   if (error) {
     return json(
@@ -69,15 +69,16 @@ export async function action({ request }: ActionFunctionArgs) {
       { status: 500 },
     );
   }
+
   const codeMap = new Map(data?.map((comp) => [comp.code, comp.id]));
 
   const err = await bulkImportGeneralInformation(
     dt.map((info) => ({
       companyId: codeMap.get(info.code) as string,
       year: parseInt(year),
-      inhabitants: parseInt((info.inhabitants as string).replaceAll(',', '')),
-      landSurface: parseFloat(info.landSurface as string),
-      cleaningCost: parseInt((info.cleaningCost as string).replaceAll(',', '')),
+      inhabitants: info.inhabitants ? parseInt((info.inhabitants as string).replaceAll(',', '')) : undefined,
+      landSurface: info.landSurface ? parseFloat(info.landSurface as string) : undefined,
+      cleaningCost: info.cleaningCost ? parseInt((info.cleaningCost as string).replaceAll(',', '')) : undefined,
       cleanedKg: info.cleanedKg ? parseInt((info.cleanedKg as string).replaceAll(',', '')) : undefined,
       epaLitterMeasurement: info.epaLitterMeasurement?.toLocaleLowerCase() === 'yes' ? true : undefined,
     })),

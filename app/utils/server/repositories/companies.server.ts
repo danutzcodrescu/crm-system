@@ -80,6 +80,7 @@ export async function getCompaniesWithCode(): Promise<[string | null, CompanyWit
   try {
     return [null, await db.select({ id: companies.id, code: companies.code }).from(companies)];
   } catch (e) {
+    logger.error(e);
     return [(e as DatabaseError).detail as string, null];
   }
 }
