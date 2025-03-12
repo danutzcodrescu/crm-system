@@ -41,9 +41,9 @@ export const years = pgTable('years', {
     0.735147372938808,
   ) as unknown as PgDoublePrecisionBuilderInitial<'sekAdmin'>,
   adminFee: integer().default(8904),
-  addition_1: integer().default(890),
-  addition_2: integer().default(445),
-  addition_3: integer().default(65),
+  addition_1: numeric().default('890') as unknown as PgDoublePrecisionBuilderInitial<'addition_1'>,
+  addition_2: numeric().default('445') as unknown as PgDoublePrecisionBuilderInitial<'addition_2'>,
+  addition_3: numeric().default('65') as unknown as PgDoublePrecisionBuilderInitial<'addition_3'>,
   createdAt: timestamp({ withTimezone: true, mode: 'date' }).notNull().defaultNow(),
   updatedAt: timestamp({ withTimezone: true, mode: 'date' }).$onUpdate(() => new Date()),
 });
@@ -229,12 +229,20 @@ export const compensationView = pgMaterializedView('compensation_view', {
   inhabitants: integer('inhabitants'),
   typeOfAgreement: agreementTypeEnum('type_of_agreement'),
   inAgreement: boolean('in_agreement'),
-  variableCompensation: integer('variable_compensation'),
-  totalAddition: integer('total_addition'),
-  changeFactor: numeric('change_factor', { precision: 10, scale: 5 }),
-  changeFactorLitter: numeric('change_factor_litter', { precision: 10, scale: 5 }),
-  totalCompensationNew: integer('total_compensation_new'),
-  totalCompensationOld: integer('total_compensation_old'),
+  variableCompensation: numeric(
+    'variable_compensation',
+  ) as unknown as PgDoublePrecisionBuilderInitial<'variable_compensation'>,
+  totalAddition: numeric('total_addition') as unknown as PgDoublePrecisionBuilderInitial<'total_addition'>,
+  changeFactor: numeric('change_factor') as unknown as PgDoublePrecisionBuilderInitial<'change_factor'>,
+  changeFactorLitter: numeric(
+    'change_factor_litter',
+  ) as unknown as PgDoublePrecisionBuilderInitial<'change_factor_litter'>,
+  totalCompensationNew: numeric(
+    'total_compensation_new',
+  ) as unknown as PgDoublePrecisionBuilderInitial<'total_compensation_new'>,
+  totalCompensationOld: numeric(
+    'total_compensation_old',
+  ) as unknown as PgDoublePrecisionBuilderInitial<'total_compensation_old'>,
   totalCompensation: integer('total_compensation'),
 }).as(sql`
 WITH
@@ -274,7 +282,7 @@ WITH
 			inhabitants,
 			land_surface_km,
 			inhabitants_per_meter,
-			ROUND(sek_admin * inhabitants) AS variable_compensation,
+			sek_admin * inhabitants AS variable_compensation,
 			admin_komun,
 			CASE
 				WHEN inhabitants < 8000
@@ -321,8 +329,8 @@ SELECT
 	total_addition,
 	"years"."change_factor" AS change_factor,
 	"years"."change_factor_litter" AS change_factor_litter,
-	ROUND("years"."change_factor" * total_compensation) AS total_compensation_new,
-	ROUND("years"."change_factor" * total_compensation * "years"."change_factor_litter") AS total_compensation_old,
+	"years"."change_factor" * total_compensation AS total_compensation_new,
+	"years"."change_factor" * total_compensation * "years"."change_factor_litter" AS total_compensation_old,
 	CASE
 		WHEN "agreements"."new_agreement_date_signed" IS NOT NULL THEN ROUND("years"."change_factor" * total_compensation)
 		ELSE ROUND("years"."change_factor" * total_compensation * "years"."change_factor_litter")

@@ -45,10 +45,11 @@ async function main() {
 
     await $`ssh ${process.env.REMOTE_USER}@${process.env.REMOTE} << 'EOF'
 cd crm
-docker-compose down
-docker rmi crm-system
+docker-compose down webapp
+docker rmi $(docker images --format "{{.ID}}" --filter "reference=crm-system*")
 docker load -i docker.tar
-docker-compose up -d
+sed -i 's/image: crm-system:[0-9]\+\.[0-9]\+\.[0-9]\+/image: ${imageName}/g' docker-compose.yml
+docker-compose up -d webapp
 rm -f docker.tar
 EOF`;
 

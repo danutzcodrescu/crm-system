@@ -1,0 +1,1093 @@
+{
+  "id": "6634aa0e-fcf7-4763-bc88-430417578102",
+  "prevId": "98d8ffe7-3e2f-438a-ad44-14f7ec8fc2ff",
+  "version": "7",
+  "dialect": "postgresql",
+  "tables": {
+    "public.agreements": {
+      "name": "agreements",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "company_id": {
+          "name": "company_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "type_of_agreement": {
+          "name": "type_of_agreement",
+          "type": "agreement_type",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "old_agreement_sent": {
+          "name": "old_agreement_sent",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false,
+          "default": false
+        },
+        "old_agreement_date_signed": {
+          "name": "old_agreement_date_signed",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "old_agreement_date_shared": {
+          "name": "old_agreement_date_shared",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "old_agreement_link_to_agreement": {
+          "name": "old_agreement_link_to_agreement",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "old_agreement_link_to_appendix": {
+          "name": "old_agreement_link_to_appendix",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "new_agreement_sent": {
+          "name": "new_agreement_sent",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false,
+          "default": false
+        },
+        "new_agreement_date_signed": {
+          "name": "new_agreement_date_signed",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "new_agreement_date_shared": {
+          "name": "new_agreement_date_shared",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "new_agreement_link_to_agreement": {
+          "name": "new_agreement_link_to_agreement",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "agreements_company_id_companies_id_fk": {
+          "name": "agreements_company_id_companies_id_fk",
+          "tableFrom": "agreements",
+          "tableTo": "companies",
+          "columnsFrom": ["company_id"],
+          "columnsTo": ["id"],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.companies": {
+      "name": "companies",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "name": {
+          "name": "name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "code": {
+          "name": "code",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "status_id": {
+          "name": "status_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "responsible_id": {
+          "name": "responsible_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "consultations": {
+          "name": "consultations",
+          "type": "smallint[]",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "ARRAY[]::smallint[]"
+        },
+        "email": {
+          "name": "email",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "companies_status_id_statuses_id_fk": {
+          "name": "companies_status_id_statuses_id_fk",
+          "tableFrom": "companies",
+          "tableTo": "statuses",
+          "columnsFrom": ["status_id"],
+          "columnsTo": ["id"],
+          "onDelete": "set null",
+          "onUpdate": "no action"
+        },
+        "companies_responsible_id_users_id_fk": {
+          "name": "companies_responsible_id_users_id_fk",
+          "tableFrom": "companies",
+          "tableTo": "users",
+          "schemaTo": "authentication",
+          "columnsFrom": ["responsible_id"],
+          "columnsTo": ["id"],
+          "onDelete": "set null",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "companies_name_unique": {
+          "name": "companies_name_unique",
+          "nullsNotDistinct": false,
+          "columns": ["name"]
+        },
+        "companies_code_unique": {
+          "name": "companies_code_unique",
+          "nullsNotDistinct": false,
+          "columns": ["code"]
+        },
+        "companies_email_unique": {
+          "name": "companies_email_unique",
+          "nullsNotDistinct": false,
+          "columns": ["email"]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.general_information": {
+      "name": "general_information",
+      "schema": "",
+      "columns": {
+        "company_id": {
+          "name": "company_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "year": {
+          "name": "year",
+          "type": "smallint",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "inhabitants": {
+          "name": "inhabitants",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "land_surface": {
+          "name": "land_surface",
+          "type": "numeric(10, 2)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "cleaning_cost": {
+          "name": "cleaning_cost",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "cleaned_kg": {
+          "name": "cleaned_kg",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "epa_litter_measurement": {
+          "name": "epa_litter_measurement",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "general_information_company_id_companies_id_fk": {
+          "name": "general_information_company_id_companies_id_fk",
+          "tableFrom": "general_information",
+          "tableTo": "companies",
+          "columnsFrom": ["company_id"],
+          "columnsTo": ["id"],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "general_information_year_years_name_fk": {
+          "name": "general_information_year_years_name_fk",
+          "tableFrom": "general_information",
+          "tableTo": "years",
+          "columnsFrom": ["year"],
+          "columnsTo": ["name"],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {
+        "general_information_company_id_year_pk": {
+          "name": "general_information_company_id_year_pk",
+          "columns": ["company_id", "year"]
+        }
+      },
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.initial_consultations": {
+      "name": "initial_consultations",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "company_id": {
+          "name": "company_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "document_sent": {
+          "name": "document_sent",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false,
+          "default": false
+        },
+        "date_signed": {
+          "name": "date_signed",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "date_shared": {
+          "name": "date_shared",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "link": {
+          "name": "link",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "initial_consultations_company_id_companies_id_fk": {
+          "name": "initial_consultations_company_id_companies_id_fk",
+          "tableFrom": "initial_consultations",
+          "tableTo": "companies",
+          "columnsFrom": ["company_id"],
+          "columnsTo": ["id"],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.invoicing": {
+      "name": "invoicing",
+      "schema": "",
+      "columns": {
+        "company_id": {
+          "name": "company_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "year": {
+          "name": "year",
+          "type": "smallint",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "invoice_date": {
+          "name": "invoice_date",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "date_paid": {
+          "name": "date_paid",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "invoice_amount": {
+          "name": "invoice_amount",
+          "type": "numeric(10, 2)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "vat": {
+          "name": "vat",
+          "type": "numeric(10, 2)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "invoicing_company_id_companies_id_fk": {
+          "name": "invoicing_company_id_companies_id_fk",
+          "tableFrom": "invoicing",
+          "tableTo": "companies",
+          "columnsFrom": ["company_id"],
+          "columnsTo": ["id"],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "invoicing_year_years_name_fk": {
+          "name": "invoicing_year_years_name_fk",
+          "tableFrom": "invoicing",
+          "tableTo": "years",
+          "columnsFrom": ["year"],
+          "columnsTo": ["name"],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {
+        "invoicing_company_id_year_pk": {
+          "name": "invoicing_company_id_year_pk",
+          "columns": ["company_id", "year"]
+        }
+      },
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.logs": {
+      "name": "logs",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "description": {
+          "name": "description",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "company_id": {
+          "name": "company_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "date": {
+          "name": "date",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "logs_company_id_companies_id_fk": {
+          "name": "logs_company_id_companies_id_fk",
+          "tableFrom": "logs",
+          "tableTo": "companies",
+          "columnsFrom": ["company_id"],
+          "columnsTo": ["id"],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.recurring_consultations": {
+      "name": "recurring_consultations",
+      "schema": "",
+      "columns": {
+        "company_id": {
+          "name": "company_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "year": {
+          "name": "year",
+          "type": "smallint",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "sent_date": {
+          "name": "sent_date",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "meeting_date": {
+          "name": "meeting_date",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "consultation_form_completed": {
+          "name": "consultation_form_completed",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "meeting_held": {
+          "name": "meeting_held",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "date_shared_with_authority": {
+          "name": "date_shared_with_authority",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "recurring_consultations_year_years_name_fk": {
+          "name": "recurring_consultations_year_years_name_fk",
+          "tableFrom": "recurring_consultations",
+          "tableTo": "years",
+          "columnsFrom": ["year"],
+          "columnsTo": ["name"],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {
+        "recurring_consultations_company_id_year_pk": {
+          "name": "recurring_consultations_company_id_year_pk",
+          "columns": ["company_id", "year"]
+        }
+      },
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.reporting": {
+      "name": "reporting",
+      "schema": "",
+      "columns": {
+        "company_id": {
+          "name": "company_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "year": {
+          "name": "year",
+          "type": "smallint",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "reporting_date": {
+          "name": "reporting_date",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "cigarette_butts": {
+          "name": "cigarette_butts",
+          "type": "numeric(10, 2)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "motivation": {
+          "name": "motivation",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "reporting_company_id_companies_id_fk": {
+          "name": "reporting_company_id_companies_id_fk",
+          "tableFrom": "reporting",
+          "tableTo": "companies",
+          "columnsFrom": ["company_id"],
+          "columnsTo": ["id"],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "reporting_year_years_name_fk": {
+          "name": "reporting_year_years_name_fk",
+          "tableFrom": "reporting",
+          "tableTo": "years",
+          "columnsFrom": ["year"],
+          "columnsTo": ["name"],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {
+        "reporting_company_id_year_pk": {
+          "name": "reporting_company_id_year_pk",
+          "columns": ["company_id", "year"]
+        }
+      },
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.responsibles": {
+      "name": "responsibles",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "name": {
+          "name": "name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "email": {
+          "name": "email",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "phone_number": {
+          "name": "phone_number",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "title": {
+          "name": "title",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "company_id": {
+          "name": "company_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "responsibles_company_id_companies_id_fk": {
+          "name": "responsibles_company_id_companies_id_fk",
+          "tableFrom": "responsibles",
+          "tableTo": "companies",
+          "columnsFrom": ["company_id"],
+          "columnsTo": ["id"],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "authentication.sessions": {
+      "name": "sessions",
+      "schema": "authentication",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "user_id": {
+          "name": "user_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "expires_at": {
+          "name": "expires_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "sessions_user_id_users_id_fk": {
+          "name": "sessions_user_id_users_id_fk",
+          "tableFrom": "sessions",
+          "tableTo": "users",
+          "schemaTo": "authentication",
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.statuses": {
+      "name": "statuses",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "serial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "name": {
+          "name": "name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "statuses_name_unique": {
+          "name": "statuses_name_unique",
+          "nullsNotDistinct": false,
+          "columns": ["name"]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "authentication.users": {
+      "name": "users",
+      "schema": "authentication",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "serial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "username": {
+          "name": "username",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "password": {
+          "name": "password",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "users_username_unique": {
+          "name": "users_username_unique",
+          "nullsNotDistinct": false,
+          "columns": ["username"]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.years": {
+      "name": "years",
+      "schema": "",
+      "columns": {
+        "name": {
+          "name": "name",
+          "type": "smallint",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "change_factor": {
+          "name": "change_factor",
+          "type": "numeric",
+          "primaryKey": false,
+          "notNull": false,
+          "default": 1
+        },
+        "change_factor_litter": {
+          "name": "change_factor_litter",
+          "type": "numeric",
+          "primaryKey": false,
+          "notNull": false,
+          "default": 1
+        },
+        "sek_admin": {
+          "name": "sek_admin",
+          "type": "numeric",
+          "primaryKey": false,
+          "notNull": false,
+          "default": 0.735147372938808
+        },
+        "admin_fee": {
+          "name": "admin_fee",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "default": 8904
+        },
+        "addition_1": {
+          "name": "addition_1",
+          "type": "numeric",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "'890'"
+        },
+        "addition_2": {
+          "name": "addition_2",
+          "type": "numeric",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "'445'"
+        },
+        "addition_3": {
+          "name": "addition_3",
+          "type": "numeric",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "'65'"
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "years_name_unique": {
+          "name": "years_name_unique",
+          "nullsNotDistinct": false,
+          "columns": ["name"]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    }
+  },
+  "enums": {
+    "public.agreement_type": {
+      "name": "agreement_type",
+      "schema": "public",
+      "values": ["old", "new"]
+    }
+  },
+  "schemas": {
+    "authentication": "authentication"
+  },
+  "sequences": {},
+  "roles": {},
+  "policies": {},
+  "views": {
+    "public.compensation_view": {
+      "columns": {
+        "year": {
+          "name": "year",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "company_name": {
+          "name": "company_name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "inhabitants": {
+          "name": "inhabitants",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "type_of_agreement": {
+          "name": "type_of_agreement",
+          "type": "agreement_type",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "in_agreement": {
+          "name": "in_agreement",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "variable_compensation": {
+          "name": "variable_compensation",
+          "type": "numeric",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "total_addition": {
+          "name": "total_addition",
+          "type": "numeric",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "change_factor": {
+          "name": "change_factor",
+          "type": "numeric",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "change_factor_litter": {
+          "name": "change_factor_litter",
+          "type": "numeric",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "total_compensation_new": {
+          "name": "total_compensation_new",
+          "type": "numeric",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "total_compensation_old": {
+          "name": "total_compensation_old",
+          "type": "numeric",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "total_compensation": {
+          "name": "total_compensation",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "definition": "\nWITH\n\tinfo AS (\n\t\tSELECT\n\t\t\t\"general_information\".\"company_id\",\n\t\t\t\"general_information\".\"land_surface\",\n\t\t\t\"general_information\".\"land_surface\" * 1000000 AS land_surface_km,\n\t\t\tg.inhabitants,\n\t\t\tgeneral_information.year\n\t\tFROM\n\t\t\t\"general_information\"\n\t\t\tLEFT JOIN general_information AS g ON \"general_information\".company_id = g.company_id\n\t\tWHERE\n\t\t\tg.\"year\" = general_information.\"year\" - 1\n\t),\n\tcalculated AS (\n\t\tSELECT\n\t\t\tcompany_id,\n\t\t\tinhabitants,\n\t\t\tland_surface_km,\n\t\t\tROUND(SQRT((2 * (land_surface_km / inhabitants)) / SQRT(3))) AS inhabitants_per_meter,\n\t\t\tyears.admin_fee AS admin_komun,\n\t\t\tyears.addition_1 AS compensation_1,\n\t\t\tyears.addition_2 AS compensation_2,\n\t\t\tyears.addition_3 AS compensation_3,\n\t\t\tyears.sek_admin AS sek_admin,\n\t\t\tinfo.year\n\t\tFROM\n\t\t\tinfo\n\t\t\tLEFT JOIN \"years\" ON info.year = years.\"name\"\n\t),\n\tcompensation AS (\n\t\tSELECT\n\t\t\tcalculated.year AS \"year\",\n\t\t\tcompany_id,\n\t\t\tinhabitants,\n\t\t\tland_surface_km,\n\t\t\tinhabitants_per_meter,\n\t\t\tsek_admin * inhabitants AS variable_compensation,\n\t\t\tadmin_komun,\n\t\t\tCASE\n\t\t\t\tWHEN inhabitants < 8000\n\t\t\t\tAND inhabitants_per_meter > 350 THEN compensation_1\n\t\t\t\tELSE 0\n\t\t\tEND AS calculation_1,\n\t\t\tCASE\n\t\t\t\tWHEN inhabitants_per_meter > 350\n\t\t\t\tAND inhabitants >= 8000\n\t\t\t\tAND inhabitants < 25000 THEN compensation_2\n\t\t\t\tELSE 0\n\t\t\tEND AS calculation_2,\n\t\t\tCASE\n\t\t\t\tWHEN inhabitants_per_meter < 350\n\t\t\t\tAND inhabitants < 8000 THEN compensation_3\n\t\t\t\tELSE 0\n\t\t\tEND AS calculation_3\n\t\tFROM\n\t\t\tcalculated\n\t),\n\ttotalval AS (\n\t\tSELECT\n\t\t\tcompensation.year AS \"year\",\n\t\t\tcompany_id,\n\t\t\tvariable_compensation,\n\t\t\tcalculation_1 + calculation_2 + calculation_3 AS total_addition,\n\t\t\tcalculation_1 + calculation_2 + calculation_3 + variable_compensation + admin_komun AS total_compensation,\n\t\t\tinhabitants\n\t\tFROM\n\t\t\tcompensation\n\t)\nSELECT\n\ttotalval.year,\n\t\"totalval\".company_id AS id,\n\t\"companies\".\"name\" AS company_name,\n\t\"agreements\".\"type_of_agreement\" AS type_of_agreement,\n\tinhabitants,\n\tCASE\n\t\tWHEN \"agreements\".\"new_agreement_date_signed\" IS NOT NULL\n\t\tOR \"agreements\".\"old_agreement_date_signed\" IS NOT NULL THEN TRUE\n\t\tELSE FALSE\n\tEND AS in_agreement,\n\tvariable_compensation,\n\ttotal_addition,\n\t\"years\".\"change_factor\" AS change_factor,\n\t\"years\".\"change_factor_litter\" AS change_factor_litter,\n\t\"years\".\"change_factor\" * total_compensation AS total_compensation_new,\n\t\"years\".\"change_factor\" * total_compensation * \"years\".\"change_factor_litter\" AS total_compensation_old,\n\tCASE\n\t\tWHEN \"agreements\".\"new_agreement_date_signed\" IS NOT NULL THEN ROUND(\"years\".\"change_factor\" * total_compensation)\n\t\tELSE ROUND(\"years\".\"change_factor\" * total_compensation * \"years\".\"change_factor_litter\")\n\tEND AS total_compensation\nFROM\n\ttotalval\n\tLEFT JOIN \"agreements\" ON \"agreements\".\"company_id\" = totalval.company_id\n\tLEFT JOIN \"companies\" ON \"companies\".\"id\" = totalval.company_id\n\tLEFT JOIN \"years\" ON years.\"name\" = totalval.year",
+      "name": "compensation_view",
+      "schema": "public",
+      "isExisting": false,
+      "materialized": true
+    }
+  },
+  "_meta": {
+    "columns": {},
+    "schemas": {},
+    "tables": {}
+  }
+}

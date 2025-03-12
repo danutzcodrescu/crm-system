@@ -102,6 +102,7 @@ export default function Compensation() {
         id: 'variableCompensation',
         accessorKey: 'variableCompensation',
         enableColumnFilter: false,
+        cell: ({ getValue }) => Intl.NumberFormat('sv-SE', { maximumFractionDigits: 6 }).format(getValue() as number),
       },
 
       {
@@ -109,7 +110,7 @@ export default function Compensation() {
         id: 'totalAddition',
         accessorKey: 'totalAddition',
         enableColumnFilter: false,
-        cell: ({ getValue }) => Intl.NumberFormat('sv-SE', { maximumFractionDigits: 2 }).format(getValue() as number),
+        cell: ({ getValue }) => Intl.NumberFormat('sv-SE', { maximumFractionDigits: 3 }).format(getValue() as number),
       },
       {
         header: `Change factor CPI (old + new)`,
@@ -132,21 +133,21 @@ export default function Compensation() {
         id: 'totalCompensationOld',
         accessorKey: 'totalCompensationOld',
         enableColumnFilter: false,
-        cell: ({ getValue }) => Intl.NumberFormat('sv-SE', { minimumFractionDigits: 2 }).format(getValue() as number),
+        cell: ({ getValue }) => Intl.NumberFormat('sv-SE', { minimumFractionDigits: 5 }).format(getValue() as number),
       },
       {
         header: `Total compensation (new)`,
         id: 'totalCompensationNew',
         accessorKey: 'totalCompensationNew',
         enableColumnFilter: false,
-        cell: ({ getValue }) => Intl.NumberFormat('sv-SE', { minimumFractionDigits: 2 }).format(getValue() as number),
+        cell: ({ getValue }) => Intl.NumberFormat('sv-SE', { minimumFractionDigits: 5 }).format(getValue() as number),
       },
       {
         header: `Total compensation`,
         id: 'totalCompensation',
         accessorKey: 'totalCompensation',
         enableColumnFilter: false,
-        cell: ({ getValue }) => Intl.NumberFormat('sv-SE', { maximumFractionDigits: 2 }).format(getValue() as number),
+        cell: ({ getValue }) => Intl.NumberFormat('sv-SE').format(getValue() as number),
       },
     ],
     // eslint-disable-next-line react-hooks/exhaustive-deps

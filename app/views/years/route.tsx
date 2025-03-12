@@ -56,9 +56,9 @@ export async function action({ request }: ActionFunctionArgs) {
       changeFactorLitter: parseFloat(changeFactorLitter),
       adminFee: parseInt(adminFee),
       sekAdmin: parseFloat(sekAdmin),
-      addition_1: parseInt(addition_1),
-      addition_2: parseInt(addition_2),
-      addition_3: parseInt(addition_3),
+      addition_1: parseFloat(addition_1),
+      addition_2: parseFloat(addition_2),
+      addition_3: parseFloat(addition_3),
     });
     if (error) {
       return json({ message: 'Cold not update the year', severity: 'error', timeStamp: Date.now() }, { status: 500 });
@@ -88,14 +88,14 @@ export default function YearsPage() {
         label: 'Change factor',
         name: 'changeFactor',
         type: 'number',
-        inputProps: { step: '0.000001' },
+        inputProps: { step: '0.00000000000001' },
         defaultValue: data.changeFactor as number,
       },
       {
         label: 'Change factor litter (old agreement)',
         name: 'changeFactorLitter',
         type: 'number',
-        inputProps: { step: '0.000001' },
+        inputProps: { step: '0.00000000000001' },
         defaultValue: data.changeFactor as number,
       },
       {
@@ -115,18 +115,21 @@ export default function YearsPage() {
         label: 'Tillägg 1',
         name: 'addition_1',
         type: 'number',
+        inputProps: { step: '0.00001' },
         defaultValue: data.addition_1 as number,
       },
       {
         label: 'Tillägg 2',
         name: 'addition_2',
         type: 'number',
+        inputProps: { step: '0.00001' },
         defaultValue: data.addition_2 as number,
       },
       {
         label: 'Tillägg 3',
         name: 'addition_3',
         type: 'number',
+        inputProps: { step: '0.00001' },
         defaultValue: data.addition_3 as number,
       },
     ]);
@@ -135,7 +138,18 @@ export default function YearsPage() {
 
   return (
     <PageContainer actionData={fetcher.data} title="Years" additionalTitleElement={null}>
-      <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 2 }}>
+      <Box
+        sx={{
+          display: 'grid',
+          gridTemplateColumns: {
+            xs: '1fr',
+            md: 'repeat(3, 1fr)',
+            xl: 'repeat(4, 1fr)',
+            '2k': 'repeat(5, 1fr)',
+          },
+          gap: 2,
+        }}
+      >
         {(data as { years: FullYearData[] }).years.map((year) => (
           <Stack
             key={year.name}
@@ -153,7 +167,7 @@ export default function YearsPage() {
             flexWrap="wrap"
             gap={1.5}
           >
-            <Typography sx={{ fontWeight: 'bold', flex: '0 0 90%', fontSize: '1.5rem', pr: 1.5 }}>
+            <Typography sx={{ fontWeight: 'bold', flex: '0 0 80%', fontSize: '1.5rem', pr: 1.5 }}>
               {year.name}
             </Typography>
             <IconButton size="small" aria-label={`Edit ${year.name}`} onClick={() => setEditableFields(year)}>
@@ -163,43 +177,55 @@ export default function YearsPage() {
               <Box component="span" sx={{ fontWeight: 'bold' }}>
                 Change factor:
               </Box>{' '}
-              {parseFloat(year.changeFactor as unknown as string).toFixed(5)}
+              {Intl.NumberFormat('sv-SE', { minimumFractionDigits: 6, maximumSignificantDigits: 14 }).format(
+                year.changeFactor as number,
+              )}
             </Typography>
             <Typography>
               <Box component="span" sx={{ fontWeight: 'bold' }}>
                 Change factor litter (old agreement):
               </Box>{' '}
-              {parseFloat(year.changeFactorLitter as unknown as string).toFixed(5)}
+              {Intl.NumberFormat('sv-SE', { minimumFractionDigits: 6, maximumFractionDigits: 14 }).format(
+                year.changeFactorLitter as number,
+              )}
             </Typography>
             <Typography>
               <Box component="span" sx={{ fontWeight: 'bold' }}>
                 SEK admin:
               </Box>{' '}
-              {parseFloat(year.sekAdmin as unknown as string).toFixed(15)}
+              {Intl.NumberFormat('sv-SE', { minimumFractionDigits: 3, maximumFractionDigits: 15 }).format(
+                year.sekAdmin as number,
+              )}
             </Typography>
             <Typography>
               <Box component="span" sx={{ fontWeight: 'bold' }}>
                 Admin/kommun:
               </Box>{' '}
-              {year.adminFee}
+              {Intl.NumberFormat('sv-SE').format(year.adminFee as number)}
             </Typography>
             <Typography>
               <Box component="span" sx={{ fontWeight: 'bold' }}>
                 Tillägg 1:
               </Box>{' '}
-              {year.addition_1}
+              {Intl.NumberFormat('sv-SE', { minimumFractionDigits: 0, maximumFractionDigits: 6 }).format(
+                year.addition_1 as number,
+              )}
             </Typography>
             <Typography>
               <Box component="span" sx={{ fontWeight: 'bold' }}>
                 Tillägg 2:
               </Box>{' '}
-              {year.addition_2}
+              {Intl.NumberFormat('sv-SE', { minimumFractionDigits: 0, maximumFractionDigits: 6 }).format(
+                year.addition_2 as number,
+              )}
             </Typography>
             <Typography>
               <Box component="span" sx={{ fontWeight: 'bold' }}>
                 Tillägg 3:
               </Box>{' '}
-              {year.addition_3}
+              {Intl.NumberFormat('sv-SE', { minimumFractionDigits: 0, maximumFractionDigits: 6 }).format(
+                year.addition_3 as number,
+              )}
             </Typography>
           </Stack>
         ))}
