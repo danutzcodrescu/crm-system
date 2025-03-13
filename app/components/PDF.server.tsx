@@ -41,7 +41,7 @@ export function PDF(data: CompensationDataPerCompanyPerYear) {
             <Text style={{ fontFamily: 'Helvetica-Bold' }}>
               {Intl.NumberFormat('sv-SE').format(data?.total as number)} kronor
             </Text>
-            &nbsp; (A + B + C) x (D) {data?.typeOfAgreement === 'old' ? ' x (E)' : ''}
+            &nbsp; (A + B + C) x (D)
           </Text>
         </View>
 
@@ -51,7 +51,8 @@ export function PDF(data: CompensationDataPerCompanyPerYear) {
             <Text style={{ fontFamily: 'Helvetica-Bold' }}>
               {Intl.NumberFormat('sv-SE').format(data?.variableCompensation as number)} kronor
             </Text>
-            &nbsp;(&nbsp;{Intl.NumberFormat('sv-SE', { minimumFractionDigits: 15 }).format(data.yearSekAdmin)} SEK x &nbsp;
+            &nbsp;(&nbsp;{Intl.NumberFormat('sv-SE', { minimumFractionDigits: 15 }).format(data.yearSekAdmin)} SEK x
+            &nbsp;
             {Intl.NumberFormat('sv-SE').format(data.inhabitants as number)}&nbsp;inhabitants&nbsp;)
           </Text>
           <Text style={{ marginBottom: 8 }}>

@@ -59,8 +59,8 @@ export async function getCompensationForCompany(
     const data = await db
       .select({
         id: compensationView.id,
-        new: compensationView.totalCompensationNew,
-        old: compensationView.totalCompensationOld,
+        new: sql<number>`round(${compensationView.totalCompensationNew})`,
+        old: sql<number>`round(${compensationView.totalCompensationOld})`,
         typeOfAgreement: compensationView.typeOfAgreement,
         year: compensationView.year,
       })

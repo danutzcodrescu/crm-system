@@ -1,0 +1,11 @@
+FROM postgres:17
+
+RUN apt-get update && apt-get install -y locales
+RUN localedef -i sv_SE -c -f UTF-8 -A /usr/share/locale/locale.alias sv_SE.UTF-8
+RUN localedef -i en_US -c -f UTF-8 -A /usr/share/locale/locale.alias en_US.UTF-8
+
+# set general locale to english
+ENV LANG en_US.utf8
+# set locale for sorting and string comparison to swedish
+ENV LC_COLLATE sv_SE.utf8
+ENV LC_CTYPE sv_SE.utf8
