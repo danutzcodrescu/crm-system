@@ -142,59 +142,63 @@ export function RecurringConsultation({ years, data, fetcher }: Props) {
             </Typography>
           </Box>
 
-          <TabContext value={value}>
-            <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
-              <TabList onChange={handleChange} aria-label="recurring consultation years">
-                {years.map((year) => (
-                  <Tab key={year} label={`Year ${year}`} value={year} />
-                ))}
-              </TabList>
-            </Box>
-            {data.map((dt) => {
-              return (
-                <TabPanel key={dt.year} value={dt.year}>
-                  <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-                    <Typography>
-                      Information and form sent to municipality:{' '}
-                      <Box component="span">{dt.sentDate ? 'Yes' : 'No'}</Box>
-                    </Typography>
+          {years.length > 0 ? (
+            <TabContext value={value}>
+              <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
+                <TabList onChange={handleChange} aria-label="recurring consultation years">
+                  {years.map((year) => (
+                    <Tab key={year} label={`Year ${year}`} value={year} />
+                  ))}
+                </TabList>
+              </Box>
+              {data.map((dt) => {
+                return (
+                  <TabPanel key={dt.year} value={dt.year}>
+                    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                      <Typography>
+                        Information and form sent to municipality:{' '}
+                        <Box component="span">{dt.sentDate ? 'Yes' : 'No'}</Box>
+                      </Typography>
 
-                    <Typography>
-                      Time for sending information and form:{' '}
-                      {dt.sentDate ? (
-                        <Box component="span">{formatDate(dt.sentDate as unknown as string, 'Pp')}</Box>
-                      ) : (
-                        <Box component="span">N/A</Box>
-                      )}
-                    </Typography>
+                      <Typography>
+                        Time for sending information and form:{' '}
+                        {dt.sentDate ? (
+                          <Box component="span">{formatDate(dt.sentDate as unknown as string, 'Pp')}</Box>
+                        ) : (
+                          <Box component="span">N/A</Box>
+                        )}
+                      </Typography>
 
-                    <Typography>
-                      Time scheduled with municipality:{' '}
-                      {dt.meetingDate ? (
-                        <Box component="span">{formatDate(dt.meetingDate as unknown as string, 'Pp')}</Box>
-                      ) : (
-                        <Box component="span">N/A</Box>
-                      )}
-                    </Typography>
+                      <Typography>
+                        Time scheduled with municipality:{' '}
+                        {dt.meetingDate ? (
+                          <Box component="span">{formatDate(dt.meetingDate as unknown as string, 'Pp')}</Box>
+                        ) : (
+                          <Box component="span">N/A</Box>
+                        )}
+                      </Typography>
 
-                    <Typography>
-                      Recurring Consultation Form shared with NPA:{' '}
-                      <Box component="span">{dt.infoSharedWithAuthority ? 'Yes' : 'No'}</Box>
-                    </Typography>
+                      <Typography>
+                        Recurring Consultation Form shared with NPA:{' '}
+                        <Box component="span">{dt.infoSharedWithAuthority ? 'Yes' : 'No'}</Box>
+                      </Typography>
 
-                    <Typography>
-                      Date when Recurring Consultation form was shared with NPA:{' '}
-                      {dt.dateSharedWithAuthority ? (
-                        <Box component="span">{formatDate(dt.dateSharedWithAuthority as unknown as string)}</Box>
-                      ) : (
-                        <Box component="span">N/A</Box>
-                      )}
-                    </Typography>
-                  </Box>
-                </TabPanel>
-              );
-            })}
-          </TabContext>
+                      <Typography>
+                        Date when Recurring Consultation form was shared with NPA:{' '}
+                        {dt.dateSharedWithAuthority ? (
+                          <Box component="span">{formatDate(dt.dateSharedWithAuthority as unknown as string)}</Box>
+                        ) : (
+                          <Box component="span">N/A</Box>
+                        )}
+                      </Typography>
+                    </Box>
+                  </TabPanel>
+                );
+              })}
+            </TabContext>
+          ) : (
+            <Typography>No recurring consultations</Typography>
+          )}
         </CardContent>
       </Card>
       <ClientOnly>

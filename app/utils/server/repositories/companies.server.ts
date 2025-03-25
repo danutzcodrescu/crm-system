@@ -84,3 +84,16 @@ export async function getCompaniesWithCode(): Promise<[string | null, CompanyWit
     return [(e as DatabaseError).detail as string, null];
   }
 }
+
+export async function getCompanies() {
+  try {
+    const dt = await db
+      .select({ id: companies.id, name: companies.name, code: companies.code })
+      .from(companies)
+      .orderBy(asc(companies.name));
+    return [null, dt];
+  } catch (e) {
+    logger.error(e);
+    return [(e as DatabaseError).detail as string, null];
+  }
+}

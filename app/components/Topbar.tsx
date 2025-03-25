@@ -4,6 +4,8 @@ import { AppBar, Box, IconButton, Menu, MenuItem, Toolbar, Typography } from '@m
 import { Form, Link as RLink } from '@remix-run/react';
 import { getYear } from 'date-fns';
 import { useCallback, useState } from 'react';
+import { SearchBox } from './topbar/SearchBox';
+import { ClientOnly } from 'remix-utils/client-only';
 
 const links = [
   { title: 'Dashboard', href: '/' },
@@ -29,8 +31,11 @@ export function Topbar() {
   return (
     <>
       <AppBar position="static">
-        <Toolbar variant="dense" sx={{ display: 'flex' }}>
-          <Box sx={{ flex: 1, display: 'flex', alignItems: 'center' }}>
+        <Toolbar
+          variant="dense"
+          sx={{ display: 'flex', gap: 2, justifyContent: 'space-between', alignItems: 'center' }}
+        >
+          <Box sx={{ display: 'flex', alignItems: 'center' }}>
             <IconButton
               edge="start"
               color="inherit"
@@ -44,6 +49,7 @@ export function Topbar() {
               CRM System
             </Typography>
           </Box>
+          <SearchBox />
           <Form method="delete" action="/api/auth">
             <IconButton type="submit" color="inherit" aria-label="logout" sx={{ ml: 'auto' }}>
               <ExitToApp />
