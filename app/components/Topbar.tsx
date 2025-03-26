@@ -5,7 +5,6 @@ import { Form, Link as RLink } from '@remix-run/react';
 import { getYear } from 'date-fns';
 import { useCallback, useState } from 'react';
 import { SearchBox } from './topbar/SearchBox';
-import { ClientOnly } from 'remix-utils/client-only';
 
 const links = [
   { title: 'Dashboard', href: '/' },
@@ -19,6 +18,7 @@ const links = [
   { title: 'General information', href: `/general-information?year=${getYear(new Date())}` },
   { title: 'Years', href: '/years' },
   { title: 'Statuses', href: '/statuses' },
+  { title: 'Recent logs', href: '/logs' },
 ];
 
 export function Topbar() {

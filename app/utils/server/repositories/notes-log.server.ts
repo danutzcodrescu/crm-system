@@ -1,8 +1,8 @@
-import { desc, eq } from 'drizzle-orm';
+import { desc, eq, lte, gte, and } from 'drizzle-orm';
 import { DatabaseError } from 'pg';
 
 import { logger } from '../logger.server';
-import { logs } from '../schema.server';
+import { companies, logs } from '../schema.server';
 import { db } from './db.server';
 
 export interface LogForCompany {
@@ -61,5 +61,37 @@ export async function getLogsForCompany(companyId: string): Promise<[string | un
   } catch (e) {
     logger.error(e);
     return [`Could not retrieve logs for company`, undefined];
+  }
+}
+
+export interface LogsWithCompanyDetails {
+  id: string;
+  companyId: string;
+  companyName: string;
+  description: string;
+  date: Date;
+}
+
+export async function getRecentLogs(): Promise<[string | undefined, LogsWithCompanyDetails[] | undefined]> {
+  try {
+    logger.info('Fetching logs for period');
+    return [
+      undefined,
+      (await db
+        .select({
+          id: logs.id,
+          companyId: logs.companyId,
+          companyName: companies.name,
+          description: logs.description,
+          date: logs.date,
+        })
+        .from(logs)
+        .leftJoin(companies, eq(logs.companyId, companies.id))
+        .limit(50)
+        .orderBy(desc(logs.date))) as LogsWithCompanyDetails[],
+    ];
+  } catch (e) {
+    logger.error('Could not retrieve logs for period', e);
+    return [`Could not retrieve logs for period`, undefined];
   }
 }

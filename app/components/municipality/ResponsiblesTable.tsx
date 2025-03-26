@@ -178,7 +178,7 @@ export function ResponsiblesTable({ data, companyId, fetcher }: Props) {
             isOpen={!!fields.length}
             handleClose={() => setFields([])}
             fields={fields}
-            title={`Edit responsible`}
+            title={fields?.[0]?.name === 'companyId' ? 'Add responsible' : `Edit responsible`}
             fetcher={fetcher}
             method={fields?.[0]?.name === 'companyId' ? 'POST' : 'PATCH'}
             url={

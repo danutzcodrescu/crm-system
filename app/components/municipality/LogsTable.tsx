@@ -1,5 +1,5 @@
 import PostAdd from '@mui/icons-material/PostAdd';
-import { Box, IconButton, Stack, Typography } from '@mui/material';
+import { Box, IconButton, Stack, Tooltip, Typography } from '@mui/material';
 import { useFetcher } from '@remix-run/react';
 import { ColumnDef } from '@tanstack/react-table';
 import { useCallback, useMemo } from 'react';
@@ -78,6 +78,7 @@ export function LogsTable({ data, companyId, fetcher }: Props) {
         name: 'date',
         type: 'date',
         required: true,
+        defaultValue: new Date() as unknown as string,
       },
       {
         label: 'Description',
@@ -123,9 +124,11 @@ export function LogsTable({ data, companyId, fetcher }: Props) {
         <Typography variant="h6" component="h2" sx={{ fontWeight: 'bold', flex: 1 }} gutterBottom>
           Logs
         </Typography>
-        <IconButton size="small" aria-label="Add new log" onClick={() => setNewLogFields()}>
-          <PostAdd />
-        </IconButton>
+        <Tooltip title="Add new log">
+          <IconButton size="small" aria-label="Add new log" onClick={() => setNewLogFields()}>
+            <PostAdd />
+          </IconButton>
+        </Tooltip>
       </Stack>
       <Box sx={{ minWidth: 650 }}>
         <PaginatedTable defaultSorting={{ id: 'date', desc: true }} columns={columns} data={data} />
@@ -136,7 +139,7 @@ export function LogsTable({ data, companyId, fetcher }: Props) {
             isOpen={!!fields.length}
             handleClose={() => setFields([])}
             fields={fields}
-            title={`Edit log`}
+            title={fields?.[0]?.name === 'companyId' ? 'Add log' : `Edit log`}
             fetcher={fetcher}
             method={fields?.[0]?.name === 'companyId' ? 'POST' : 'PATCH'}
             url={
