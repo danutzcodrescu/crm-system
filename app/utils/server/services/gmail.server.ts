@@ -2,13 +2,14 @@ import { decodeHex, encodeHexLowerCase } from '@oslojs/encoding';
 import { eq } from 'drizzle-orm';
 import { gmail_v1, google } from 'googleapis';
 import { decode } from 'html-entities';
+import sanitizeHtml from 'sanitize-html';
+
 import { auth, storeRefreshToken } from '../auth.server';
 import { getSecret } from '../infisical.server';
 import { logger } from '../logger.server';
 import { db } from '../repositories/db.server';
-import { companies, users } from '../schema.server';
-import sanitizeHtml from 'sanitize-html';
 import { cleanEmptyTags, cleanGmailReply, removeQuotedReplies } from '../sanitize.server';
+import { companies, users } from '../schema.server';
 
 const clientId = await getSecret('GMAIL_CLIENT_ID');
 const clientSecret = await getSecret('GMAIL_CLIENT_SECRET');
@@ -68,8 +69,8 @@ function getBodyContent(part: gmail_v1.Schema$MessagePart): string {
 
   if (part?.parts) {
     // Prefer HTML content over plain text
-    const htmlPart = part.parts.find((p: any) => p.mimeType === 'text/html');
-    const textPart = part.parts.find((p: any) => p.mimeType === 'text/plain');
+    const htmlPart = part.parts.find((p) => p.mimeType === 'text/html');
+    const textPart = part.parts.find((p) => p.mimeType === 'text/plain');
 
     if (htmlPart?.body?.data) {
       const text = sanitizeHtml(decodeContent(htmlPart.body.data), {
@@ -97,11 +98,11 @@ function getBodyContent(part: gmail_v1.Schema$MessagePart): string {
 export const gmail = {
   getEmail: async function (): Promise<[string | null, string | null]> {
     try {
-      const resp = await google.people({ version: 'v1', auth: oauth2Client }).people.get({
-        resourceName: 'people/me',
-        personFields: 'emailAddresses',
+      const resp = await google.gmail({ version: 'v1', auth: oauth2Client }).users.getProfile({
+        userId: 'me',
+        fields: 'emailAddress',
       });
-      return [null, resp.data.emailAddresses?.[0]?.value ?? null];
+      return [null, resp.data.emailAddress as string];
     } catch (error) {
       logger.error('Error getting email', { error });
       return ['could not fetch email data', null];
@@ -115,7 +116,6 @@ export const gmail = {
         'https://www.googleapis.com/auth/gmail.readonly',
         'https://www.googleapis.com/auth/gmail.compose',
         'https://www.googleapis.com/auth/gmail.modify',
-        'https://www.googleapis.com/auth/userinfo.profile',
       ],
       state: path,
       include_granted_scopes: true,
@@ -189,6 +189,7 @@ export const gmail = {
     // Process each message in the thread
     const messagesPromises = response.data.messages.toReversed().map(async (message) => {
       // Get headers
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const headers = message.payload?.headers?.reduce((acc: any, header) => {
         acc[header.name?.toLowerCase() ?? ''] = header.value;
         return acc;

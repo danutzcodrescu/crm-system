@@ -1,4 +1,4 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
+ 
 import { Box, Card, CardContent } from '@mui/material';
 import { json, LoaderFunctionArgs, redirect } from '@remix-run/node';
 import { useFetcher, useLoaderData } from '@remix-run/react';
@@ -34,7 +34,7 @@ import { getReportingForCompany, ReportingData } from '~/utils/server/repositori
 import { getResponsiblesForMunicipality, ResponsibleData } from '~/utils/server/repositories/responsibles.server';
 import { getAllStatuses, Status } from '~/utils/server/repositories/status.server';
 import { getAllUsers, User } from '~/utils/server/repositories/users.server';
-import { EmailMessage, getEmailsPerMunicipality, gmail, Thread } from '~/utils/server/services/gmail.server';
+import { gmail } from '~/utils/server/services/gmail.server';
 
 interface LoaderResponse {
   logs: LogForCompany[];
@@ -210,9 +210,7 @@ export default function Municipality() {
         <InvoicingCard data={municipalityData.invoicing} fetcher={fetcher} />
 
         <GeneralInformationCard data={municipalityData.generalInformation} fetcher={fetcher} />
-        {municipalityData.emailAddress?.length && municipalityData.emailAddress ? (
-          <EmailsCard email={municipalityData.emailAddress} />
-        ) : null}
+        {municipalityData.emailAddress ? <EmailsCard email={municipalityData.emailAddress} /> : null}
       </Box>
     </PageContainer>
   );
