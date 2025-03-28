@@ -102,7 +102,6 @@ interface UpdateMunicipalityArgs {
 }
 
 export async function updateMunicipality(args: UpdateMunicipalityArgs): Promise<[null, string] | [string, null]> {
-  console.log('test', args.responsibleId);
   try {
     logger.info('Updating municipalities data');
     await db.update(companies).set(args).where(eq(companies.id, args.companyId));

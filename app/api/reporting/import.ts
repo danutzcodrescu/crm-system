@@ -65,7 +65,6 @@ export async function action({ request }: ActionFunctionArgs) {
 
   const formData = await unstable_parseMultipartFormData(request, uploadHandler);
   const year = formData.get('year') as string;
-
   if (!year || formData.get('file') !== 'parsed') {
     return json({ message: 'Invalid file', severity: 'error', timeStamp: Date.now() }, { status: 400 });
   }

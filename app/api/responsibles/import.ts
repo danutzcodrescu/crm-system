@@ -25,7 +25,6 @@ export async function action({ request }: ActionFunctionArgs) {
   const isLoggedIn = await auth.isLoggedIn(request);
   if (!isLoggedIn) return redirect('/signin');
   let dt: ContactData[] = [];
-  console.log('test');
   const uploadHandler = unstable_composeUploadHandlers(
     async ({ name, data }) => {
       if (name !== 'file') {
@@ -46,7 +45,6 @@ export async function action({ request }: ActionFunctionArgs) {
           .slice(1) as ContactData[];
         return 'parsed';
       } catch (e) {
-        console.log(e);
         logger.error(e);
         return 'error';
       }

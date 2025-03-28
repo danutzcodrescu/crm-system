@@ -5,6 +5,7 @@ import { useFetcher, useLoaderData } from '@remix-run/react';
 
 import { AgreementCard } from '~/components/municipality/AgreementCard';
 import { CompensationCard } from '~/components/municipality/CompensationCard';
+import { EmailsCard } from '~/components/municipality/EmailsCard';
 import { GeneralInformationCard } from '~/components/municipality/GeneralInformationCard';
 import { InitialConsultationCard } from '~/components/municipality/InitialConsultationCard';
 import { InvoicingCard } from '~/components/municipality/InvoicingCard';
@@ -33,6 +34,7 @@ import { getReportingForCompany, ReportingData } from '~/utils/server/repositori
 import { getResponsiblesForMunicipality, ResponsibleData } from '~/utils/server/repositories/responsibles.server';
 import { getAllStatuses, Status } from '~/utils/server/repositories/status.server';
 import { getAllUsers, User } from '~/utils/server/repositories/users.server';
+import { EmailMessage, getEmailsPerMunicipality, gmail, Thread } from '~/utils/server/services/gmail.server';
 
 interface LoaderResponse {
   logs: LogForCompany[];
@@ -58,11 +60,15 @@ interface LoaderResponse {
   compensation: CompensationDataPerCompany[];
   invoicing: InvoicingData[];
   users: User[];
+  emailAddress: string;
 }
 
 export async function loader({ request, params }: LoaderFunctionArgs) {
   const isLoggedIn = await auth.isLoggedIn(request);
   if (!isLoggedIn) return redirect('/signin');
+  if (!gmail.isTokenSet()) {
+    await gmail.getRedirectUrlIfThereIsNoToken(request);
+  }
 
   const id = params.municipalityId as string;
   const currentYear = new Date().getFullYear();
@@ -78,6 +84,7 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
     compensationResp,
     invoicingResp,
     usersResp,
+    email,
   ] = await Promise.all([
     getLogsForCompany(id),
     getAllStatuses(),
@@ -90,23 +97,26 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
     getCompensationForCompany(id, currentYear),
     getInvoicingForCompany(id, currentYear),
     getAllUsers(),
+    gmail.getEmail(),
   ]);
 
   if (
-    (logsResp[0] ||
-      statusesResp[0] ||
-      municipalityResp[0] ||
-      responsiblesResp[0] ||
-      initialConsultationResp[0] ||
-      agreementResp[0] ||
-      reportingResp[0] ||
-      generalInformationResp[0] ||
-      compensationResp[0] ||
-      invoicingResp[0],
-    usersResp[0])
+    logsResp[0] ||
+    statusesResp[0] ||
+    municipalityResp[0] ||
+    responsiblesResp[0] ||
+    initialConsultationResp[0] ||
+    agreementResp[0] ||
+    reportingResp[0] ||
+    generalInformationResp[0] ||
+    compensationResp[0] ||
+    invoicingResp[0] ||
+    usersResp[0]
   ) {
     return json({ message: 'Could not fetch data for company', severity: 'error' }, { status: 500 });
   }
+
+  setImmediate(() => gmail.clearRefreshToken());
 
   // Fetch recurring consultation data for all years in one query
   const [recurringConsultationError, recurringConsultationData] = await getRecurringConsultationForCompanyAndYears(
@@ -135,6 +145,7 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
       generalInformation: generalInformationResp[1],
       compensation: compensationResp[1],
       invoicing: invoicingResp[1],
+      emailAddress: email?.[1],
     },
     severity: 'success',
   });
@@ -199,6 +210,9 @@ export default function Municipality() {
         <InvoicingCard data={municipalityData.invoicing} fetcher={fetcher} />
 
         <GeneralInformationCard data={municipalityData.generalInformation} fetcher={fetcher} />
+        {municipalityData.emailAddress?.length && municipalityData.emailAddress ? (
+          <EmailsCard email={municipalityData.emailAddress} />
+        ) : null}
       </Box>
     </PageContainer>
   );
