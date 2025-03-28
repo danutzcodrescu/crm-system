@@ -1,4 +1,3 @@
- 
 import { Box, Card, CardContent } from '@mui/material';
 import { json, LoaderFunctionArgs, redirect } from '@remix-run/node';
 import { useFetcher, useLoaderData } from '@remix-run/react';

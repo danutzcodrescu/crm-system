@@ -2,7 +2,15 @@ import { json, LoaderFunctionArgs, redirect } from '@remix-run/node';
 import { Outlet } from '@remix-run/react';
 
 import { auth } from '~/utils/server/auth.server';
-import { getEmailsPerMunicipality, gmail } from '~/utils/server/services/gmail.server';
+import { getEmailsPerMunicipality, gmail, Thread } from '~/utils/server/services/gmail.server';
+
+export interface EmailApiResponse {
+  message: {
+    emails: Thread[];
+    municipalityId: string;
+  };
+  severity: 'success';
+}
 
 export async function loader({ request }: LoaderFunctionArgs) {
   const isLoggedIn = await auth.isLoggedIn(request);
@@ -19,7 +27,7 @@ export async function loader({ request }: LoaderFunctionArgs) {
   if (error) {
     return json({ message: 'Could not fetch emails', severity: 'error' }, { status: 500 });
   }
-  return json({ message: data, severity: 'success' }, { status: 200 });
+  return json({ message: { emails: data, municipalityId: companyId }, severity: 'success' }, { status: 200 });
 }
 
 export default function EmailApiRoute() {

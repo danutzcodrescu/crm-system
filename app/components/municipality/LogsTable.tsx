@@ -131,7 +131,13 @@ export function LogsTable({ data, companyId, fetcher }: Props) {
         </Tooltip>
       </Stack>
       <Box sx={{ minWidth: 650 }}>
-        <PaginatedTable defaultSorting={{ id: 'date', desc: true }} columns={columns} data={data} />
+        <PaginatedTable
+          tableHeight="950px"
+          defaultPageSize={10}
+          defaultSorting={{ id: 'date', desc: true }}
+          columns={columns}
+          data={data}
+        />
       </Box>
       <ClientOnly>
         {() => (

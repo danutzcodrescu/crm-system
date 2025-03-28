@@ -3,7 +3,7 @@ import { useIntersectionObserver } from '@react-hookz/web';
 import { useFetcher, useParams } from '@remix-run/react';
 import { useEffect, useRef, useState } from 'react';
 
-import { loader } from '~/api/emails/route';
+import { EmailApiResponse, loader } from '~/api/emails/route';
 import { Thread } from '~/utils/server/services/gmail.server';
 
 import { ThreadsList } from './ThreadList';
@@ -18,19 +18,22 @@ export function EmailsCard({ email }: EmailCardProps) {
   const [thread, setThread] = useState<Thread | null>(null);
   const cardRef = useRef<HTMLDivElement>(null); // Ref for IntersectionObserver
   const fetcher = useFetcher<typeof loader>();
+  console.log('fetcher', fetcher?.data);
   const intersection = useIntersectionObserver(cardRef, {
     root: null, // relative to the viewport
     rootMargin: '0px 0px 300px 0px', // 300px margin below the viewport (triggers earlier)
     threshold: [0.01], // Trigger if even a small part is within the margin
   });
 
-  // Effect for Intersection Observer
   useEffect(() => {
-    if (intersection?.isIntersecting) {
+    if (
+      intersection?.isIntersecting &&
+      (!fetcher.data || (fetcher?.data as EmailApiResponse)?.message?.municipalityId !== params.municipalityId)
+    ) {
       fetcher.load(`/api/emails?municipalityId=${params.municipalityId}`);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [params.companyId, intersection?.isIntersecting]);
+  }, [params.companyId, intersection?.isIntersecting, fetcher.data]);
 
   return (
     <Card
@@ -72,14 +75,16 @@ export function EmailsCard({ email }: EmailCardProps) {
               </Box>
             ) : null}
 
-            {fetcher.data?.message?.length ? (
+            {fetcher.state === 'idle' && (fetcher.data as EmailApiResponse)?.message?.emails?.length ? (
               <ThreadsList
-                data={fetcher.data.message as Thread[]}
+                data={(fetcher?.data as EmailApiResponse).message.emails}
                 onClick={(thread) => setThread(thread)}
                 email={email}
               />
             ) : null}
-            {fetcher.data?.message?.length === 0 && fetcher.state === 'idle' ? (
+            {fetcher.state === 'idle' &&
+            (fetcher.data as EmailApiResponse)?.message?.emails?.length === 0 &&
+            fetcher.state === 'idle' ? (
               <Typography>No emails found.</Typography>
             ) : null}
           </>

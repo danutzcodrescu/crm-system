@@ -62,6 +62,8 @@ interface Props<T> {
   hideHeader?: true;
   disablePagination?: true;
   defaultSorting?: ColumnSort;
+  tableHeight?: string;
+  defaultPageSize?: number;
 }
 
 function cellPinning<T>(column: Column<T>): BoxProps['sx'] {
@@ -92,6 +94,8 @@ export function PaginatedTable<T extends { id: string; warning?: boolean }>({
   hideHeader,
   disablePagination,
   defaultSorting,
+  tableHeight,
+  defaultPageSize,
 }: Props<T>) {
   const tableContainer = useRef<HTMLDivElement>(null);
   const [dt, setDt] = useState(data);
@@ -124,7 +128,7 @@ export function PaginatedTable<T extends { id: string; warning?: boolean }>({
     onColumnVisibilityChange: setColumnVisibility,
     initialState: {
       pagination: {
-        pageSize: 50,
+        pageSize: defaultPageSize ?? 50,
       },
       sorting: [
         defaultSorting ?? {
@@ -161,7 +165,13 @@ export function PaginatedTable<T extends { id: string; warning?: boolean }>({
   const { pageSize, pageIndex } = table.getState().pagination;
 
   return (
-    <Box sx={{ width: '100%', maxHeight: 'calc(100vh - 50px - 56px)' }}>
+    <Box
+      sx={{
+        width: '100%',
+        maxHeight: tableHeight ?? 'calc(100vh - 50px - 56px)',
+        overflow: tableHeight ? 'auto' : 'initial',
+      }}
+    >
       <Stack
         direction="row"
         gap={3}
@@ -175,7 +185,11 @@ export function PaginatedTable<T extends { id: string; warning?: boolean }>({
       <TableContainer
         ref={tableContainer}
         component={Paper}
-        sx={{ maxWidth: '100%', maxHeight: 'calc(100vh - 200px)', overflow: 'auto' }}
+        sx={{
+          maxWidth: '100%',
+          maxHeight: tableHeight ? 'none' : 'calc(100vh - 200px)',
+          overflow: 'auto',
+        }}
       >
         <Table sx={{ minWidth: 650 }} stickyHeader>
           <TableHead>
@@ -260,7 +274,7 @@ export function PaginatedTable<T extends { id: string; warning?: boolean }>({
       </TableContainer>
       {!disablePagination ? (
         <TablePagination
-          rowsPerPageOptions={[50, 100, 200, 290]}
+          rowsPerPageOptions={[10, 50, 100, 200, 290]}
           component="div"
           count={table.getFilteredRowModel().rows.length}
           rowsPerPage={pageSize}

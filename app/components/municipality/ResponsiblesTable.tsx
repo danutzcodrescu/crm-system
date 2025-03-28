@@ -170,7 +170,14 @@ export function ResponsiblesTable({ data, companyId, fetcher }: Props) {
         </IconButton>
       </Stack>
       <Box sx={{ minWidth: 650 }}>
-        <PaginatedTable defaultSorting={{ id: 'name', desc: false }} disablePagination columns={columns} data={data} />
+        <PaginatedTable
+          tableHeight="950px"
+          defaultPageSize={10}
+          defaultSorting={{ id: 'name', desc: false }}
+          disablePagination
+          columns={columns}
+          data={data}
+        />
       </Box>
       <ClientOnly>
         {() => (
