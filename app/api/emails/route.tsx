@@ -1,5 +1,6 @@
 import { json, LoaderFunctionArgs, redirect } from '@remix-run/node';
 import { Outlet } from '@remix-run/react';
+
 import { auth } from '~/utils/server/auth.server';
 import { getEmailsPerMunicipality, gmail } from '~/utils/server/services/gmail.server';
 

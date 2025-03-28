@@ -1,5 +1,6 @@
 import { ActionFunctionArgs, json, redirect } from '@remix-run/node';
 import { Outlet } from '@remix-run/react';
+
 import { auth } from '~/utils/server/auth.server';
 import { createLog } from '~/utils/server/repositories/notes-log.server';
 

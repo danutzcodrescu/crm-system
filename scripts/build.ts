@@ -1,4 +1,3 @@
-import { readFileSync } from 'fs';
 import { $ } from 'zx';
 
 // Enable better error messages

@@ -1,7 +1,8 @@
 import { Box } from '@mui/material';
 import { isToday } from 'date-fns';
+
 import { extractNameFromHeader } from '~/utils/emails';
-import { EmailMessage, getEmailsPerMunicipality, Thread } from '~/utils/server/services/gmail.server';
+import { getEmailsPerMunicipality, Thread } from '~/utils/server/services/gmail.server';
 
 interface Props {
   data: NonNullable<Awaited<ReturnType<typeof getEmailsPerMunicipality>>[1]>;

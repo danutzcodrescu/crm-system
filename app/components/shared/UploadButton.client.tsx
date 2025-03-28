@@ -1,7 +1,7 @@
-import { Box, IconButton, Tooltip } from '@mui/material';
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
-import { ChangeEvent, useCallback } from 'react';
+import { Box, IconButton, Tooltip } from '@mui/material';
 import { FetcherWithComponents } from '@remix-run/react';
+import { ChangeEvent, useCallback } from 'react';
 
 interface UploadButtonProps {
   title: string;
@@ -25,6 +25,7 @@ export function UploadButton({ title, fetcher, path, search }: UploadButtonProps
         });
       }
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [fetcher, search],
   );
   return (

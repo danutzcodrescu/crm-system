@@ -104,7 +104,7 @@ export default function Reporting() {
             {getValue() as string}
           </Link>
         ),
-        // eslint-disable-next-line react-hooks/exhaustive-deps
+         
       },
       {
         header: 'Land area(km²)',

@@ -107,7 +107,7 @@ export default function Invoicing() {
             {getValue() as string}
           </Link>
         ),
-        // eslint-disable-next-line react-hooks/exhaustive-deps
+         
       },
       {
         header: 'Total compensation',

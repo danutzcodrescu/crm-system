@@ -5,6 +5,7 @@ import { Link as RLink, useFetcher, useLoaderData } from '@remix-run/react';
 import { ColumnDef } from '@tanstack/react-table';
 import { useCallback, useMemo } from 'react';
 import { ClientOnly } from 'remix-utils/client-only';
+
 import { EditDialog } from '~/components/shared/EditDialog.client';
 import { PageContainer } from '~/components/shared/PageContainer';
 import { PaginatedTable } from '~/components/shared/table/PaginatedTable';
@@ -57,7 +58,7 @@ export default function Logs() {
             {getValue() as string}
           </Link>
         ),
-        // eslint-disable-next-line react-hooks/exhaustive-deps
+         
       },
       {
         header: 'Date',

@@ -1,6 +1,6 @@
 import PersonAdd from '@mui/icons-material/PersonAdd';
 import { Box, IconButton, Link, Stack, Typography } from '@mui/material';
-import { FetcherWithComponents, useFetcher } from '@remix-run/react';
+import { FetcherWithComponents } from '@remix-run/react';
 import { ColumnDef } from '@tanstack/react-table';
 import { useCallback, useMemo } from 'react';
 import { ClientOnly } from 'remix-utils/client-only';
@@ -8,10 +8,10 @@ import { ClientOnly } from 'remix-utils/client-only';
 import { useEditFields } from '~/hooks/editFields';
 import { ResponsibleData } from '~/utils/server/repositories/responsibles.server';
 
+import { DeleteButton } from '../shared/DeleteButton';
 import { EditDialog } from '../shared/EditDialog.client';
 import { PaginatedTable } from '../shared/table/PaginatedTable';
 import { TableActionsCell } from '../shared/table/TableActionsCell';
-import { DeleteButton } from '../shared/DeleteButton';
 
 interface Props {
   data: ResponsibleData[];

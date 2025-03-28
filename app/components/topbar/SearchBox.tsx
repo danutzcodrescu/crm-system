@@ -1,6 +1,7 @@
 import { Autocomplete, CircularProgress, TextField } from '@mui/material';
 import { useFetcher, useNavigate } from '@remix-run/react';
-import { useCallback, useState, useTransition } from 'react';
+import { useCallback, useState } from 'react';
+
 import { loader } from '~/api/municipalities/layout';
 
 export function SearchBox() {
@@ -13,6 +14,7 @@ export function SearchBox() {
     if (!fetcher.data?.message?.length) {
       fetcher.submit({}, { method: 'GET', action: '/api/municipalities', relative: 'path' });
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [fetcher.data?.message]);
 
   const handleClose = useCallback(() => {

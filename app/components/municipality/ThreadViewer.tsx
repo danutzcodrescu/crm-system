@@ -1,9 +1,10 @@
-import { Box, Typography, Divider, Paper, IconButton, Stack, Tooltip } from '@mui/material';
-import { isToday } from 'date-fns';
-import { EmailMessage, Thread } from '~/utils/server/services/gmail.server';
-import { base64ToBlob, extractNameFromHeader, extractEmailFromHeader } from '~/utils/emails';
 import BackIcon from '@mui/icons-material/ArrowBack';
 import ArticleIcon from '@mui/icons-material/Article';
+import { Box, Divider, IconButton, Paper, Stack, Tooltip, Typography } from '@mui/material';
+import { isToday } from 'date-fns';
+
+import { extractEmailFromHeader, extractNameFromHeader } from '~/utils/emails';
+import { Thread } from '~/utils/server/services/gmail.server';
 
 interface ThreadViewerProps {
   thread: Thread;
@@ -71,7 +72,12 @@ export function ThreadViewer({ thread, onClose, email }: ThreadViewerProps) {
                 <Divider />
                 <Stack gap={2} direction="row" alignItems="center">
                   {emailItem.attachments.map((attachment) => (
-                    <Stack gap={1} direction={'row'} alignItems="center">
+                    <Stack
+                      key={attachment.filename + attachment.mimeType}
+                      gap={1}
+                      direction={'row'}
+                      alignItems="center"
+                    >
                       <Typography variant="body2">{attachment.filename}</Typography>
                       <IconButton
                         title={attachment.filename}

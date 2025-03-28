@@ -1,7 +1,8 @@
+import { ne } from 'drizzle-orm';
+
 import { logger } from '../logger.server';
 import { users } from '../schema.server';
 import { db } from './db.server';
-import { ne } from 'drizzle-orm';
 
 export interface User {
   id: number;

@@ -1,10 +1,11 @@
 import ExitToApp from '@mui/icons-material/ExitToApp';
-import WifiIcon from '@mui/icons-material/Wifi';
 import MenuIcon from '@mui/icons-material/Menu';
-import { AppBar, Box, IconButton, Link, Menu, MenuItem, Stack, Toolbar, Typography } from '@mui/material';
+import WifiIcon from '@mui/icons-material/Wifi';
+import { AppBar, Box, IconButton, Menu, MenuItem, Stack, Toolbar, Typography } from '@mui/material';
 import { Form, Link as RLink } from '@remix-run/react';
 import { getYear } from 'date-fns';
 import { useCallback, useState } from 'react';
+
 import { SearchBox } from './topbar/SearchBox';
 
 const links = [

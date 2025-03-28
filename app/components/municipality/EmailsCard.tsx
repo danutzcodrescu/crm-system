@@ -1,14 +1,13 @@
 import { Box, Card, CardContent, Skeleton, Typography } from '@mui/material';
-
-import { isToday } from 'date-fns';
-
-import { EmailMessage, getEmailsPerMunicipality, gmail, Thread } from '~/utils/server/services/gmail.server';
-import { ThreadsList } from './ThreadList';
-import { Suspense, useEffect, useRef, useState } from 'react';
-import { ThreadViewer } from './ThreadViewer';
-import { Await, useFetcher, useParams } from '@remix-run/react';
 import { useIntersectionObserver } from '@react-hookz/web';
+import { useFetcher, useParams } from '@remix-run/react';
+import { useEffect, useRef, useState } from 'react';
+
 import { loader } from '~/api/emails/route';
+import { Thread } from '~/utils/server/services/gmail.server';
+
+import { ThreadsList } from './ThreadList';
+import { ThreadViewer } from './ThreadViewer';
 
 interface EmailCardProps {
   email: string;
@@ -30,6 +29,7 @@ export function EmailsCard({ email }: EmailCardProps) {
     if (intersection?.isIntersecting) {
       fetcher.load(`/api/emails?municipalityId=${params.municipalityId}`);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [params.companyId, intersection?.isIntersecting]);
 
   return (

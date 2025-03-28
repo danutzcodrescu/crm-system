@@ -7,9 +7,9 @@ import { ClientOnly } from 'remix-utils/client-only';
 import { useEditFields } from '~/hooks/editFields';
 import { MunicipalityData } from '~/utils/server/repositories/municipalities.server';
 import { Status } from '~/utils/server/repositories/status.server';
+import { User } from '~/utils/server/repositories/users.server';
 
 import { EditDialog } from '../shared/EditDialog.client';
-import { User } from '~/utils/server/repositories/users.server';
 
 interface Props {
   municipality: MunicipalityData;

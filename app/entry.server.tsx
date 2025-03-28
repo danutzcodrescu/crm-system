@@ -1,10 +1,8 @@
-import * as Sentry from '@sentry/remix';
 /**
  * By default, Remix will handle generating the HTTP Response for you.
  * You are free to delete this file if you'd like to, but if you ever want it revealed again, you can run `npx remix reveal` ✨
  * For more information, see https://remix.run/file-conventions/entry.server
  */
-
 import { PassThrough } from 'node:stream';
 
 import { CacheProvider } from '@emotion/react';
@@ -14,16 +12,19 @@ import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import type { AppLoadContext, EntryContext } from '@remix-run/node';
 import { createReadableStreamFromReadable } from '@remix-run/node';
 import { RemixServer } from '@remix-run/react';
+import * as Sentry from '@sentry/remix';
 import { sv } from 'date-fns/locale';
 import { isbot } from 'isbot';
 import { renderToPipeableStream, renderToString } from 'react-dom/server';
 
 import { createEmotion } from './emotion/emotion-server';
+import { logger } from './utils/server/logger.server';
 import { handlePDFRequest } from './utils/server/pdf.server';
 import { theme } from './utils/theme';
 
-export const handleError = Sentry.wrapHandleErrorWithSentry((error, { request }) => {
-  // Custom handleError implementation
+export const handleError = Sentry.wrapHandleErrorWithSentry((error) => {
+  logger.error('Error in handleRequest', error);
+  Sentry.captureException(error);
 });
 
 const ABORT_DELAY = 5_000;

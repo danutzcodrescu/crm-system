@@ -1,8 +1,9 @@
+import { lt } from 'drizzle-orm';
 import { schedule } from 'node-cron';
+
+import { logger } from '~/utils/server/logger.server.js';
 import { db } from '~/utils/server/repositories/db.server.js';
 import { sessions } from '~/utils/server/schema.server.js';
-import { lt } from 'drizzle-orm';
-import { logger } from '~/utils/server/logger.server.js';
 
 export const cleanExpiredSessions = schedule(
   '00 04 * * * *',

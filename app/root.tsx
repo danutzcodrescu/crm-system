@@ -1,4 +1,3 @@
-import { captureRemixErrorBoundaryError } from '@sentry/remix';
 import '@fontsource/roboto/300.css';
 import '@fontsource/roboto/400.css';
 import '@fontsource/roboto/500.css';
@@ -6,6 +5,7 @@ import '@fontsource/roboto/700.css';
 
 import { withEmotionCache } from '@emotion/react';
 import { Links, Meta, Outlet, Scripts, ScrollRestoration, useRouteError } from '@remix-run/react';
+import { captureRemixErrorBoundaryError } from '@sentry/remix';
 import { PropsWithChildren } from 'react';
 
 import { useInjectStyles } from './emotion/emotion-client';

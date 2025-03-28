@@ -2,7 +2,7 @@ import { createRequestHandler } from '@remix-run/express';
 import compression from 'compression';
 import express from 'express';
 import { join } from 'path';
-import { pinoHttp } from 'pino-http';
+
 import { cleanExpiredSessions } from './cron.js';
 // import helmet from 'helmet';
 

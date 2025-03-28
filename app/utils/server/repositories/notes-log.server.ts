@@ -1,4 +1,4 @@
-import { desc, eq, lte, gte, and } from 'drizzle-orm';
+import {desc, eq } from 'drizzle-orm';
 import { DatabaseError } from 'pg';
 
 import { logger } from '../logger.server';

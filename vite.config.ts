@@ -1,7 +1,8 @@
 import { vitePlugin as remix } from '@remix-run/dev';
-import { defineConfig } from 'vite';
 import { sentryVitePlugin } from '@sentry/vite-plugin';
+import { defineConfig } from 'vite';
 import tsconfigPaths from 'vite-tsconfig-paths';
+
 import pkg from './package.json';
 
 export default defineConfig(({ isSsrBuild }) => ({

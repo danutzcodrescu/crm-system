@@ -17,7 +17,7 @@ export function removeQuotedReplies(text: string) {
         foundQuoteParent = true;
 
         // Get all siblings that come after this parent
-        let $nextSiblings = $parent.nextAll();
+        const $nextSiblings = $parent.nextAll();
 
         // Remove the parent and all following siblings
         $parent.remove();
