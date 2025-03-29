@@ -18,7 +18,6 @@ export function EmailsCard({ email }: EmailCardProps) {
   const [thread, setThread] = useState<Thread | null>(null);
   const cardRef = useRef<HTMLDivElement>(null); // Ref for IntersectionObserver
   const fetcher = useFetcher<typeof loader>();
-  console.log('fetcher', fetcher?.data);
   const intersection = useIntersectionObserver(cardRef, {
     root: null, // relative to the viewport
     rootMargin: '0px 0px 300px 0px', // 300px margin below the viewport (triggers earlier)
@@ -31,6 +30,7 @@ export function EmailsCard({ email }: EmailCardProps) {
       (!fetcher.data || (fetcher?.data as EmailApiResponse)?.message?.municipalityId !== params.municipalityId)
     ) {
       fetcher.load(`/api/emails?municipalityId=${params.municipalityId}`);
+      setThread(null); // Reset thread when loading new emails
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [params.companyId, intersection?.isIntersecting, fetcher.data]);
