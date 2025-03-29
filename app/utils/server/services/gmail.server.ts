@@ -14,14 +14,11 @@ import { companies, users } from '../schema.server';
 const clientId = await getSecret('GMAIL_CLIENT_ID');
 const clientSecret = await getSecret('GMAIL_CLIENT_SECRET');
 const tokenKey = await getSecret('TOKEN_KEY');
+const redirectUrl = await getSecret('GMAIL_REDIRECT_URL');
 
 google.options({ http2: true });
 
-const oauth2Client = new google.auth.OAuth2(
-  clientId.secretValue,
-  clientSecret.secretValue,
-  'http://localhost:4200/gmail-auth-redirect',
-);
+const oauth2Client = new google.auth.OAuth2(clientId.secretValue, clientSecret.secretValue, redirectUrl.secretValue);
 
 // Function to decode base64 content
 const decodeContent = (data: string) => {

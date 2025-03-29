@@ -2,6 +2,7 @@ import { createRequestHandler } from '@remix-run/express';
 import compression from 'compression';
 import express from 'express';
 import { join } from 'path';
+import { pinoHttp } from 'pino-http';
 
 import { cleanExpiredSessions } from './cron.js';
 // import helmet from 'helmet';
@@ -30,19 +31,19 @@ const app = express();
 app.use(compression());
 
 // app.use(helmet());
-// app.use(
-//   pinoHttp({
-//     quietReqLogger: true, // turn off the default logging output
-//     transport: {
-//       target: 'pino-http-print', // use the pino-http-print transport and its formatting output
-//       options: {
-//         destination: 1,
-//         all: true,
-//         translateTime: true,
-//       },
-//     },
-//   }),
-// );
+app.use(
+  pinoHttp({
+    quietReqLogger: true, // turn off the default logging output
+    transport: {
+      target: 'pino-http-print', // use the pino-http-print transport and its formatting output
+      options: {
+        destination: 1,
+        all: true,
+        translateTime: true,
+      },
+    },
+  }),
+);
 
 // http://expressjs.com/en/advanced/best-practice-security.html#at-a-minimum-disable-x-powered-by-header
 app.disable('x-powered-by');

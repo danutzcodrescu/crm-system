@@ -19,7 +19,7 @@ const { getSession, commitSession, destroySession } = createCookieSessionStorage
     httpOnly: true,
     maxAge,
     path: '/',
-    sameSite: process.env.NODE_ENV === 'production' ? 'strict' : 'lax',
+    sameSite: 'lax',
     secure: process.env.NODE_ENV === 'production',
     secrets: [secret.secretValue],
   },

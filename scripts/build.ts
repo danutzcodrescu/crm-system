@@ -42,15 +42,15 @@ async function main() {
     await $`docker image prune -a -f`;
     console.log('✅ docker images removed');
 
-    await $`ssh ${process.env.REMOTE_USER}@${process.env.REMOTE} << 'EOF'
-cd crm
-docker-compose down webapp
-docker rmi $(docker images --format "{{.ID}}" --filter "reference=crm-system*")
-docker load -i docker.tar
-sed -i 's/image: crm-system:[0-9]\+\.[0-9]\+\.[0-9]\+/image: ${imageName}/g' docker-compose.yml
-docker-compose up -d webapp
-rm -f docker.tar
-EOF`;
+    //     await $`ssh ${process.env.REMOTE_USER}@${process.env.REMOTE} << 'EOF'
+    // cd crm
+    // docker-compose down
+    // docker load -i docker.tar
+    // sed -i 's/image: crm-system:[0-9]\+\.[0-9]\+\.[0-9]\+/image: ${imageName}/g' docker-compose.yml
+    // docker-compose up -d
+    // rm -f docker.tar
+    // docker rmi $(docker images --format "{{.ID}}" --filter "reference=crm-system*")
+    // EOF`;
 
     process.exit(0);
   } catch (error) {
