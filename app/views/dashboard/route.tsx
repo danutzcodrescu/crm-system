@@ -1,6 +1,9 @@
-import { Box, Card, CardContent, Link, Stack, Typography } from '@mui/material';
+import Alarm from '@mui/icons-material/Alarm';
+import { Box, Card, CardContent, Link, Stack, Tooltip, Typography } from '@mui/material';
 import { json, LoaderFunctionArgs, MetaFunction, redirect } from '@remix-run/node';
 import { Link as RLink, useLoaderData } from '@remix-run/react';
+import { isAfter } from 'date-fns';
+import { Fragment } from 'react/jsx-runtime';
 
 import { PageContainer } from '~/components/shared/PageContainer';
 import { formatDate } from '~/utils/client/dates';
@@ -14,6 +17,7 @@ import {
 import { getSignedInitialConsultation } from '~/utils/server/repositories/initialConsultation.server';
 import { getInvoicingAggregatedPerYear, InvoicingAggregated } from '~/utils/server/repositories/invoicing.server';
 import { getUpcomingMeetings, UpcomingMeeting } from '~/utils/server/repositories/recurringConsultation.server';
+import { getAllReminders, ReminderData } from '~/utils/server/repositories/reminders.server';
 import { getGroupedReportingPerYear, GroupedReportingPerYear } from '~/utils/server/repositories/reporting.server';
 
 export const meta: MetaFunction = () => {
@@ -31,6 +35,7 @@ interface LoaderResponse {
   invoicing: InvoicingAggregated[];
   recurringConsultations: ConsultationPerYear[];
   upcomingMeetings: UpcomingMeeting[];
+  reminders: ReminderData[];
 }
 
 export async function loader({ request }: LoaderFunctionArgs) {
@@ -38,16 +43,25 @@ export async function loader({ request }: LoaderFunctionArgs) {
     return redirect('/signin');
   }
   const currentYear = new Date().getFullYear();
-  const [initialConsultation, agreement, reporting, compensation, invoicing, recurringConsultations, upcomingMeetings] =
-    await Promise.all([
-      getSignedInitialConsultation(),
-      getInAgreementCount(),
-      getGroupedReportingPerYear(2022, currentYear),
-      getAggregatedCompensationPerYear(2023, currentYear),
-      getInvoicingAggregatedPerYear(2023, currentYear),
-      getCompaniesWithConsultationInYear(currentYear),
-      getUpcomingMeetings(currentYear),
-    ]);
+  const [
+    initialConsultation,
+    agreement,
+    reporting,
+    compensation,
+    invoicing,
+    recurringConsultations,
+    upcomingMeetings,
+    reminders,
+  ] = await Promise.all([
+    getSignedInitialConsultation(),
+    getInAgreementCount(),
+    getGroupedReportingPerYear(2022, currentYear),
+    getAggregatedCompensationPerYear(2023, currentYear),
+    getInvoicingAggregatedPerYear(2023, currentYear),
+    getCompaniesWithConsultationInYear(currentYear),
+    getUpcomingMeetings(currentYear),
+    getAllReminders(),
+  ]);
 
   if (
     initialConsultation[0] ||
@@ -56,7 +70,8 @@ export async function loader({ request }: LoaderFunctionArgs) {
     compensation[0] ||
     invoicing[0] ||
     recurringConsultations[0] ||
-    upcomingMeetings[0]
+    upcomingMeetings[0] ||
+    reminders[0]
   ) {
     return json(
       {
@@ -68,6 +83,7 @@ export async function loader({ request }: LoaderFunctionArgs) {
           invoicing[0] ||
           recurringConsultations[0] ||
           upcomingMeetings[0],
+        reminders: reminders[0],
       },
       { status: 500 },
     );
@@ -84,6 +100,7 @@ export async function loader({ request }: LoaderFunctionArgs) {
     invoicing: invoicing[1],
     recurringConsultations: recurringConsultations[1] || [],
     upcomingMeetings: upcomingMeetings[1] || [],
+    reminders: reminders[1] || [],
   });
 }
 
@@ -93,6 +110,39 @@ export default function Dashboard() {
   return (
     <PageContainer title="Dashboard" additionalTitleElement={null} sx={{ overflow: 'auto' }}>
       <Box sx={{ display: 'flex', gap: 3, flexWrap: 'wrap', bgcolor: 'primary.dark', p: 3, borderRadius: 2, px: 0 }}>
+        <Card sx={{ bgcolor: 'background.paper', flexBasis: '100%' }}>
+          <CardContent>
+            <Typography variant="h6" gutterBottom sx={{ color: 'text.primary', fontWeight: 'bold' }}>
+              Reminders
+            </Typography>
+            {data.reminders.length === 0 ? <Typography color="text.secondary">No reminders</Typography> : null}
+            {data.reminders.length > 0 ? (
+              <Box
+                sx={{
+                  display: 'grid',
+                  gridTemplateColumns: `max-content 1fr max-content 1fr`,
+                  gap: 3,
+                }}
+              >
+                {data.reminders.map((reminder) => (
+                  <Fragment key={reminder.id}>
+                    <Link component={RLink} to={`/municipalities/${reminder.companyId}`} prefetch="intent">
+                      {reminder.companyName}
+                    </Link>
+                    <Stack direction="row" gap={1} alignItems="center">
+                      <Alarm color={isAfter(new Date(reminder.date), new Date()) ? 'primary' : 'error'} />
+                      <Tooltip title={reminder.description}>
+                        <Typography variant="body2" component="span">
+                          {formatDate(reminder.date)}
+                        </Typography>
+                      </Tooltip>
+                    </Stack>
+                  </Fragment>
+                ))}
+              </Box>
+            ) : null}
+          </CardContent>
+        </Card>
         <Card sx={{ bgcolor: 'background.paper' }}>
           <CardContent>
             <Typography variant="h6" gutterBottom sx={{ color: 'text.primary', fontWeight: 'bold' }}>
@@ -106,6 +156,7 @@ export default function Dashboard() {
             </Typography>
           </CardContent>
         </Card>
+
         <Card sx={{ minWidth: 300, bgcolor: 'background.paper' }}>
           <CardContent>
             <Typography variant="h6" gutterBottom sx={{ color: 'text.primary', fontWeight: 'bold' }}>
@@ -277,7 +328,7 @@ export default function Dashboard() {
                 <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(5, 3fr)' }}>
                   {data.recurringConsultations.map((company) => (
                     <Typography key={company.id}>
-                      <Link component={RLink} to={`/municipalities/${company.id}`} underline="hover">
+                      <Link component={RLink} to={`/municipalities/${company.id}`} prefetch="intent">
                         {company.name}
                       </Link>
                       {company.meetingDate ? ` - ${formatDate(company.meetingDate)}` : ''}
@@ -298,7 +349,7 @@ export default function Dashboard() {
                 <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(5, 3fr)' }}>
                   {data.upcomingMeetings.map((meeting, index) => (
                     <Typography key={index}>
-                      <Link component={RLink} to={`/municipalities/${meeting.companyId}`} underline="hover">
+                      <Link component={RLink} to={`/municipalities/${meeting.companyId}`} prefetch="intent">
                         {meeting.companyName}
                       </Link>
                       &nbsp;- {formatDate(meeting.meetingDate)}

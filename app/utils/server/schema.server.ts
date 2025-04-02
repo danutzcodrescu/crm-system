@@ -66,6 +66,7 @@ export const logs = pgTable('logs', {
   id: uuid().primaryKey().defaultRandom(),
   description: text().notNull(),
   companyId: uuid().references(() => companies.id, { onDelete: 'cascade', onUpdate: 'no action' }),
+  reminderId: uuid().references(() => reminders.id, { onDelete: 'cascade', onUpdate: 'no action' }),
   date: timestamp({ mode: 'date', withTimezone: true }).notNull(),
   createdAt: timestamp({ withTimezone: true, mode: 'date' }).notNull().defaultNow(),
   updatedAt: timestamp({ withTimezone: true, mode: 'date' }).$onUpdate(() => new Date()),
@@ -199,6 +200,18 @@ export const invoicing = pgTable(
     return [primaryKey({ columns: [table.companyId, table.year] })];
   },
 );
+
+export const reminders = pgTable('reminders', {
+  id: uuid().primaryKey().defaultRandom(),
+  description: text(),
+  companyId: uuid()
+    .notNull()
+    .references(() => companies.id, { onDelete: 'cascade', onUpdate: 'no action' }),
+  status: boolean().default(false),
+  dueDate: timestamp({ mode: 'date', withTimezone: true }).notNull(),
+  createdAt: timestamp({ withTimezone: true, mode: 'date' }).notNull().defaultNow(),
+  updatedAt: timestamp({ withTimezone: true, mode: 'date' }).$onUpdate(() => new Date()),
+});
 
 export const authSchema = pgSchema('authentication');
 

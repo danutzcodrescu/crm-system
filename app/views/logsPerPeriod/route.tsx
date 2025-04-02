@@ -1,8 +1,11 @@
+import AddAlarm from '@mui/icons-material/AddAlarm';
+import Alarm from '@mui/icons-material/Alarm';
 import PostAdd from '@mui/icons-material/PostAdd';
-import { IconButton, Link, Tooltip } from '@mui/material';
-import { json, LoaderFunctionArgs, redirect } from '@remix-run/node';
+import { IconButton, Link, Stack, Tooltip, Typography } from '@mui/material';
+import { json, LoaderFunctionArgs, MetaFunction, redirect } from '@remix-run/node';
 import { Link as RLink, useFetcher, useLoaderData } from '@remix-run/react';
 import { ColumnDef } from '@tanstack/react-table';
+import { isAfter } from 'date-fns';
 import { useCallback, useMemo } from 'react';
 import { ClientOnly } from 'remix-utils/client-only';
 
@@ -15,6 +18,16 @@ import { formatDate } from '~/utils/client/dates';
 import { auth } from '~/utils/server/auth.server';
 import { getCompanies } from '~/utils/server/repositories/companies.server';
 import { getRecentLogs, LogsWithCompanyDetails } from '~/utils/server/repositories/notes-log.server';
+
+export const meta: MetaFunction = () => {
+  return [
+    { title: 'CRM System - Recent logs' },
+    {
+      name: 'description',
+      content: 'Check the latest created logs in the system. You can add and edit logs.',
+    },
+  ];
+};
 
 export async function loader({ request }: LoaderFunctionArgs) {
   const isLoggedIn = await auth.isLoggedIn(request);
@@ -42,7 +55,6 @@ interface LoaderResponse {
 
 export default function Logs() {
   const data = useLoaderData<typeof loader>();
-  console.log(data);
   const fetcher = useFetcher();
   const { setEditableData, fields, setFields } = useEditFields(fetcher);
   const columns = useMemo<ColumnDef<LogsWithCompanyDetails>[]>(
@@ -58,13 +70,12 @@ export default function Logs() {
             {getValue() as string}
           </Link>
         ),
-         
       },
       {
         header: 'Date',
-        accessorKey: 'date',
+        accessorFn: (row) => new Date(row.date),
         id: 'date',
-        enableSorting: false,
+        sortingFn: 'datetime',
         filterFn: 'dateRange',
         meta: {
           filterByDate: true,
@@ -82,6 +93,33 @@ export default function Logs() {
         enableSorting: false,
       },
       {
+        header: 'Reminder',
+        id: 'reminderDueDate',
+        accessorFn: (row) => (row.reminderDueDate ? new Date(row.reminderDueDate as unknown as string) : undefined),
+        sortingFn: 'datetime',
+        sortUndefined: 'last',
+        meta: {
+          filterOptionsLabel: 'Reminder date',
+          filterByDate: true,
+        },
+        filterFn: 'dateRange',
+        cell: ({ row, getValue }) => {
+          if (!row.original.reminderId) {
+            return '';
+          }
+          return (
+            <Stack direction="row" gap={1} alignItems="center">
+              <Alarm color={isAfter(new Date(getValue() as string), new Date()) ? 'primary' : 'error'} />
+              <Tooltip title={row.original.reminderDescription}>
+                <Typography variant="body2" component="span">
+                  {formatDate(row.original.reminderDueDate as unknown as string)}
+                </Typography>
+              </Tooltip>
+            </Stack>
+          );
+        },
+      },
+      {
         id: 'actions',
         header: 'Actions',
         enableSorting: false,
@@ -94,6 +132,19 @@ export default function Logs() {
               id={row.original.id as string}
               isEditable
               onEdit={() => setEditableFields(row.original)}
+              additionalElement={
+                !row.original.reminderId ? (
+                  <Tooltip title="Add reminder">
+                    <IconButton
+                      onClick={() => setNewReminderFields(row.original)}
+                      size="small"
+                      aria-label="Add reminder"
+                    >
+                      <AddAlarm />
+                    </IconButton>
+                  </Tooltip>
+                ) : undefined
+              }
             />
           );
         },
@@ -128,6 +179,17 @@ export default function Logs() {
         name: 'description',
         type: 'text',
         required: true,
+        multiline: true,
+      },
+      {
+        label: 'Reminder due date',
+        name: 'reminderDueDate',
+        type: 'date',
+      },
+      {
+        label: 'Reminder description',
+        name: 'reminderDescription',
+        type: 'text',
         multiline: true,
       },
     ]);
@@ -165,9 +227,77 @@ export default function Logs() {
         multiline: true,
         defaultValue: data.description,
       },
+      {
+        label: 'Reminder due date',
+        name: 'reminderDueDate',
+        type: 'date',
+        defaultValue: data.reminderDueDate as unknown as string,
+      },
+      {
+        label: 'Reminder status',
+        name: 'reminderStatus',
+        type: 'text',
+        select: true,
+        defaultValue: data.reminderStatus?.toString() || undefined,
+        options: [
+          { label: 'Not completed', value: 'false' },
+          { label: 'Completed', value: 'true' },
+        ],
+      },
+      {
+        label: 'Reminder description',
+        name: 'reminderDescription',
+        type: 'text',
+        multiline: true,
+        defaultValue: data.reminderDescription as unknown as string,
+      },
+
+      {
+        label: 'Reminder id',
+        name: 'reminderId',
+        type: 'text',
+        defaultValue: data.reminderId as unknown as string,
+        hidden: true,
+      },
     ]);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  const setNewReminderFields = useCallback(
+    (data: LogsWithCompanyDetails) => {
+      setEditableData([
+        {
+          label: 'logId',
+          name: 'logId',
+          hidden: true,
+          type: 'text',
+          defaultValue: data.id,
+        },
+        {
+          label: 'companyId',
+          name: 'companyId',
+          hidden: true,
+          type: 'text',
+          defaultValue: data.companyId,
+        },
+        {
+          label: 'Due date',
+          name: 'date',
+          type: 'date',
+          required: true,
+          defaultValue: new Date() as unknown as string,
+        },
+        {
+          label: 'Description',
+          name: 'description',
+          type: 'text',
+          multiline: true,
+        },
+      ]);
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [],
+  );
   return (
     <>
       <PageContainer
@@ -193,13 +323,21 @@ export default function Logs() {
             isOpen={!!fields.length}
             handleClose={() => setFields([])}
             fields={fields}
-            title={`Add log`}
+            title={
+              fields?.[0]?.name === 'logId'
+                ? 'Add reminder to log'
+                : fields?.[0]?.name === 'companyId'
+                  ? `Add log`
+                  : `Edit log`
+            }
             fetcher={fetcher}
-            method={fields?.[0]?.name === 'companyId' ? 'POST' : 'PATCH'}
+            method={fields?.[0]?.name === 'companyId' || fields?.[0]?.name === 'logId' ? 'POST' : 'PATCH'}
             url={
-              fields?.[0]?.name === 'companyId'
-                ? `/api/logs`
-                : `/api/logs/${fields[1]?.defaultValue as string}/${fields[0]?.defaultValue as string}`
+              fields?.[0]?.name === 'logId'
+                ? `/api/municipalities/${fields[1]?.defaultValue as string}/reminders`
+                : fields?.[0]?.name === 'companyId'
+                  ? `/api/logs`
+                  : `/api/logs/${fields[1]?.defaultValue as string}/${fields[0]?.defaultValue as string}`
             }
           />
         )}

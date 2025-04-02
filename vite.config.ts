@@ -39,13 +39,14 @@ export default defineConfig(({ isSsrBuild }) => ({
           route('/api/reporting/import', 'api/reporting/import.ts');
           route('/api/general-information/import', 'api/general-information/import.ts');
           route('/api/invoicing/import', 'api/invoicing/import.ts');
-          route('/api/responsibles', 'api/responsibles/route.tsx', () => {
+          route('/api/responsibles', 'api/responsibles/responsibles.tsx', () => {
             route('/api/responsibles/import', 'api/responsibles/import.ts');
           });
           route('/api/municipalities', 'api/municipalities/layout.tsx', () => {
             route('/api/municipalities/:companyId', 'api/municipalities/route.ts');
             route('/api/municipalities/:companyId/responsibles', 'api/municipalities/responsibles.ts');
             route('/api/municipalities/:companyId/responsibles/:responsibleId', 'api/municipalities/responsible.ts');
+            route('/api/municipalities/:companyId/reminders', 'api/municipalities/reminders.ts');
           });
           route('/api/logs', 'api/notes-log/layout.tsx', () => {
             route('/api/logs/:companyId', 'api/notes-log/companyLog.ts');

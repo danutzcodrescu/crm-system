@@ -3,7 +3,7 @@ import { IconButton, Tooltip } from '@mui/material';
 import { useFetcher } from '@remix-run/react';
 import { useCallback, useEffect } from 'react';
 
-import { action } from '~/api/responsibles/route';
+import { action } from '~/api/responsibles/responsibles';
 import { useIds } from '~/utils/store';
 
 export function SendEmail() {
