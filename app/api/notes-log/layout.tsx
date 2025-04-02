@@ -13,12 +13,19 @@ export async function action({ request }: ActionFunctionArgs) {
     const description = formData.get('description') as string;
     const date = formData.get('date') as string;
     const companyId = formData.get('companyId') as string;
-
+    const reminderDate = formData.get('reminderDueDate');
+    const reminderDescription = formData.get('reminderDescription');
     if (!description || !date || !companyId) {
       return json({ message: 'Missing parameters', severity: 'error', timeStamp: Date.now() }, { status: 400 });
     }
 
-    const error = await createLog(companyId, description, new Date(date));
+    const error = await createLog(
+      companyId,
+      description,
+      new Date(date),
+      reminderDate ? new Date(reminderDate as string) : undefined,
+      reminderDescription ? (reminderDescription as string) : undefined,
+    );
     if (error) {
       return json({ message: 'Could not create the log', severity: 'error', timeStamp: Date.now() }, { status: 500 });
     }

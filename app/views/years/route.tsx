@@ -1,6 +1,6 @@
 import Edit from '@mui/icons-material/Edit';
 import { Box, IconButton, Stack, Typography } from '@mui/material';
-import { ActionFunctionArgs, json, LoaderFunctionArgs } from '@remix-run/node';
+import { ActionFunctionArgs, json, LoaderFunctionArgs, MetaFunction } from '@remix-run/node';
 import { redirect, useFetcher, useLoaderData } from '@remix-run/react';
 import { useCallback } from 'react';
 import { ClientOnly } from 'remix-utils/client-only';
@@ -10,6 +10,10 @@ import { PageContainer } from '~/components/shared/PageContainer';
 import { useEditFields } from '~/hooks/editFields';
 import { auth } from '~/utils/server/auth.server';
 import { FullYearData, getYearsData, updateYear } from '~/utils/server/repositories/years.server';
+
+export const meta: MetaFunction = () => {
+  return [{ title: 'CRM System - Years' }];
+};
 
 export async function loader({ request }: LoaderFunctionArgs) {
   const isLoggedIn = await auth.isLoggedIn(request);

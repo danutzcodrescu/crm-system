@@ -9,6 +9,6 @@ const client = new pg.Client({
   ssl: false,
 });
 
-export const db = drizzle(client, { logger: false, casing: 'snake_case' });
+export const db = drizzle(client, { logger: true, casing: 'snake_case' });
 
 await client.connect();
