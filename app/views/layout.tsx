@@ -1,6 +1,6 @@
 import { Box } from '@mui/material';
 import { ActionFunctionArgs, json, LoaderFunctionArgs, MetaFunction, redirect } from '@remix-run/node';
-import { Outlet, useLoaderData } from '@remix-run/react';
+import { Outlet, ShouldRevalidateFunctionArgs, useLoaderData } from '@remix-run/react';
 
 import { Topbar } from '~/components/Topbar';
 import { auth } from '~/utils/server/auth.server';
@@ -29,6 +29,16 @@ export async function action({ request }: ActionFunctionArgs) {
 export const meta: MetaFunction = () => {
   return [{ title: 'CRM System - Years' }];
 };
+
+export function shouldRevalidate({ formAction, formMethod }: ShouldRevalidateFunctionArgs) {
+  if (
+    formAction === '/api/responsibles' ||
+    (formMethod === 'GET' && formAction === '/api/municipalities') ||
+    formAction?.includes('attachments')
+  )
+    return false;
+  return true;
+}
 
 export default function AppLayout() {
   const data = useLoaderData<typeof loader>();

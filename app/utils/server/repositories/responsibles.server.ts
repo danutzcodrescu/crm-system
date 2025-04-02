@@ -1,4 +1,4 @@
-import { eq } from 'drizzle-orm';
+import { and, eq, inArray, isNotNull } from 'drizzle-orm';
 
 import { logger } from '../logger.server';
 import { responsibles } from '../schema.server';
@@ -71,6 +71,23 @@ export async function getResponsiblesForMunicipality(
   } catch (e) {
     logger.error(e);
     return ['could not delete responsible', null];
+  }
+}
+
+export async function getEmailAddressesByCompanyId(ids: string[]): Promise<[null | string, null | string[]]> {
+  try {
+    logger.info('Getting responsibles by company id');
+
+    const data = await db
+      .select({ emailAddress: responsibles.email })
+      .from(responsibles)
+      .where(and(inArray(responsibles.companyId, ids), isNotNull(responsibles.email)));
+
+    return [null, data.map((item) => item.emailAddress as string)];
+  } catch (e) {
+    console.log(e);
+    logger.error('Could not retrieve email addresses', e);
+    return ['could not get email addresses', null];
   }
 }
 

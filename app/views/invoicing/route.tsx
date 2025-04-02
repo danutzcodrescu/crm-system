@@ -1,8 +1,15 @@
 import Cancel from '@mui/icons-material/Cancel';
 import CheckBox from '@mui/icons-material/CheckBox';
-import { FormControl, InputLabel, Link, MenuItem, Select, Typography } from '@mui/material';
+import { FormControl, InputLabel, Link, MenuItem, Select, Stack, Typography } from '@mui/material';
 import { ActionFunctionArgs, json, LoaderFunctionArgs, MetaFunction, redirect } from '@remix-run/node';
-import { Link as RLink, useFetcher, useLoaderData, useLocation, useNavigate } from '@remix-run/react';
+import {
+  Link as RLink,
+  ShouldRevalidateFunctionArgs,
+  useFetcher,
+  useLoaderData,
+  useLocation,
+  useNavigate,
+} from '@remix-run/react';
 import { ColumnDef } from '@tanstack/react-table';
 import { getYear } from 'date-fns';
 import { useCallback, useMemo } from 'react';
@@ -10,6 +17,7 @@ import { ClientOnly } from 'remix-utils/client-only';
 
 import { EditDialog } from '~/components/shared/EditDialog.client';
 import { PageContainer } from '~/components/shared/PageContainer';
+import { SendEmail } from '~/components/shared/SendEmail';
 import { booleanFilterFn } from '~/components/shared/table/filters';
 import { PaginatedTable } from '~/components/shared/table/PaginatedTable';
 import { TableActionsCell } from '~/components/shared/table/TableActionsCell';
@@ -23,6 +31,7 @@ import {
   InvoicingData,
 } from '~/utils/server/repositories/invoicing.server';
 import { getAllYears } from '~/utils/server/repositories/years.server';
+import { useIds } from '~/utils/store';
 
 export const meta: MetaFunction = () => {
   return [
@@ -88,12 +97,18 @@ export async function action({ request }: ActionFunctionArgs) {
   return json({ status: 405 });
 }
 
+export function shouldRevalidate({ formAction }: ShouldRevalidateFunctionArgs) {
+  if (formAction === '/api/responsibles') return false;
+  return true;
+}
+
 export default function Invoicing() {
   const data = useLoaderData<typeof loader>();
   const fetcher = useFetcher();
   const navigate = useNavigate();
   const location = useLocation();
   const { setEditableData, fields, setFields } = useEditFields(fetcher);
+  const setIds = useIds((state) => state.setIds);
   const columns = useMemo<ColumnDef<InvoicingData>[]>(
     () => [
       {
@@ -107,7 +122,6 @@ export default function Invoicing() {
             {getValue() as string}
           </Link>
         ),
-         
       },
       {
         header: 'Total compensation',
@@ -300,7 +314,8 @@ export default function Invoicing() {
     <PageContainer
       title="Invoicing"
       additionalTitleElement={
-        <>
+        <Stack direction="row" alignItems="center" gap={1}>
+          <SendEmail />
           <ClientOnly>
             {() => (
               <UploadButton
@@ -327,11 +342,12 @@ export default function Invoicing() {
               ))}
             </Select>
           </FormControl>
-        </>
+        </Stack>
       }
       actionData={fetcher.data as { message: string; severity: string } | undefined}
     >
       <PaginatedTable
+        onFilter={(rows) => setIds(rows.map((row) => row.original.id))}
         data={(data as unknown as LoaderResponse).invoicingData}
         columns={columns}
         additionalHeader={(rows) => (

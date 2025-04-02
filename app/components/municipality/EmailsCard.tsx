@@ -19,8 +19,7 @@ export function EmailsCard({ email }: EmailCardProps) {
   const cardRef = useRef<HTMLDivElement>(null); // Ref for IntersectionObserver
   const fetcher = useFetcher<typeof loader>();
   const intersection = useIntersectionObserver(cardRef, {
-    root: null, // relative to the viewport
-    rootMargin: '0px 0px 300px 0px', // 300px margin below the viewport (triggers earlier)
+    rootMargin: '500px 0px 300px 0px',
     threshold: [0.01], // Trigger if even a small part is within the margin
   });
 
