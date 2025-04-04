@@ -1,13 +1,14 @@
 import PersonAdd from '@mui/icons-material/PersonAdd';
 import { Box, IconButton, Link, Stack, Typography } from '@mui/material';
 import { json, LoaderFunctionArgs, redirect } from '@remix-run/node';
-import { Link as RLink, useFetcher, useLoaderData } from '@remix-run/react';
+import { Link as RLink, ShouldRevalidateFunctionArgs, useFetcher, useLoaderData } from '@remix-run/react';
 import { ColumnDef } from '@tanstack/react-table';
 import { useCallback, useMemo } from 'react';
 import { ClientOnly } from 'remix-utils/client-only';
 
 import { EditDialog } from '~/components/shared/EditDialog.client';
 import { PageContainer } from '~/components/shared/PageContainer';
+import { SendEmail } from '~/components/shared/SendEmail';
 import { PaginatedTable } from '~/components/shared/table/PaginatedTable';
 import { TableActionsCell } from '~/components/shared/table/TableActionsCell';
 import { UploadButton } from '~/components/shared/UploadButton.client';
@@ -16,6 +17,7 @@ import { auth } from '~/utils/server/auth.server';
 import { getMunicipalitiesData, MunicipalityData } from '~/utils/server/repositories/municipalities.server';
 import { getAllStatuses, Status } from '~/utils/server/repositories/status.server';
 import { getAllUsers, User } from '~/utils/server/repositories/users.server';
+import { useIds } from '~/utils/store';
 
 interface LoaderResponse {
   statuses: Status[];
@@ -38,11 +40,16 @@ export async function loader({ request }: LoaderFunctionArgs) {
   return json({ municipalities: municipalities[1], statuses: statusData[1], users: users[1] });
 }
 
+export function shouldRevalidate({ formAction }: ShouldRevalidateFunctionArgs) {
+  if (formAction === '/api/responsibles') return false;
+  return true;
+}
+
 export default function Companies() {
   const data = useLoaderData<typeof loader>();
   const fetcher = useFetcher();
   const { setEditableData, fields, setFields } = useEditFields(fetcher);
-
+  const setIds = useIds((state) => state.setIds);
   const columns = useMemo<ColumnDef<MunicipalityData>[]>(
     () => [
       {
@@ -258,21 +265,28 @@ export default function Companies() {
     <PageContainer
       title="Municipalities"
       additionalTitleElement={
-        <ClientOnly>
-          {() => (
-            <UploadButton
-              search={location.search}
-              title="Import responsibles for municipalities"
-              fetcher={fetcher}
-              path="/api/responsibles/import"
-            />
-          )}
-        </ClientOnly>
+        <Stack direction="row" alignItems="center" gap={1}>
+          <SendEmail />
+          <ClientOnly>
+            {() => (
+              <UploadButton
+                search={location.search}
+                title="Import responsibles for municipalities"
+                fetcher={fetcher}
+                path="/api/responsibles/import"
+              />
+            )}
+          </ClientOnly>
+        </Stack>
       }
       actionData={fetcher.data as { message: string; severity: 'string' }}
     >
       <Box sx={{ mt: 2, '& .MuiTableContainer-root': { maxHeight: 'calc(100vh - 215px)' } }}>
-        <PaginatedTable data={(data as unknown as LoaderResponse).municipalities} columns={columns} />
+        <PaginatedTable
+          onFilter={(rows) => setIds(rows.map((row) => row.original.id))}
+          data={(data as unknown as LoaderResponse).municipalities}
+          columns={columns}
+        />
       </Box>
       <ClientOnly>
         {() => (

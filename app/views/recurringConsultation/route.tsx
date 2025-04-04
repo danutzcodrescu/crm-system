@@ -1,8 +1,15 @@
 import Cancel from '@mui/icons-material/Cancel';
 import CheckBox from '@mui/icons-material/CheckBox';
-import { FormControl, InputLabel, Link, MenuItem, Select, Typography } from '@mui/material';
+import { FormControl, InputLabel, Link, MenuItem, Select, Stack, Typography } from '@mui/material';
 import { ActionFunctionArgs, json, LoaderFunctionArgs, MetaFunction, redirect } from '@remix-run/node';
-import { Link as RLink, useFetcher, useLoaderData, useLocation, useNavigate } from '@remix-run/react';
+import {
+  Link as RLink,
+  ShouldRevalidateFunctionArgs,
+  useFetcher,
+  useLoaderData,
+  useLocation,
+  useNavigate,
+} from '@remix-run/react';
 import { ColumnDef } from '@tanstack/react-table';
 import { getYear } from 'date-fns';
 import { useCallback, useMemo } from 'react';
@@ -10,6 +17,7 @@ import { ClientOnly } from 'remix-utils/client-only';
 
 import { EditDialog } from '~/components/shared/EditDialog.client';
 import { PageContainer } from '~/components/shared/PageContainer';
+import { SendEmail } from '~/components/shared/SendEmail';
 import { PaginatedTable } from '~/components/shared/table/PaginatedTable';
 import { TableActionsCell } from '~/components/shared/table/TableActionsCell';
 import { useEditFields } from '~/hooks/editFields';
@@ -25,6 +33,7 @@ import {
   RecurringConsultationPerMunicipality,
 } from '~/utils/server/repositories/recurringConsultation.server';
 import { getAllYears } from '~/utils/server/repositories/years.server';
+import { useIds } from '~/utils/store';
 
 export const meta: MetaFunction = () => {
   return [
@@ -108,12 +117,18 @@ export async function action({ request }: ActionFunctionArgs) {
   return json({ status: 405 });
 }
 
+export function shouldRevalidate({ formAction }: ShouldRevalidateFunctionArgs) {
+  if (formAction === '/api/responsibles') return false;
+  return true;
+}
+
 export default function RecurringConsultation() {
   const location = useLocation();
   const navigate = useNavigate();
   const data = useLoaderData<typeof loader>();
   const fetcher = useFetcher();
   const { setEditableData, fields, setFields } = useEditFields(fetcher);
+  const setIds = useIds((state) => state.setIds);
   const setEditableFields = useCallback((data: RecurringConsultationPerMunicipality) => {
     const fields = [
       {
@@ -432,28 +447,32 @@ export default function RecurringConsultation() {
     <PageContainer
       title="Recurring consultation"
       additionalTitleElement={
-        <FormControl>
-          <InputLabel id="years-selector">Select the year</InputLabel>
-          <Select
-            labelId="years-selector"
-            value={new URLSearchParams(location.search).get('year')}
-            label="Select the year"
-            onChange={(e) => navigate({ search: `?year=${e.target.value}` })}
-            size="small"
-          >
-            {(data as { yearsData: number[]; recurringData: RecurringConsultationPerMunicipality[] }).yearsData.map(
-              (year) => (
-                <MenuItem key={year} value={year}>
-                  {year}
-                </MenuItem>
-              ),
-            )}
-          </Select>
-        </FormControl>
+        <Stack direction="row" alignItems="center" gap={1}>
+          <SendEmail />
+          <FormControl>
+            <InputLabel id="years-selector">Select the year</InputLabel>
+            <Select
+              labelId="years-selector"
+              value={new URLSearchParams(location.search).get('year')}
+              label="Select the year"
+              onChange={(e) => navigate({ search: `?year=${e.target.value}` })}
+              size="small"
+            >
+              {(data as { yearsData: number[]; recurringData: RecurringConsultationPerMunicipality[] }).yearsData.map(
+                (year) => (
+                  <MenuItem key={year} value={year}>
+                    {year}
+                  </MenuItem>
+                ),
+              )}
+            </Select>
+          </FormControl>
+        </Stack>
       }
       actionData={fetcher.data as { message: string; severity: string } | undefined}
     >
       <PaginatedTable
+        onFilter={(rows) => setIds(rows.map((row) => row.original.id))}
         data={(data as LoaderResponse).recurringData}
         columns={columns}
         additionalHeader={(rows) => (

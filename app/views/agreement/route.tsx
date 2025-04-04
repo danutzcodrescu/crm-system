@@ -4,7 +4,7 @@ import CheckBox from '@mui/icons-material/CheckBox';
 import LinkIcon from '@mui/icons-material/Link';
 import { IconButton, Link, Stack, Tooltip, Typography } from '@mui/material';
 import { ActionFunctionArgs, json, LoaderFunctionArgs, MetaFunction, redirect } from '@remix-run/node';
-import { Link as RLink, useFetcher, useLoaderData } from '@remix-run/react';
+import { Link as RLink, ShouldRevalidateFunctionArgs, useFetcher, useLoaderData } from '@remix-run/react';
 import { ColumnDef } from '@tanstack/react-table';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { ClientOnly } from 'remix-utils/client-only';
@@ -12,11 +12,13 @@ import { ClientOnly } from 'remix-utils/client-only';
 import { Field } from '~/components/EditForm';
 import { EditDialog } from '~/components/shared/EditDialog.client';
 import { PageContainer } from '~/components/shared/PageContainer';
+import { SendEmail } from '~/components/shared/SendEmail';
 import { PaginatedTable } from '~/components/shared/table/PaginatedTable';
 import { TableActionsCell } from '~/components/shared/table/TableActionsCell';
 import { formatDate } from '~/utils/client/dates';
 import { auth } from '~/utils/server/auth.server';
 import { AgreementData, editAgreementRecord, getAgreementData } from '~/utils/server/repositories/agreement.server';
+import { useIds } from '~/utils/store';
 
 export const meta: MetaFunction = () => {
   return [
@@ -76,10 +78,16 @@ export async function loader({ request }: LoaderFunctionArgs) {
   return json(data);
 }
 
+export function shouldRevalidate({ formAction }: ShouldRevalidateFunctionArgs) {
+  if (formAction === '/api/responsibles') return false;
+  return true;
+}
+
 export default function Agreement() {
   const data = useLoaderData<typeof loader>();
   const [fields, setFields] = useState<Field[]>([]);
   const fetcher = useFetcher();
+  const setIds = useIds((state) => state.setIds);
 
   const setEditableData = useCallback((data: AgreementData) => {
     setFields([
@@ -473,10 +481,11 @@ export default function Agreement() {
   return (
     <PageContainer
       title="Agreement stage"
-      additionalTitleElement={null}
+      additionalTitleElement={<SendEmail />}
       actionData={fetcher.data as { message: string; severity: string } | undefined}
     >
       <PaginatedTable
+        onFilter={(rows) => setIds(rows.map((row) => row.original.companyId))}
         data={data as AgreementData[]}
         columns={columns}
         additionalHeader={(rows) => (

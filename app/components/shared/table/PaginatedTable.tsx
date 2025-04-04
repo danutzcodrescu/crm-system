@@ -18,6 +18,7 @@ import {
   Tooltip,
   Typography,
 } from '@mui/material';
+import { useDeepCompareEffect } from '@react-hookz/web';
 import {
   Column,
   ColumnDef,
@@ -64,6 +65,7 @@ interface Props<T> {
   defaultSorting?: ColumnSort;
   tableHeight?: string;
   defaultPageSize?: number;
+  onFilter?: (rows: Row<T>[]) => void;
 }
 
 function cellPinning<T>(column: Column<T>): BoxProps['sx'] {
@@ -96,6 +98,7 @@ export function PaginatedTable<T extends { id: string; warning?: boolean }>({
   defaultSorting,
   tableHeight,
   defaultPageSize,
+  onFilter,
 }: Props<T>) {
   const tableContainer = useRef<HTMLDivElement>(null);
   const [dt, setDt] = useState(data);
@@ -161,6 +164,12 @@ export function PaginatedTable<T extends { id: string; warning?: boolean }>({
   useEffect(() => {
     setDt(data);
   }, [data]);
+
+  useDeepCompareEffect(() => {
+    if (onFilter) {
+      onFilter(table.getFilteredRowModel().rows);
+    }
+  }, [table.getFilteredRowModel().rows]);
 
   const { pageSize, pageIndex } = table.getState().pagination;
 

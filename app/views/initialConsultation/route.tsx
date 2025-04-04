@@ -3,7 +3,7 @@ import CheckBox from '@mui/icons-material/CheckBox';
 import LinkIcon from '@mui/icons-material/Link';
 import { IconButton, Link, Tooltip, Typography } from '@mui/material';
 import { ActionFunctionArgs, json, LoaderFunctionArgs, MetaFunction, redirect } from '@remix-run/node';
-import { Link as RLink, useFetcher, useLoaderData } from '@remix-run/react';
+import { Link as RLink, ShouldRevalidateFunctionArgs, useFetcher, useLoaderData } from '@remix-run/react';
 import { ColumnDef } from '@tanstack/react-table';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { ClientOnly } from 'remix-utils/client-only';
@@ -11,6 +11,7 @@ import { ClientOnly } from 'remix-utils/client-only';
 import { Field } from '~/components/EditForm';
 import { EditDialog } from '~/components/shared/EditDialog.client';
 import { PageContainer } from '~/components/shared/PageContainer';
+import { SendEmail } from '~/components/shared/SendEmail';
 import { PaginatedTable } from '~/components/shared/table/PaginatedTable';
 import { TableActionsCell } from '~/components/shared/table/TableActionsCell';
 import { formatDate } from '~/utils/client/dates';
@@ -20,6 +21,7 @@ import {
   getInitialConsultationData,
   type InitialConsultation as IInitialConsultation,
 } from '~/utils/server/repositories/initialConsultation.server';
+import { useIds } from '~/utils/store';
 
 export const meta: MetaFunction = () => {
   return [
@@ -71,10 +73,16 @@ export async function loader({ request }: LoaderFunctionArgs) {
   return json(data);
 }
 
+export function shouldRevalidate({ formAction }: ShouldRevalidateFunctionArgs) {
+  if (formAction === '/api/responsibles') return false;
+  return true;
+}
+
 export default function InitialConsultation() {
   const data = useLoaderData<typeof loader>();
   const [fields, setFields] = useState<Field[]>([]);
   const fetcher = useFetcher();
+  const setIds = useIds((state) => state.setIds);
 
   const setEditableData = useCallback((data: IInitialConsultation) => {
     setFields([
@@ -259,10 +267,11 @@ export default function InitialConsultation() {
   return (
     <PageContainer
       title="Initial consultation"
-      additionalTitleElement={null}
+      additionalTitleElement={<SendEmail />}
       actionData={fetcher.data as { message: string; severity: string } | undefined}
     >
       <PaginatedTable
+        onFilter={(rows) => setIds(rows.map((row) => row.original.companyId))}
         data={data as IInitialConsultation[]}
         columns={columns}
         additionalHeader={(rows) => (
@@ -272,7 +281,7 @@ export default function InitialConsultation() {
               Initial consultation document signed: {rows.filter((row) => row.original.isSigned).length}
             </Typography>
             <Typography>
-              Initial consultation document signed: {rows.filter((row) => row.original.isShared).length}
+              Initial consultation document shared: {rows.filter((row) => row.original.isShared).length}
             </Typography>
           </>
         )}

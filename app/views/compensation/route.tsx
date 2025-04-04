@@ -1,17 +1,19 @@
 import Cancel from '@mui/icons-material/Cancel';
 import CheckBox from '@mui/icons-material/CheckBox';
-import { FormControl, InputLabel, Link, MenuItem, Select, Typography } from '@mui/material';
+import { FormControl, InputLabel, Link, MenuItem, Select, Stack, Typography } from '@mui/material';
 import { json, LoaderFunctionArgs, MetaFunction, redirect } from '@remix-run/node';
-import { Link as RLink, useLoaderData, useLocation, useNavigate } from '@remix-run/react';
+import { Link as RLink, ShouldRevalidateFunctionArgs, useLoaderData, useLocation, useNavigate } from '@remix-run/react';
 import { ColumnDef } from '@tanstack/react-table';
 import { getYear } from 'date-fns';
 import { useMemo } from 'react';
 
 import { PageContainer } from '~/components/shared/PageContainer';
+import { SendEmail } from '~/components/shared/SendEmail';
 import { PaginatedTable } from '~/components/shared/table/PaginatedTable';
 import { auth } from '~/utils/server/auth.server';
 import { CompensationData, getCompensationByYear } from '~/utils/server/repositories/compensation.server';
 import { getAllYears } from '~/utils/server/repositories/years.server';
+import { useIds } from '~/utils/store';
 
 export const meta: MetaFunction = () => {
   return [
@@ -40,10 +42,16 @@ export async function loader({ request }: LoaderFunctionArgs) {
   return json({ compensationData: compensationData[1], yearsData: yearsData[1] });
 }
 
+export function shouldRevalidate({ formAction }: ShouldRevalidateFunctionArgs) {
+  if (formAction === '/api/responsibles') return false;
+  return true;
+}
+
 export default function Compensation() {
   const data = useLoaderData<typeof loader>();
   const location = useLocation();
   const navigate = useNavigate();
+  const setIds = useIds((state) => state.setIds);
   const columns = useMemo<ColumnDef<CompensationData>[]>(
     () => [
       {
@@ -158,25 +166,29 @@ export default function Compensation() {
     <PageContainer
       title="Compensation"
       additionalTitleElement={
-        <FormControl>
-          <InputLabel id="years-selector">Select the year</InputLabel>
-          <Select
-            labelId="years-selector"
-            value={new URLSearchParams(location.search).get('year')}
-            label="Select the year"
-            onChange={(e) => navigate({ search: `?year=${e.target.value}` })}
-            size="small"
-          >
-            {(data as LoaderResponse).yearsData.map((year) => (
-              <MenuItem key={year} value={year}>
-                {year}
-              </MenuItem>
-            ))}
-          </Select>
-        </FormControl>
+        <Stack direction="row" alignItems="center" gap={1}>
+          <SendEmail />
+          <FormControl>
+            <InputLabel id="years-selector">Select the year</InputLabel>
+            <Select
+              labelId="years-selector"
+              value={new URLSearchParams(location.search).get('year')}
+              label="Select the year"
+              onChange={(e) => navigate({ search: `?year=${e.target.value}` })}
+              size="small"
+            >
+              {(data as LoaderResponse).yearsData.map((year) => (
+                <MenuItem key={year} value={year}>
+                  {year}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+        </Stack>
       }
     >
       <PaginatedTable
+        onFilter={(rows) => setIds(rows.map((row) => row.original.id))}
         data={(data as LoaderResponse).compensationData}
         columns={columns}
         additionalHeader={(rows) => (
