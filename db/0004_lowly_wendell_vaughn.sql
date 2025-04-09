@@ -3,7 +3,7 @@ CREATE TABLE IF NOT EXISTS "reminders" (
 	"description" text,
 	"company_id" uuid NOT NULL,
   "due_date" timestamp with time zone NOT NULL,
-  "status": boolean DEFAULT false,
+  "status" boolean DEFAULT false,
 	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
 	"updated_at" timestamp with time zone
 );
