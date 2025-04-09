@@ -1,5 +1,5 @@
 import { Box, Card, CardContent } from '@mui/material';
-import { json, LoaderFunctionArgs, redirect } from '@remix-run/node';
+import { json, LoaderFunctionArgs, MetaFunction, redirect } from '@remix-run/node';
 import { useFetcher, useLoaderData } from '@remix-run/react';
 
 import { AgreementCard } from '~/components/municipality/AgreementCard';
@@ -149,6 +149,10 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
     severity: 'success',
   });
 }
+
+export const meta: MetaFunction<typeof loader> = ({ data }) => {
+  return [{ title: `CRM System - ${(data?.message as unknown as LoaderResponse)?.municipality?.name} Municipality` }];
+};
 
 export default function Municipality() {
   const data = useLoaderData<typeof loader>();

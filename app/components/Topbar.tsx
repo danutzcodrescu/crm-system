@@ -6,6 +6,7 @@ import { Form, Link as RLink } from '@remix-run/react';
 import { getYear } from 'date-fns';
 import { useCallback, useState } from 'react';
 
+import { GlobalCreate } from './topbar/GlobalCreate';
 import { SearchBox } from './topbar/SearchBox';
 
 const links = [
@@ -62,6 +63,7 @@ export function Topbar({ redirectUrl }: Props) {
                 <WifiIcon />
               </IconButton>
             ) : null}
+            <GlobalCreate />
 
             <Form method="delete" action="/api/auth">
               <IconButton type="submit" color="inherit" aria-label="logout" sx={{ ml: 'auto' }}>
