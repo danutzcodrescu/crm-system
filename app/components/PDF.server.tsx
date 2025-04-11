@@ -51,9 +51,12 @@ export function PDF(data: CompensationDataPerCompanyPerYear) {
             <Text style={{ fontFamily: 'Helvetica-Bold' }}>
               {Intl.NumberFormat('sv-SE').format(data?.variableCompensation as number)} kronor
             </Text>
-            &nbsp;(&nbsp;{Intl.NumberFormat('sv-SE', { minimumFractionDigits: 15 }).format(data.yearSekAdmin)} SEK x
-            &nbsp;
-            {Intl.NumberFormat('sv-SE').format(data.inhabitants as number)}&nbsp;inhabitants&nbsp;)
+            &nbsp;(&nbsp;
+            {Intl.NumberFormat('sv-SE', { minimumFractionDigits: 1, maximumFractionDigits: 15 }).format(
+              data.yearSekAdmin,
+            )}{' '}
+            kronor x &nbsp;
+            {Intl.NumberFormat('sv-SE').format(data.inhabitants as number)}&nbsp;invånare&nbsp;)
           </Text>
           <Text style={{ marginBottom: 8 }}>
             B) Rapporteringsersättning:&nbsp;
@@ -70,7 +73,9 @@ export function PDF(data: CompensationDataPerCompanyPerYear) {
           <Text style={{ marginBottom: 8 }}>
             D) Förändringsfaktor med KPI:&nbsp;
             <Text style={{ fontFamily: 'Helvetica-Bold' }}>
-              {Intl.NumberFormat('sv-SE', { minimumFractionDigits: 6 }).format(data?.changeFactor as number)}
+              {Intl.NumberFormat('sv-SE', { minimumFractionDigits: 0, maximumFractionDigits: 6 }).format(
+                data?.changeFactor as number,
+              )}
             </Text>
           </Text>
           {/* <Text style={{ marginBottom: 8 }}>
