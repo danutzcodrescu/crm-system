@@ -1,11 +1,13 @@
+import Edit from '@mui/icons-material/Edit';
 import PersonAdd from '@mui/icons-material/PersonAdd';
-import { Box, IconButton, Link, Stack, Typography } from '@mui/material';
+import { Box, IconButton, Link, Stack, Tooltip, Typography } from '@mui/material';
 import { FetcherWithComponents } from '@remix-run/react';
 import { ColumnDef } from '@tanstack/react-table';
 import { useCallback, useMemo } from 'react';
 import { ClientOnly } from 'remix-utils/client-only';
 
 import { useEditFields } from '~/hooks/editFields';
+import { formatDate } from '~/utils/client/dates';
 import { ResponsibleData } from '~/utils/server/repositories/responsibles.server';
 
 import { DeleteButton } from '../shared/DeleteButton';
@@ -17,9 +19,10 @@ interface Props {
   data: ResponsibleData[];
   companyId: string;
   fetcher: FetcherWithComponents<unknown>;
+  infoVerified?: string;
 }
 
-export function ResponsiblesTable({ data, companyId, fetcher }: Props) {
+export function ResponsiblesTable({ data, companyId, fetcher, infoVerified }: Props) {
   const { setEditableData, fields, setFields } = useEditFields(fetcher);
 
   const columns = useMemo<ColumnDef<ResponsibleData>[]>(
@@ -159,6 +162,18 @@ export function ResponsiblesTable({ data, companyId, fetcher }: Props) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  const setContactVerificationFields = useCallback(() => {
+    setEditableData([
+      {
+        label: 'Info verified',
+        name: 'infoVerified',
+        type: 'date',
+        defaultValue: infoVerified,
+      },
+    ]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [infoVerified]);
+
   return (
     <>
       <Stack direction="row" gap={1} alignItems="center" justifyContent="space-between">
@@ -179,19 +194,46 @@ export function ResponsiblesTable({ data, companyId, fetcher }: Props) {
           data={data}
         />
       </Box>
+      {infoVerified ? (
+        <Stack direction="row" gap={1} alignItems="center" sx={{ mt: 2 }}>
+          <Typography variant="body2" component="p">
+            Last verification date:{' '}
+            <Box component="span" sx={{ fontWeight: 'bold' }}>
+              {formatDate(infoVerified)}
+            </Box>
+          </Typography>
+          <Tooltip title="Edit last verification date">
+            <IconButton
+              size="small"
+              aria-label="Edit last verification date"
+              onClick={() => setContactVerificationFields()}
+            >
+              <Edit />
+            </IconButton>
+          </Tooltip>
+        </Stack>
+      ) : null}
       <ClientOnly>
         {() => (
           <EditDialog
             isOpen={!!fields.length}
             handleClose={() => setFields([])}
             fields={fields}
-            title={fields?.[0]?.name === 'companyId' ? 'Add responsible' : `Edit responsible`}
+            title={
+              fields[0]?.name === 'infoVerified'
+                ? 'Edit last verification date'
+                : fields?.[0]?.name === 'companyId'
+                  ? 'Add responsible'
+                  : `Edit responsible`
+            }
             fetcher={fetcher}
             method={fields?.[0]?.name === 'companyId' ? 'POST' : 'PATCH'}
             url={
-              fields?.[0]?.name === 'companyId'
-                ? `/api/municipalities/${companyId}/responsibles`
-                : `/api/municipalities/${companyId}/responsibles/${fields[0]?.defaultValue as string}`
+              fields?.[0]?.name === 'infoVerified'
+                ? `/api/municipalities/${companyId}`
+                : fields?.[0]?.name === 'companyId'
+                  ? `/api/municipalities/${companyId}/responsibles`
+                  : `/api/municipalities/${companyId}/responsibles/${fields[0]?.defaultValue as string}`
             }
           />
         )}

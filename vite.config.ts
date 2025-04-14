@@ -9,14 +9,6 @@ export default defineConfig(({ isSsrBuild }) => ({
   ssr: {
     noExternal: process.env.NODE_ENV === 'production' ? [/^@mui\//] : [/^@mui\/x-.{1,}/],
   },
-  resolve: {
-    alias: [
-      {
-        find: /^@mui\/icons-material\/(.*)/,
-        replacement: '@mui/icons-material/esm/$1',
-      },
-    ],
-  },
   optimizeDeps: {
     exclude: ['@node-rs/argon2', '@node-rs/bcrypt'],
   },

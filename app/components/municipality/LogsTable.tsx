@@ -262,7 +262,7 @@ export function LogsTable({ data, companyId, fetcher }: Props) {
       <Box sx={{ minWidth: 650 }}>
         <PaginatedTable
           tableHeight="950px"
-          defaultPageSize={10}
+          defaultPageSize={5}
           defaultSorting={{ id: 'date', desc: true }}
           columns={columns}
           data={data}

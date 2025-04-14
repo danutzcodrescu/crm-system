@@ -31,14 +31,12 @@ import {
 } from '~/utils/server/repositories/recurringConsultation.server';
 import { getReportingForCompany, ReportingData } from '~/utils/server/repositories/reporting.server';
 import { getResponsiblesForMunicipality, ResponsibleData } from '~/utils/server/repositories/responsibles.server';
-import { getAllStatuses, Status } from '~/utils/server/repositories/status.server';
 import { getAllUsers, User } from '~/utils/server/repositories/users.server';
 import { gmail } from '~/utils/server/services/gmail.server';
 
 interface LoaderResponse {
   logs: LogForCompany[];
   municipality: MunicipalityData;
-  statuses: Status[];
   responsibles: ResponsibleData[];
   initialConsultation: {
     id: string;
@@ -73,7 +71,6 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
   const currentYear = new Date().getFullYear();
   const [
     logsResp,
-    statusesResp,
     municipalityResp,
     responsiblesResp,
     initialConsultationResp,
@@ -86,7 +83,6 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
     email,
   ] = await Promise.all([
     getLogsForCompany(id),
-    getAllStatuses(),
     getMunicipalityData(id),
     getResponsiblesForMunicipality(id),
     getInitialConsultationForMunicipality(id),
@@ -101,7 +97,6 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
 
   if (
     logsResp[0] ||
-    statusesResp[0] ||
     municipalityResp[0] ||
     responsiblesResp[0] ||
     initialConsultationResp[0] ||
@@ -132,7 +127,6 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
       users: usersResp[1],
       logs: logsResp[1],
       municipality: municipalityResp[1],
-      statuses: statusesResp[1],
       responsibles: responsiblesResp[1],
       initialConsultation: initialConsultationResp[1],
       agreement: agreementResp[1],
@@ -167,7 +161,6 @@ export default function Municipality() {
         <MunicipalityTitle
           municipality={municipalityData.municipality}
           fetcher={fetcher}
-          statusList={municipalityData.statuses}
           users={municipalityData.users}
         />
       }
@@ -187,6 +180,7 @@ export default function Municipality() {
               data={municipalityData.responsibles}
               companyId={municipalityData.municipality.id}
               fetcher={fetcher}
+              infoVerified={municipalityData.municipality.infoVerified as unknown as string}
             />
           </CardContent>
         </Card>

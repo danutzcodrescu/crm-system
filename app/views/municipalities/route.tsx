@@ -1,9 +1,11 @@
+import Cancel from '@mui/icons-material/Cancel';
+import CheckBox from '@mui/icons-material/CheckBox';
 import PersonAdd from '@mui/icons-material/PersonAdd';
 import { Box, IconButton, Link, Stack, Typography } from '@mui/material';
-import { json, LoaderFunctionArgs, redirect } from '@remix-run/node';
+import { json, LoaderFunctionArgs, MetaFunction, redirect } from '@remix-run/node';
 import { Link as RLink, ShouldRevalidateFunctionArgs, useFetcher, useLoaderData } from '@remix-run/react';
-import { ColumnDef } from '@tanstack/react-table';
-import { useCallback, useMemo } from 'react';
+import { ColumnDef, ColumnFiltersState, Row } from '@tanstack/react-table';
+import { useCallback, useMemo, useState } from 'react';
 import { ClientOnly } from 'remix-utils/client-only';
 
 import { EditDialog } from '~/components/shared/EditDialog.client';
@@ -13,6 +15,7 @@ import { PaginatedTable } from '~/components/shared/table/PaginatedTable';
 import { TableActionsCell } from '~/components/shared/table/TableActionsCell';
 import { UploadButton } from '~/components/shared/UploadButton.client';
 import { useEditFields } from '~/hooks/editFields';
+import { formatDate } from '~/utils/client/dates';
 import { auth } from '~/utils/server/auth.server';
 import { getMunicipalitiesData, MunicipalityData } from '~/utils/server/repositories/municipalities.server';
 import { getAllStatuses, Status } from '~/utils/server/repositories/status.server';
@@ -45,10 +48,29 @@ export function shouldRevalidate({ formAction }: ShouldRevalidateFunctionArgs) {
   return true;
 }
 
+export const meta: MetaFunction<typeof loader> = () => {
+  return [{ title: `CRM System - Municipalities`, description: 'Municipalities overview information' }];
+};
+
+const defaultFilterList = [
+  { label: 'Blank', value: '' },
+  { label: 'A', value: 'A' },
+  { label: 'B', value: 'B' },
+  { label: 'C', value: 'C' },
+  { label: 'D', value: 'D' },
+  { label: 'E', value: 'E' },
+  { label: 'F', value: 'F' },
+  { label: 'G', value: 'G' },
+  { label: 'H', value: 'H' },
+  { label: 'Z', value: 'Z' },
+  { label: 'X', value: 'X' },
+];
+
 export default function Companies() {
   const data = useLoaderData<typeof loader>();
   const fetcher = useFetcher();
   const { setEditableData, fields, setFields } = useEditFields(fetcher);
+  const [waveFilterList, setWaveFilterList] = useState<{ label: string; value: string }[]>(defaultFilterList);
   const setIds = useIds((state) => state.setIds);
   const columns = useMemo<ColumnDef<MunicipalityData>[]>(
     () => [
@@ -68,18 +90,7 @@ export default function Companies() {
         header: 'Code',
         accessorKey: 'code',
       },
-      {
-        header: 'Status',
-        accessorKey: 'statusId',
-        id: 'statusId',
-        cell: ({ row, getValue }) => `(${getValue() as string}) ${row.original.statusName}`,
-        meta: {
-          filterOptions: (data as unknown as LoaderResponse).statuses.map((status) => {
-            return { label: status.name, value: status.id };
-          }),
-        },
-        filterFn: 'boolean',
-      },
+
       {
         header: 'General Email',
         accessorKey: 'email',
@@ -117,12 +128,128 @@ export default function Companies() {
         ),
       },
       {
+        header: 'Info Verified',
+        id: 'infoVerified',
+        accessorFn: (row) => (row.infoVerified ? new Date(row.infoVerified) : null),
+        cell: ({ getValue }) => (getValue() ? formatDate(getValue() as string) : ''),
+        filterFn: (row: Row<MunicipalityData>, columnId: string, filterValue: boolean[]) => {
+          if (filterValue === undefined) return true;
+          // @ts-expect-error it works , type is not correct
+          const value = row.original[columnId];
+
+          if ((filterValue.includes(true) && value) || (filterValue.includes(false) && !value)) {
+            return true;
+          }
+          return false;
+        },
+        meta: {
+          filterOptions: [
+            { label: 'Has date', value: true },
+            { label: 'No date', value: false },
+          ],
+          filterOptionsLabel: 'Filter by info verified',
+        },
+      },
+      {
+        header: 'Status',
+        accessorKey: 'computedStatus',
+        id: 'computedStatus',
+        meta: {
+          filterOptions: [
+            {
+              label: '1. No consultation/agreement',
+              value: '1. No consultation/agreement',
+            },
+            {
+              label: '2. Only consultation',
+              value: '2. Only consultation',
+            },
+            {
+              label: '3. Agreement signed',
+              value: '3. Agreement signed',
+            },
+          ],
+        },
+        filterFn: 'boolean',
+      },
+      {
+        header: 'Manual Consultation',
+        accessorKey: 'manualConsultation',
+        id: 'manualConsultation',
+        cell: ({ getValue }) =>
+          getValue() ? <CheckBox sx={{ color: (theme) => theme.palette.success.main }} /> : null,
+      },
+      {
+        header: 'Declines Agreement',
+        id: 'declinedAgreement',
+        accessorKey: 'declinedAgreement',
+        cell: ({ getValue }) => (getValue() ? <Cancel sx={{ color: (theme) => theme.palette.error.main }} /> : null),
+      },
+      {
+        header: 'Wave',
+        id: 'workingCategory',
+        accessorKey: 'workingCategory',
+        meta: {
+          filterOptions: [
+            {
+              label: 'Wave 1',
+              value: 'Wave 1',
+            },
+            {
+              label: 'Wave 2',
+              value: 'Wave 2',
+            },
+            {
+              label: 'Wave 3',
+              value: 'Wave 3',
+            },
+          ],
+        },
+        filterFn: 'boolean',
+      },
+      {
+        header: 'Wave under category',
+        accessorKey: 'wave',
+        id: 'wave',
+        filterFn: (row: Row<MunicipalityData>, columnId: string, filterValue: string[]) => {
+          if (filterValue.length === 0) return true;
+          // @ts-expect-error it works , type is not correct
+          const value = row.original[columnId] as string;
+          if (filterValue.includes('')) {
+            // @ts-expect-error it is for blank values
+            filterValue = filterValue.map((item) => {
+              if (item === '') {
+                return null;
+              }
+              return item;
+            });
+          }
+          return filterValue.includes(value);
+        },
+        meta: {
+          filterOptions: waveFilterList,
+          filterOptionsLabel: 'Filter wave by subcategory',
+        },
+      },
+      {
         header: 'SUP responsible',
         accessorKey: 'responsibleName',
         id: 'responsibleName',
         meta: {
           filterOptions: (data as unknown as LoaderResponse).users.map((user) => {
             return { label: user.name, value: user.id };
+          }),
+        },
+        filterFn: 'boolean',
+      },
+      {
+        header: 'Old Status',
+        accessorKey: 'statusId',
+        id: 'statusId',
+        cell: ({ row, getValue }) => `(${getValue() as string}) ${row.original.statusName}`,
+        meta: {
+          filterOptions: (data as unknown as LoaderResponse).statuses.map((status) => {
+            return { label: status.name, value: status.id };
           }),
         },
         filterFn: 'boolean',
@@ -158,7 +285,7 @@ export default function Companies() {
       },
     ],
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [data],
+    [data, waveFilterList],
   );
 
   const setMunicipalityFields = useCallback(
@@ -193,18 +320,6 @@ export default function Companies() {
           defaultValue: data.email,
         },
         {
-          label: 'Status',
-          name: 'statusId',
-          select: true,
-          type: 'text',
-          // @ts-expect-error it works for now TO DO: fix it
-          options: statuses.map((status) => ({
-            label: status.name,
-            value: status.id,
-          })),
-          defaultValue: data.statusId,
-        },
-        {
           label: 'SUP responsible',
           name: 'responsibleId',
           select: true,
@@ -216,7 +331,87 @@ export default function Companies() {
               value: user.id,
             }))
             .concat({ label: 'None', value: 0 }),
-          defaultValue: data.statusId,
+          defaultValue: data.responsibleId || 0,
+        },
+        {
+          label: 'Manual Consultation',
+          name: 'manualConsultation',
+          type: 'text',
+          select: true,
+          defaultValue: data.manualConsultation,
+          options: [
+            { label: 'Yes', value: 'true' },
+            { label: 'Blank', value: '' },
+          ],
+        },
+        {
+          label: 'Declines Agreement',
+          name: 'declinedAgreement',
+          type: 'text',
+          select: true,
+          defaultValue: data.declinedAgreement,
+          options: [
+            { label: 'Yes', value: 'true' },
+            { label: 'Blank', value: '' },
+          ],
+        },
+        {
+          label: 'Wave',
+          name: 'workingCategory',
+          type: 'text',
+          select: true,
+          defaultValue: data.workingCategory?.toLowerCase(),
+          watchable: true,
+          options: [
+            { label: 'Wave 1', value: 'wave 1' },
+            { label: 'Wave 2', value: 'wave 2' },
+            { label: 'Wave 3', value: 'wave 3' },
+          ],
+        },
+        {
+          label: 'Wave under group',
+          name: 'wave',
+          type: 'text',
+          select: true,
+          defaultValue: data.wave,
+          condition: ['workingCategory', 'wave 2'],
+          options: [
+            { label: 'A', value: 'A' },
+            { label: 'B', value: 'B' },
+            { label: 'C', value: 'C' },
+            { label: 'D', value: 'D' },
+            { label: 'E', value: 'E' },
+            { label: 'F', value: 'F' },
+            { label: 'G', value: 'G' },
+            { label: 'H', value: 'H' },
+            { label: 'Z', value: 'Z' },
+          ],
+        },
+        {
+          label: 'Wave under group',
+          name: 'wave',
+          type: 'text',
+          select: true,
+          defaultValue: data.wave,
+          condition: ['workingCategory', 'wave 3'],
+          options: [
+            { label: 'X', value: 'X' },
+            { label: 'Blank', value: '' },
+          ],
+        },
+        {
+          label: 'Wave under group',
+          name: 'wave',
+          type: 'text',
+          defaultValue: '',
+          condition: ['workingCategory', 'wave 1'],
+          hidden: true,
+        },
+        {
+          label: 'Info Verified',
+          name: 'infoVerified',
+          type: 'date',
+          defaultValue: data.infoVerified as unknown as string,
         },
       ]);
     },
@@ -261,6 +456,35 @@ export default function Companies() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  const setFilter = (rows: Row<MunicipalityData>[], filters: ColumnFiltersState) => {
+    setIds(rows.map((row) => row.original.id));
+    const workingCategoryFilter = filters.find((filter) => filter.id === 'workingCategory');
+    if (workingCategoryFilter) {
+      const filterList = [{ label: 'Blank', value: '' }] as { label: string; value: string }[];
+      if ((workingCategoryFilter.value as string[]).includes('Wave 2')) {
+        filterList.push(
+          ...[
+            { label: 'A', value: 'A' },
+            { label: 'B', value: 'B' },
+            { label: 'C', value: 'C' },
+            { label: 'D', value: 'D' },
+            { label: 'E', value: 'E' },
+            { label: 'F', value: 'F' },
+            { label: 'G', value: 'G' },
+            { label: 'H', value: 'H' },
+            { label: 'Z', value: 'Z' },
+          ],
+        );
+      }
+      if ((workingCategoryFilter.value as string[]).includes('Wave 3')) {
+        filterList.push(...[{ label: 'X', value: 'X' }]);
+      }
+      setWaveFilterList(filterList);
+    } else if (!workingCategoryFilter && waveFilterList.length !== defaultFilterList.length) {
+      setWaveFilterList(defaultFilterList);
+    }
+  };
+
   return (
     <PageContainer
       title="Municipalities"
@@ -283,7 +507,7 @@ export default function Companies() {
     >
       <Box sx={{ mt: 2, '& .MuiTableContainer-root': { maxHeight: 'calc(100vh - 215px)' } }}>
         <PaginatedTable
-          onFilter={(rows) => setIds(rows.map((row) => row.original.id))}
+          onFilter={setFilter}
           data={(data as unknown as LoaderResponse).municipalities}
           columns={columns}
         />

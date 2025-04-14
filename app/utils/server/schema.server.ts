@@ -18,6 +18,8 @@ import {
 
 export const agreementTypeEnum = pgEnum('agreement_type', ['old', 'new']);
 
+export const workingCategoryEnum = pgEnum('working_category', ['wave 1', 'wave 2', 'wave 3']);
+
 export const status = pgTable('statuses', {
   id: serial().primaryKey(),
   name: text().notNull().unique(),
@@ -58,6 +60,11 @@ export const companies = pgTable('companies', {
     .array()
     .default(sql`ARRAY[]::smallint[]`),
   email: text().notNull().unique(),
+  manualConsultation: boolean(),
+  declinedAgreement: boolean(),
+  workingCategory: workingCategoryEnum(),
+  wave: text(),
+  infoVerified: timestamp({ mode: 'date', withTimezone: true }),
   createdAt: timestamp({ withTimezone: true, mode: 'date' }).notNull().defaultNow(),
   updatedAt: timestamp({ withTimezone: true, mode: 'date' }).$onUpdate(() => new Date()),
 });

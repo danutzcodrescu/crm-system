@@ -6,7 +6,6 @@ import { ClientOnly } from 'remix-utils/client-only';
 
 import { useEditFields } from '~/hooks/editFields';
 import { MunicipalityData } from '~/utils/server/repositories/municipalities.server';
-import { Status } from '~/utils/server/repositories/status.server';
 import { User } from '~/utils/server/repositories/users.server';
 
 import { EditDialog } from '../shared/EditDialog.client';
@@ -14,11 +13,10 @@ import { EditDialog } from '../shared/EditDialog.client';
 interface Props {
   municipality: MunicipalityData;
   fetcher: FetcherWithComponents<unknown>;
-  statusList: Status[];
   users: User[];
 }
 
-export function MunicipalityTitle({ municipality, fetcher, statusList, users }: Props) {
+export function MunicipalityTitle({ municipality, fetcher, users }: Props) {
   const { setEditableData, fields, setFields } = useEditFields(fetcher);
 
   const handleEdit = useCallback(() => {
@@ -37,25 +35,78 @@ export function MunicipalityTitle({ municipality, fetcher, statusList, users }: 
         defaultValue: municipality.name,
       },
       {
-        label: 'Code',
-        name: 'code',
-        type: 'text',
-        defaultValue: municipality.code,
-      },
-      {
-        label: 'Email',
-        name: 'email',
-        type: 'email',
-        defaultValue: municipality.email,
-      },
-      {
-        label: 'Status',
-        name: 'statusId',
+        label: 'Manual Consultation',
+        name: 'manualConsultation',
         type: 'text',
         select: true,
-        // @ts-expect-error it works for now TO DO: fix it
-        options: statusList.map((status) => ({ label: status.name, value: status.id })),
-        defaultValue: municipality.statusId,
+        defaultValue: municipality.manualConsultation,
+        options: [
+          { label: 'Yes', value: 'true' },
+          { label: 'Blank', value: '' },
+        ],
+      },
+      {
+        label: 'Declines Agreement',
+        name: 'declinedAgreement',
+        type: 'text',
+        select: true,
+        defaultValue: municipality.declinedAgreement,
+        options: [
+          { label: 'Yes', value: 'true' },
+          { label: 'Blank', value: '' },
+        ],
+      },
+      {
+        label: 'Wave',
+        name: 'workingCategory',
+        type: 'text',
+        select: true,
+        defaultValue: municipality.workingCategory?.toLowerCase(),
+        watchable: true,
+        options: [
+          { label: 'Wave 1', value: 'wave 1' },
+          { label: 'Wave 2', value: 'wave 2' },
+          { label: 'Wave 3', value: 'wave 3' },
+        ],
+      },
+      {
+        label: 'Wave under group',
+        name: 'wave',
+        type: 'text',
+        select: true,
+        defaultValue: municipality.wave,
+        condition: ['workingCategory', 'wave 2'],
+        options: [
+          { label: 'A', value: 'A' },
+          { label: 'B', value: 'B' },
+          { label: 'C', value: 'C' },
+          { label: 'D', value: 'D' },
+          { label: 'E', value: 'E' },
+          { label: 'F', value: 'F' },
+          { label: 'G', value: 'G' },
+          { label: 'H', value: 'H' },
+          { label: 'Z', value: 'Z' },
+        ],
+      },
+      {
+        label: 'Wave under group',
+        name: 'wave',
+        type: 'text',
+        select: true,
+        defaultValue: municipality.wave,
+        condition: ['workingCategory', 'wave 3'],
+        options: [
+          { label: 'X', value: 'X' },
+          { label: 'Blank', value: '' },
+        ],
+      },
+      {
+        label: 'Wave under group',
+        name: 'wave',
+        type: 'text',
+        defaultValue: '',
+        condition: ['workingCategory', 'wave 1'],
+        hidden: true,
       },
       {
         label: 'SUP responsible',
@@ -64,7 +115,7 @@ export function MunicipalityTitle({ municipality, fetcher, statusList, users }: 
         select: true,
         // @ts-expect-error it works for now TO DO: fix it
         options: users.map((user) => ({ label: user.name, value: user.id })).concat({ label: 'None', value: 0 }),
-        defaultValue: municipality.responsibleId,
+        defaultValue: municipality.responsibleId || 0,
       },
     ]);
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -79,9 +130,10 @@ export function MunicipalityTitle({ municipality, fetcher, statusList, users }: 
           fontWeight="bold"
           sx={{ flex: 1, display: 'flex', gap: 1, alignItems: 'center' }}
         >
-          {municipality.name} ({municipality.code}) <Chip color="primary" label={municipality.statusName} />
+          {municipality.name} <Chip color="primary" label={municipality.computedStatus} />
           <Box component="span" sx={{ fontSize: '0.75em', fontWeight: 'normal' }}>
-            General email {municipality.email}
+            {municipality.workingCategory}
+            {municipality.wave ? `, ${municipality.wave}` : ''}
           </Box>
         </Typography>
         <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
@@ -108,6 +160,7 @@ export function MunicipalityTitle({ municipality, fetcher, statusList, users }: 
             fields={fields}
             title={`Edit municipality ${municipality.name}`}
             fetcher={fetcher}
+            method="PATCH"
             url={`/api/municipalities/${municipality.id}`}
           />
         )}

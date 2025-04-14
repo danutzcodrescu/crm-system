@@ -65,7 +65,7 @@ interface Props<T> {
   defaultSorting?: ColumnSort;
   tableHeight?: string;
   defaultPageSize?: number;
-  onFilter?: (rows: Row<T>[]) => void;
+  onFilter?: (rows: Row<T>[], filters: ColumnFiltersState) => void;
 }
 
 function cellPinning<T>(column: Column<T>): BoxProps['sx'] {
@@ -167,9 +167,9 @@ export function PaginatedTable<T extends { id: string; warning?: boolean }>({
 
   useDeepCompareEffect(() => {
     if (onFilter) {
-      onFilter(table.getFilteredRowModel().rows);
+      onFilter(table.getFilteredRowModel().rows, table.getState().columnFilters);
     }
-  }, [table.getFilteredRowModel().rows]);
+  }, [table.getState().columnFilters]);
 
   const { pageSize, pageIndex } = table.getState().pagination;
 
@@ -283,7 +283,7 @@ export function PaginatedTable<T extends { id: string; warning?: boolean }>({
       </TableContainer>
       {!disablePagination ? (
         <TablePagination
-          rowsPerPageOptions={[10, 50, 100, 200, 290]}
+          rowsPerPageOptions={[5, 10, 50, 100, 200, 290]}
           component="div"
           count={table.getFilteredRowModel().rows.length}
           rowsPerPage={pageSize}
