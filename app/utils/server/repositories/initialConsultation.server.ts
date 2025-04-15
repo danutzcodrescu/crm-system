@@ -57,8 +57,8 @@ export async function editInitialConsultationRecord(args: EditInitialConsultatio
       .update(initialConsultation)
       .set({
         ...args,
-        dateSigned: args.dateSigned ? new Date(args.dateSigned) : undefined,
-        dateShared: args.dateShared ? new Date(args.dateShared) : undefined,
+        dateSigned: args.dateSigned ? new Date(args.dateSigned) : null,
+        dateShared: args.dateShared ? new Date(args.dateShared) : null,
         documentSent: !!args.documentSent,
       })
       .where(eq(initialConsultation.id, args.id));
