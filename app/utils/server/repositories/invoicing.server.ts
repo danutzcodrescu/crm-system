@@ -45,11 +45,38 @@ export async function getInvoicingDataByYear(year: number): Promise<[null, Invoi
         totalCompensation: compensationView.totalCompensation,
         inAgreement: sql<boolean>`CASE WHEN agreements.new_agreement_date_signed IS NOT NULL OR agreements.old_agreement_date_signed IS NOT NULL THEN TRUE ELSE FALSE END`,
         entitled: sql<boolean>`CASE
-		WHEN
-			(agreements.new_agreement_date_signed IS NOT NULL
-			AND reporting.reporting_date IS NOT NULL)  OR (
-			agreements.old_agreement_date_signed IS NOT NULL
-			AND reporting.reporting_date IS NOT NULL )THEN TRUE
+		WHEN (
+			(
+				agreements.new_agreement_date_signed IS NOT NULL
+				AND invoicing.year < EXTRACT(
+					YEAR
+					FROM
+						agreements.new_agreement_date_signed
+				)
+			)
+			OR (
+				agreements.old_agreement_date_signed IS NOT NULL
+				AND invoicing.year < EXTRACT(
+					YEAR
+					FROM
+						agreements.old_agreement_date_signed
+				)
+			)
+		) THEN TRUE
+		WHEN agreements.new_agreement_date_signed IS NOT NULL
+		AND invoicing."year" >= EXTRACT(
+			YEAR
+			FROM
+				agreements.new_agreement_date_signed
+		)
+		AND reporting.reporting_date IS NOT NULL THEN TRUE
+		WHEN agreements.old_agreement_date_signed IS NOT NULL
+		AND invoicing."year" >= EXTRACT(
+			YEAR
+			FROM
+				agreements.old_agreement_date_signed
+		)
+		AND reporting.reporting_date IS NOT NULL THEN TRUE
 		ELSE FALSE
 	END`,
       })
@@ -93,9 +120,38 @@ export async function getInvoicingForCompany(
   END`,
         vat: invoicing.vat,
         totalCompensation: sql<number>`CASE
-    WHEN "agreements"."new_agreement_date_signed" IS NOT NULL THEN ROUND("years"."change_factor" * total_compensation)
-    ELSE ROUND("years"."change_factor" * total_compensation * "years"."change_factor_litter")
-  END`,
+		WHEN (
+			agreements.new_agreement_date_signed IS NOT NULL
+			AND invoicing.year < EXTRACT(
+				YEAR
+				FROM
+					agreements.new_agreement_date_signed
+			)
+		) THEN compensation_view.total_compensation
+		WHEN (
+			agreements.old_agreement_date_signed IS NOT NULL
+			AND invoicing.year < EXTRACT(
+				YEAR
+				FROM
+					agreements.old_agreement_date_signed
+			)
+		) THEN compensation_view.total_compensation
+		WHEN agreements.new_agreement_date_signed IS NOT NULL
+		AND invoicing."year" >= EXTRACT(
+			YEAR
+			FROM
+				agreements.new_agreement_date_signed
+		)
+		AND reporting.reporting_date IS NOT NULL THEN compensation_view.total_compensation
+		WHEN agreements.old_agreement_date_signed IS NOT NULL
+		AND invoicing."year" >= EXTRACT(
+			YEAR
+			FROM
+				agreements.old_agreement_date_signed
+		)
+		AND reporting.reporting_date IS NOT NULL THEN compensation_view.total_compensation
+		ELSE NULL
+	END`,
       })
       .from(invoicing)
       .leftJoin(
@@ -104,6 +160,7 @@ export async function getInvoicingForCompany(
       )
       .leftJoin(agreement, eq(invoicing.companyId, agreement.companyId))
       .leftJoin(years, eq(invoicing.year, years.name))
+      .leftJoin(reporting, and(eq(reporting.companyId, invoicing.companyId), eq(reporting.year, invoicing.year)))
       .where(and(eq(invoicing.companyId, companyId), lte(invoicing.year, limitYear)))
       .orderBy(asc(invoicing.year));
 
@@ -162,15 +219,16 @@ export async function getInvoicingAggregatedPerYear(
       .select({
         year: invoicing.year,
         entitled: sql<number>`COUNT(DISTINCT ${invoicing.companyId}) FILTER (
-    WHERE EXTRACT(YEAR FROM ${agreement.oldAgreementDateSigned}) <= (${invoicing.year} + 1)
-    OR EXTRACT(YEAR FROM ${agreement.newAgreementDateSigned}) <= (${invoicing.year} + 1)
-  )`,
+    WHERE ( ${invoicing.year} < EXTRACT(YEAR FROM ${agreement.oldAgreementDateSigned}))
+    OR ( ${invoicing.year} < EXTRACT(YEAR FROM ${agreement.newAgreementDateSigned})) OR ( ${invoicing.year} >= EXTRACT(YEAR FROM ${agreement.newAgreementDateSigned}) AND ${reporting.reportingDate} IS NOT NULL)
+    OR ( ${invoicing.year} >= EXTRACT(YEAR FROM ${agreement.oldAgreementDateSigned}) AND ${reporting.reportingDate} IS NOT NULL))`,
         paid: sql<number>`COUNT(DISTINCT ${invoicing.companyId}) FILTER (WHERE ${invoicing.datePaid} IS NOT NULL OR ${invoicing.invoiceAmount} IS NOT NULL)`,
         invoiced: sql<number>`COUNT(DISTINCT ${invoicing.companyId}) FILTER (WHERE ${invoicing.invoiceDate} IS NOT NULL OR ${invoicing.invoiceAmount} IS NOT NULL)`,
         totalPaid: sql<number>`COALESCE(SUM(${invoicing.invoiceAmount}), 0)`,
       })
       .from(invoicing)
       .leftJoin(agreement, eq(agreement.companyId, invoicing.companyId))
+      .leftJoin(reporting, and(eq(reporting.companyId, invoicing.companyId), eq(reporting.year, invoicing.year)))
       .where(and(gte(invoicing.year, startYear), lte(invoicing.year, endYear)))
       .groupBy(invoicing.year);
     logger.info('Aggregated invoicing per year fetched');
@@ -201,4 +259,3 @@ export async function bulkImportInvoicing(values: (typeof invoicing.$inferInsert
     return 'could not import reporting data';
   }
 }
-
