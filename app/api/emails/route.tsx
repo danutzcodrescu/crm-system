@@ -1,8 +1,13 @@
 import { json, LoaderFunctionArgs, redirect } from '@remix-run/node';
 import { Outlet } from '@remix-run/react';
 
-import { auth } from '~/utils/server/auth.server';
-import { getEmailsPerMunicipality, gmail, Thread } from '~/utils/server/services/gmail.server';
+import { isLoggedIn } from '~/utils/server/auth.server';
+import {
+  getEmailsPerMunicipality,
+  getRedirectUrlIfThereIsNoToken,
+  isTokenSet,
+  Thread,
+} from '~/utils/server/services/gmail.server';
 
 export interface EmailApiResponse {
   message: {
@@ -13,10 +18,10 @@ export interface EmailApiResponse {
 }
 
 export async function loader({ request }: LoaderFunctionArgs) {
-  const isLoggedIn = await auth.isLoggedIn(request);
-  if (!isLoggedIn) return redirect('/signin');
-  if (!gmail.isTokenSet()) {
-    await gmail.getRedirectUrlIfThereIsNoToken(request);
+  const isAuthenticated = await isLoggedIn(request);
+  if (!isAuthenticated) return redirect('/signin');
+  if (!isTokenSet()) {
+    await getRedirectUrlIfThereIsNoToken(request);
   }
   const searchParams = new URL(request.url).searchParams;
   if (!searchParams.has('municipalityId')) {

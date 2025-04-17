@@ -2,7 +2,7 @@ import { renderToStream } from '@react-pdf/renderer';
 import { LoaderFunctionArgs, redirect } from '@remix-run/node';
 
 import { PDF } from '../../components/PDF.server';
-import { auth } from './auth.server';
+import { isLoggedIn } from './auth.server';
 import { logger } from './logger.server';
 import { CompensationDataPerCompanyPerYear, getCompensationForCompanyByYear } from './repositories/compensation.server';
 
@@ -35,8 +35,8 @@ export async function handlePDFRequest(request: Request, headers: Headers) {
 }
 
 export async function loader({ request }: LoaderFunctionArgs) {
-  const isLoggedIn = await auth.isLoggedIn(request);
-  if (!isLoggedIn) return redirect('/signin');
+  const isAuthenticated = await isLoggedIn(request);
+  if (!isAuthenticated) return redirect('/signin');
   const pathname = new URL(request.url).pathname;
   const segments = pathname.split('/').slice(1);
   const [error, data] = await getCompensationForCompanyByYear(segments[1], parseInt(segments[2].replace('.pdf', '')));

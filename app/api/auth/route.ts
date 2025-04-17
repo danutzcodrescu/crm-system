@@ -1,15 +1,15 @@
 import { ActionFunctionArgs, json, redirect } from '@remix-run/node';
 
-import { auth } from '~/utils/server/auth.server';
+import { isLoggedIn, logout } from '~/utils/server/auth.server';
 import { logger } from '~/utils/server/logger.server';
 
 export async function action({ request }: ActionFunctionArgs) {
-  if (!auth.isLoggedIn(request)) {
+  if (!isLoggedIn(request)) {
     return redirect('/signin');
   }
   if (request.method === 'DELETE') {
     try {
-      await auth.logout(request);
+      await logout(request);
       return redirect('/signin');
     } catch (e) {
       logger.error(e);

@@ -4,7 +4,7 @@ import { gmail_v1, google } from 'googleapis';
 import { decode } from 'html-entities';
 import sanitizeHtml from 'sanitize-html';
 
-import { auth, storeRefreshToken } from '../auth.server';
+import { getUserFromSession, storeRefreshToken } from '../auth.server';
 import { getSecret } from '../infisical.server';
 import { logger } from '../logger.server';
 import { db } from '../repositories/db.server';
@@ -92,132 +92,131 @@ function getBodyContent(part: gmail_v1.Schema$MessagePart): string {
   return '';
 }
 
-export const gmail = {
-  getEmail: async function (): Promise<[string | null, string | null]> {
-    try {
-      const resp = await google.gmail({ version: 'v1', auth: oauth2Client }).users.getProfile({
-        userId: 'me',
-        fields: 'emailAddress',
-      });
-      return [null, resp.data.emailAddress as string];
-    } catch (error) {
-      logger.error('Error getting email', { error });
-      return ['could not fetch email data', null];
-    }
-  },
-  generateAuthUrl(path: string) {
-    logger.info('Generating auth URL for google service');
-    return oauth2Client.generateAuthUrl({
-      access_type: 'offline',
-      scope: [
-        'https://www.googleapis.com/auth/gmail.readonly',
-        'https://www.googleapis.com/auth/gmail.compose',
-        'https://www.googleapis.com/auth/gmail.modify',
-      ],
-      state: path,
-      include_granted_scopes: true,
-      prompt: 'consent',
-    });
-  },
-  setToken: async function (code: string, userId: number) {
-    const { tokens } = await oauth2Client.getToken(code);
-    logger.info('Setting token for google service');
-    oauth2Client.setCredentials(tokens);
-    if (tokens.refresh_token) {
-      logger.info('Storing refresh token for google service');
-      await setRefreshToken(tokens.refresh_token, userId);
-    }
-  },
-
-  isTokenSet: function () {
-    return !!oauth2Client.credentials?.refresh_token;
-  },
-
-  getAttachment: async function (attachmentId: string, messageId: string): Promise<[string | null, string | null]> {
-    try {
-      const response = await google.gmail({ version: 'v1', auth: oauth2Client }).users.messages.attachments.get({
-        id: attachmentId,
-        messageId,
-        userId: 'me',
-      });
-      return [null, response.data.data as string];
-    } catch (error) {
-      logger.error('Error getting attachment', { error });
-      return ['could not fetch email data', null];
-    }
-  },
-
-  clearRefreshToken: function () {
-    oauth2Client.setCredentials({ refresh_token: undefined });
-  },
-
-  getRedirectUrlIfThereIsNoToken: async function (request: Request): Promise<string | undefined> {
-    try {
-      const user = await auth.getUserFromSession(request);
-      if (!user) return undefined;
-      const data = await db.select({ refreshToken: users.gmailRefreshToken }).from(users).where(eq(users.id, user.id));
-      if (!data.length || !data?.[0]?.refreshToken) return this.generateAuthUrl(new URL(request.url).pathname);
-      const token = await decodeWithKey(data[0].refreshToken as string, tokenKey.secretValue);
-
-      oauth2Client.setCredentials({ refresh_token: token });
-    } catch (error) {
-      logger.error('Error checking if user has token', { error });
-      return undefined;
-    }
-  },
-
-  async getThreadsByEmailAddress(email: string) {
-    const response = await google
-      .gmail({ version: 'v1', auth: oauth2Client })
-      .users.threads.list({ q: `${email} AND -from:calendar-notification@google.com`, userId: 'me', maxResults: 50 });
-    return response.data;
-  },
-  async getMessagesByThreadId(threadId: string): Promise<EmailMessage[]> {
-    const response = await google.gmail({ version: 'v1', auth: oauth2Client }).users.threads.get({
-      id: threadId,
+export async function getEmail(): Promise<[string | null, string | null]> {
+  try {
+    const resp = await google.gmail({ version: 'v1', auth: oauth2Client }).users.getProfile({
       userId: 'me',
-      format: 'full', // Get full message details
+      fields: 'emailAddress',
     });
+    return [null, resp.data.emailAddress as string];
+  } catch (error) {
+    logger.error('Error getting email', { error });
+    return ['could not fetch email data', null];
+  }
+}
+export function generateAuthUrl(path: string) {
+  logger.info('Generating auth URL for google service');
+  return oauth2Client.generateAuthUrl({
+    access_type: 'offline',
+    scope: [
+      'https://www.googleapis.com/auth/gmail.readonly',
+      'https://www.googleapis.com/auth/gmail.compose',
+      'https://www.googleapis.com/auth/gmail.modify',
+    ],
+    state: path,
+    include_granted_scopes: true,
+    prompt: 'consent',
+  });
+}
+export async function setToken(code: string, userId: number) {
+  const { tokens } = await oauth2Client.getToken(code);
+  logger.info('Setting token for google service');
+  oauth2Client.setCredentials(tokens);
+  if (tokens.refresh_token) {
+    logger.info('Storing refresh token for google service');
+    await setRefreshToken(tokens.refresh_token, userId);
+  }
+}
 
-    if (!response.data.messages?.length) {
-      return [];
-    }
+export function isTokenSet() {
+  return !!oauth2Client.credentials?.refresh_token;
+}
 
-    // Process each message in the thread
-    const messagesPromises = response.data.messages.toReversed().map(async (message) => {
-      // Get headers
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const headers = message.payload?.headers?.reduce((acc: any, header) => {
-        acc[header.name?.toLowerCase() ?? ''] = header.value;
-        return acc;
-      }, {});
-
-      // Get message content
-      const content = getBodyContent(message.payload ?? {});
-
-      // Find attachments in the message
-      const attachmentsParts = findAttachments(message.payload ?? {});
-
-      return {
-        id: message.id as string,
-        threadId: message.threadId as string,
-        headers: {
-          from: headers.from as string,
-          to: headers.to as string,
-          subject: decode(headers.subject as string),
-          date: parseInt(message.internalDate as string),
-          cc: headers.cc as string,
-        },
-        snippet: decode(message.snippet as string),
-        content: decode(content),
-        attachments: attachmentsParts.length ? attachmentsParts : undefined,
-      };
+export async function getAttachment(attachmentId: string, messageId: string): Promise<[string | null, string | null]> {
+  try {
+    const response = await google.gmail({ version: 'v1', auth: oauth2Client }).users.messages.attachments.get({
+      id: attachmentId,
+      messageId,
+      userId: 'me',
     });
+    return [null, response.data.data as string];
+  } catch (error) {
+    logger.error('Error getting attachment', { error });
+    return ['could not fetch email data', null];
+  }
+}
 
-    // Wait for all messages to be processed
-    return Promise.all(messagesPromises);
-  },
-};
+export function clearRefreshToken() {
+  oauth2Client.setCredentials({ refresh_token: undefined });
+}
+
+export async function getRedirectUrlIfThereIsNoToken(request: Request): Promise<string | undefined> {
+  try {
+    const user = await getUserFromSession(request);
+    if (!user) return undefined;
+    const data = await db.select({ refreshToken: users.gmailRefreshToken }).from(users).where(eq(users.id, user.id));
+    if (!data.length || !data?.[0]?.refreshToken) return generateAuthUrl(new URL(request.url).pathname);
+    const token = await decodeWithKey(data[0].refreshToken as string, tokenKey.secretValue);
+
+    oauth2Client.setCredentials({ refresh_token: token });
+  } catch (error) {
+    logger.error('Error checking if user has token', { error });
+    return undefined;
+  }
+}
+
+export async function getThreadsByEmailAddress(email: string) {
+  const response = await google
+    .gmail({ version: 'v1', auth: oauth2Client })
+    .users.threads.list({ q: `${email} AND -from:calendar-notification@google.com`, userId: 'me', maxResults: 50 });
+  return response.data;
+}
+
+export async function getMessagesByThreadId(threadId: string): Promise<EmailMessage[]> {
+  const response = await google.gmail({ version: 'v1', auth: oauth2Client }).users.threads.get({
+    id: threadId,
+    userId: 'me',
+    format: 'full', // Get full message details
+  });
+
+  if (!response.data.messages?.length) {
+    return [];
+  }
+
+  // Process each message in the thread
+  const messagesPromises = response.data.messages.toReversed().map(async (message) => {
+    // Get headers
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const headers = message.payload?.headers?.reduce((acc: any, header) => {
+      acc[header.name?.toLowerCase() ?? ''] = header.value;
+      return acc;
+    }, {});
+
+    // Get message content
+    const content = getBodyContent(message.payload ?? {});
+
+    // Find attachments in the message
+    const attachmentsParts = findAttachments(message.payload ?? {});
+
+    return {
+      id: message.id as string,
+      threadId: message.threadId as string,
+      headers: {
+        from: headers.from as string,
+        to: headers.to as string,
+        subject: decode(headers.subject as string),
+        date: parseInt(message.internalDate as string),
+        cc: headers.cc as string,
+      },
+      snippet: decode(message.snippet as string),
+      content: decode(content),
+      attachments: attachmentsParts.length ? attachmentsParts : undefined,
+    };
+  });
+
+  // Wait for all messages to be processed
+  return Promise.all(messagesPromises);
+}
 
 async function encodeWithKey(inputString: string, key: string) {
   // Convert strings to Uint8Array for Oslo functions
@@ -275,12 +274,10 @@ export async function getEmailsPerMunicipality(id: string): Promise<[string | nu
   }
 
   try {
-    const threads = await gmail.getThreadsByEmailAddress(generalEmail);
-    const dt = await Promise.all(
-      (threads.threads || []).map((thread) => gmail.getMessagesByThreadId(thread.id as string)),
-    );
+    const threads = await getThreadsByEmailAddress(generalEmail);
+    const dt = await Promise.all((threads.threads || []).map((thread) => getMessagesByThreadId(thread.id as string)));
     setImmediate(() => {
-      gmail.clearRefreshToken();
+      clearRefreshToken();
     });
 
     return [

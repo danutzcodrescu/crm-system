@@ -1,6 +1,6 @@
 import Delete from '@mui/icons-material/Delete';
 import Edit from '@mui/icons-material/Edit';
-import { Box , IconButton, Stack, Typography } from '@mui/material';
+import { Box, IconButton, Stack, Typography } from '@mui/material';
 import { ActionFunctionArgs, json, LoaderFunctionArgs, redirect } from '@remix-run/node';
 import { MetaFunction, useFetcher, useLoaderData } from '@remix-run/react';
 import { useCallback } from 'react';
@@ -9,7 +9,7 @@ import { ClientOnly } from 'remix-utils/client-only';
 import { EditDialog } from '~/components/shared/EditDialog.client';
 import { PageContainer } from '~/components/shared/PageContainer';
 import { useEditFields } from '~/hooks/editFields';
-import { auth } from '~/utils/server/auth.server';
+import { isLoggedIn } from '~/utils/server/auth.server';
 import {
   createStatus,
   deleteStatus,
@@ -19,8 +19,8 @@ import {
 } from '~/utils/server/repositories/status.server';
 
 export async function loader({ request }: LoaderFunctionArgs) {
-  const isLoggedIn = await auth.isLoggedIn(request);
-  if (!isLoggedIn) return redirect('/signin');
+  const isAuthenticated = await isLoggedIn(request);
+  if (!isAuthenticated) return redirect('/signin');
 
   const [error, statuses] = await getAllStatuses();
   if (error) {
@@ -30,8 +30,8 @@ export async function loader({ request }: LoaderFunctionArgs) {
 }
 
 export async function action({ request }: ActionFunctionArgs) {
-  const isLoggedIn = await auth.isLoggedIn(request);
-  if (!isLoggedIn) return redirect('/signin');
+  const isAuthenticated = await isLoggedIn(request);
+  if (!isAuthenticated) return redirect('/signin');
   if (request.method === 'DELETE') {
     const formData = await request.formData();
     const id = formData.get('id') as string;

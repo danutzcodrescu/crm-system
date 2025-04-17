@@ -14,7 +14,7 @@ import { ReportingCard } from '~/components/municipality/ReportingCard';
 import { ResponsiblesTable } from '~/components/municipality/ResponsiblesTable';
 import { MunicipalityTitle } from '~/components/municipality/Title';
 import { PageContainer } from '~/components/shared/PageContainer';
-import { auth } from '~/utils/server/auth.server';
+import { isLoggedIn } from '~/utils/server/auth.server';
 import { getAgreementForMunicipality, MunicipalityAgreementData } from '~/utils/server/repositories/agreement.server';
 import { CompensationDataPerCompany, getCompensationForCompany } from '~/utils/server/repositories/compensation.server';
 import {
@@ -32,7 +32,12 @@ import {
 import { getReportingForCompany, ReportingData } from '~/utils/server/repositories/reporting.server';
 import { getResponsiblesForMunicipality, ResponsibleData } from '~/utils/server/repositories/responsibles.server';
 import { getAllUsers, User } from '~/utils/server/repositories/users.server';
-import { gmail } from '~/utils/server/services/gmail.server';
+import {
+  clearRefreshToken,
+  getEmail,
+  getRedirectUrlIfThereIsNoToken,
+  isTokenSet,
+} from '~/utils/server/services/gmail.server';
 
 interface LoaderResponse {
   logs: LogForCompany[];
@@ -61,10 +66,10 @@ interface LoaderResponse {
 }
 
 export async function loader({ request, params }: LoaderFunctionArgs) {
-  const isLoggedIn = await auth.isLoggedIn(request);
-  if (!isLoggedIn) return redirect('/signin');
-  if (!gmail.isTokenSet()) {
-    await gmail.getRedirectUrlIfThereIsNoToken(request);
+  const isAuthenticated = await isLoggedIn(request);
+  if (!isAuthenticated) return redirect('/signin');
+  if (!isTokenSet()) {
+    await getRedirectUrlIfThereIsNoToken(request);
   }
 
   const id = params.municipalityId as string;
@@ -92,7 +97,7 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
     getCompensationForCompany(id, currentYear),
     getInvoicingForCompany(id, currentYear),
     getAllUsers(),
-    gmail.getEmail(),
+    getEmail(),
   ]);
 
   if (
@@ -110,7 +115,7 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
     return json({ message: 'Could not fetch data for company', severity: 'error' }, { status: 500 });
   }
 
-  setImmediate(() => gmail.clearRefreshToken());
+  setImmediate(() => clearRefreshToken());
 
   // Fetch recurring consultation data for all years in one query
   const [recurringConsultationError, recurringConsultationData] = await getRecurringConsultationForCompanyAndYears(

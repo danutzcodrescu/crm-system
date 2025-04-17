@@ -3,26 +3,24 @@ import { ActionFunctionArgs, json, LoaderFunctionArgs, MetaFunction, redirect } 
 import { Outlet, ShouldRevalidateFunctionArgs, useLoaderData } from '@remix-run/react';
 
 import { Topbar } from '~/components/Topbar';
-import { auth } from '~/utils/server/auth.server';
-import { gmail } from '~/utils/server/services/gmail.server';
+import { isLoggedIn, logout } from '~/utils/server/auth.server';
+import { clearRefreshToken, getRedirectUrlIfThereIsNoToken, isTokenSet } from '~/utils/server/services/gmail.server';
 
 export async function loader({ request }: LoaderFunctionArgs) {
-  const isLoggedIn = await auth.isLoggedIn(request);
-  if (!isLoggedIn) return redirect('/signin');
-  const isTokenSet = gmail.isTokenSet();
-
+  const isAuthenticated = await isLoggedIn(request);
+  if (!isAuthenticated) return redirect('/signin');
   if (!isTokenSet) {
-    const token = await gmail.getRedirectUrlIfThereIsNoToken(request);
+    const token = await getRedirectUrlIfThereIsNoToken(request);
     return json({ redirectUrl: token });
   }
-  setImmediate(() => gmail.clearRefreshToken());
+  setImmediate(() => clearRefreshToken());
   return json({ redirectUrl: undefined });
 }
 
 export async function action({ request }: ActionFunctionArgs) {
-  const isLoggedIn = await auth.isLoggedIn(request);
-  if (!isLoggedIn) return redirect('/signin');
-  await auth.logout(request);
+  const isAuthenticated = await isLoggedIn(request);
+  if (!isAuthenticated) return redirect('/signin');
+  await logout(request);
   return redirect('/signin');
 }
 

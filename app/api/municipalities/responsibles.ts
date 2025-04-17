@@ -1,11 +1,11 @@
 import { ActionFunctionArgs, json, redirect } from '@remix-run/node';
 
-import { auth } from '~/utils/server/auth.server';
+import { isLoggedIn } from '~/utils/server/auth.server';
 import { createNewResponsible } from '~/utils/server/repositories/responsibles.server';
 
 export async function action({ request, params }: ActionFunctionArgs) {
-  const isLoggedIn = await auth.isLoggedIn(request);
-  if (!isLoggedIn) return redirect('/signin');
+  const isAuthenticated = await isLoggedIn(request);
+  if (!isAuthenticated) return redirect('/signin');
   const id = params.companyId;
 
   if (request.method === 'POST') {
