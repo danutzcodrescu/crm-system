@@ -1,13 +1,13 @@
 import { ActionFunctionArgs, json, redirect } from '@remix-run/node';
 import { omit } from 'lodash-es';
 
-import { auth } from '~/utils/server/auth.server';
+import { isLoggedIn } from '~/utils/server/auth.server';
 import { deleteCompany } from '~/utils/server/repositories/companies.server';
 import { updateMunicipality } from '~/utils/server/repositories/municipalities.server';
 
 export async function action({ request, params }: ActionFunctionArgs) {
-  const isLoggedIn = await auth.isLoggedIn(request);
-  if (!isLoggedIn) return redirect('/signin');
+  const isAuthenticated = await isLoggedIn(request);
+  if (!isAuthenticated) return redirect('/signin');
   const id = params.companyId;
 
   if (request.method === 'PATCH') {

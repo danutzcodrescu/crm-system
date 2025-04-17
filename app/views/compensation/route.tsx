@@ -10,7 +10,7 @@ import { useMemo } from 'react';
 import { PageContainer } from '~/components/shared/PageContainer';
 import { SendEmail } from '~/components/shared/SendEmail';
 import { PaginatedTable } from '~/components/shared/table/PaginatedTable';
-import { auth } from '~/utils/server/auth.server';
+import { isLoggedIn } from '~/utils/server/auth.server';
 import { CompensationData, getCompensationByYear } from '~/utils/server/repositories/compensation.server';
 import { getAllYears } from '~/utils/server/repositories/years.server';
 import { useIds } from '~/utils/store';
@@ -28,7 +28,7 @@ interface LoaderResponse {
 }
 
 export async function loader({ request }: LoaderFunctionArgs) {
-  if (!auth.isLoggedIn(request)) {
+  if (!isLoggedIn(request)) {
     return redirect('/signin');
   }
   const year = new URL(request.url).searchParams.get('year');

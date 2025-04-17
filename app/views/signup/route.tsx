@@ -4,7 +4,7 @@ import { Form, MetaFunction, useActionData, useLoaderData } from '@remix-run/rea
 import { HoneypotInputs, HoneypotProvider } from 'remix-utils/honeypot/react';
 import { SpamError } from 'remix-utils/honeypot/server';
 
-import { auth } from '~/utils/server/auth.server';
+import { signUp } from '~/utils/server/auth.server';
 import { honeypot } from '~/utils/server/honeypot.server';
 import { getSecret } from '~/utils/server/infisical.server';
 import { logger } from '~/utils/server/logger.server';
@@ -44,7 +44,7 @@ export const action = async ({ request }: ActionFunctionArgs) => {
     return json({ error: 'Username or password field cannot be empty' }, { status: 400 });
   }
 
-  const [error, cookie] = await auth.signUp(username as string, password as string, request);
+  const [error, cookie] = await signUp(username as string, password as string, request);
 
   if (error) {
     return json({ error: 'There was an issue when trying to sign up' }, { status: 500 });

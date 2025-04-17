@@ -22,7 +22,7 @@ import { PaginatedTable } from '~/components/shared/table/PaginatedTable';
 import { TableActionsCell } from '~/components/shared/table/TableActionsCell';
 import { useEditFields } from '~/hooks/editFields';
 import { formatDate } from '~/utils/client/dates';
-import { auth } from '~/utils/server/auth.server';
+import { isLoggedIn } from '~/utils/server/auth.server';
 import {
   getFistRecurringConsultationYearFormCompany,
   updateRecurringConsultations,
@@ -48,7 +48,7 @@ interface LoaderResponse {
 }
 
 export async function loader({ request }: LoaderFunctionArgs) {
-  if (!auth.isLoggedIn(request)) {
+  if (!isLoggedIn(request)) {
     return redirect('/signin');
   }
   const year = new URL(request.url).searchParams.get('year');
@@ -66,7 +66,7 @@ export async function loader({ request }: LoaderFunctionArgs) {
 }
 
 export async function action({ request }: ActionFunctionArgs) {
-  if (!auth.isLoggedIn(request)) {
+  if (!isLoggedIn(request)) {
     return redirect('/signin');
   }
   if (request.method === 'PATCH') {

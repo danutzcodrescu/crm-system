@@ -16,7 +16,7 @@ import { SendEmail } from '~/components/shared/SendEmail';
 import { PaginatedTable } from '~/components/shared/table/PaginatedTable';
 import { TableActionsCell } from '~/components/shared/table/TableActionsCell';
 import { formatDate } from '~/utils/client/dates';
-import { auth } from '~/utils/server/auth.server';
+import { isLoggedIn } from '~/utils/server/auth.server';
 import { AgreementData, editAgreementRecord, getAgreementData } from '~/utils/server/repositories/agreement.server';
 import { useIds } from '~/utils/store';
 
@@ -28,7 +28,7 @@ export const meta: MetaFunction = () => {
 };
 
 export async function action({ request }: ActionFunctionArgs) {
-  if (!auth.isLoggedIn(request)) {
+  if (!isLoggedIn(request)) {
     return redirect('/signin');
   }
   if (request.method === 'PATCH') {
@@ -68,7 +68,7 @@ export async function action({ request }: ActionFunctionArgs) {
 }
 
 export async function loader({ request }: LoaderFunctionArgs) {
-  if (!auth.isLoggedIn(request)) {
+  if (!isLoggedIn(request)) {
     return redirect('/signin');
   }
   const [error, data] = await getAgreementData();

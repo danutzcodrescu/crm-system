@@ -1,13 +1,18 @@
 import { json, LoaderFunctionArgs, redirect } from '@remix-run/node';
 
-import { auth } from '~/utils/server/auth.server';
-import { gmail } from '~/utils/server/services/gmail.server';
+import { isLoggedIn } from '~/utils/server/auth.server';
+import {
+  clearRefreshToken,
+  getAttachment,
+  getRedirectUrlIfThereIsNoToken,
+  isTokenSet,
+} from '~/utils/server/services/gmail.server';
 
 export async function loader({ request, params }: LoaderFunctionArgs) {
-  const isLoggedIn = await auth.isLoggedIn(request);
-  if (!isLoggedIn) return redirect('/signin');
-  if (!gmail.isTokenSet()) {
-    await gmail.getRedirectUrlIfThereIsNoToken(request);
+  const isAuthenticated = await isLoggedIn(request);
+  if (!isAuthenticated) return redirect('/signin');
+  if (!isTokenSet()) {
+    await getRedirectUrlIfThereIsNoToken(request);
   }
   const searchParams = new URL(request.url).searchParams;
   const mimeType = searchParams.get('mimeType');
@@ -18,8 +23,8 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
   const messageId = params.messageId as string;
   const attachmentId = params.attachmentId as string;
 
-  const [error, data] = await gmail.getAttachment(attachmentId, messageId);
-  setImmediate(() => gmail.clearRefreshToken());
+  const [error, data] = await getAttachment(attachmentId, messageId);
+  setImmediate(() => clearRefreshToken());
   if (error) {
     return json({ message: 'Could not fetch emails', severity: 'error' }, { status: 500 });
   }

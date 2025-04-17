@@ -10,85 +10,83 @@ import { commitSession, destroySession, getRequestSession, getSession } from './
 
 export type SessionValidationResult = { session: Session; user: User } | { session: null; user: null };
 
-export const auth = {
-  login: async function (userId: string, password: string, req: Request): Promise<[string, null] | [null, string]> {
-    const user = await db
-      .select({ password: users.password, userId: users.id })
-      .from(users)
-      .where(eq(users.username, userId));
-    if (user.length !== 1) {
-      logger.info('login -> user not found');
-      return ['Invalid username or password', null];
+export async function login(userId: string, password: string, req: Request): Promise<[string, null] | [null, string]> {
+  const user = await db
+    .select({ password: users.password, userId: users.id })
+    .from(users)
+    .where(eq(users.username, userId));
+  if (user.length !== 1) {
+    logger.info('login -> user not found');
+    return ['Invalid username or password', null];
+  }
+  const pass = await verifyPasswordHash(user[0].password, password);
+
+  if (!pass) {
+    logger.info('login -> password not valid');
+    return ['Invalid username or password', null];
+  }
+  const sessionString = await setSession(req, user[0].userId);
+  logger.debug(`login -> Session created for ${userId}`);
+  return [null, sessionString];
+}
+
+export async function logout(req: Request) {
+  const session = await getRequestSession(req);
+  try {
+    const sessionId = fromSessionTokenToSessionId(session.get('session') as string);
+    await invalidateSession(sessionId);
+    logger.debug(`logout -> Session destroyed for ${session.get('session')}`);
+  } catch (e) {
+    logger.error(e);
+  }
+  logger.debug(`logout -> Destroying session for ${session.get('session')}`);
+  destroySession(session);
+  return;
+}
+
+export async function isLoggedIn(request: Request): Promise<boolean> {
+  const sessionDetails = await getSession(request.headers.get('Cookie'));
+  if (sessionDetails.has('session')) {
+    logger.debug(`isLoggedIn -> Session found`);
+    const { session } = await validateSessionToken(sessionDetails.get('session') as string);
+    logger.debug(`isLoggedIn -> ${Boolean(session)}, session is valid`);
+    return Boolean(session);
+  }
+  return false;
+}
+
+export async function getUserFromSession(request: Request): Promise<User | null> {
+  const sessionDetails = await getSession(request.headers.get('Cookie'));
+  if (!sessionDetails.has('session')) {
+    return null;
+  }
+  const { user } = await validateSessionToken(sessionDetails.get('session') as string);
+  return user;
+}
+
+export async function signUp(
+  username: string,
+  password: string,
+  req: Request,
+  shouldCreateSessions = true,
+): Promise<[string, null] | [null, string]> {
+  const hashedPassword = await hashPassword(password);
+
+  try {
+    const data = await db.insert(users).values({ username, password: hashedPassword }).returning({ id: users.id });
+    logger.info(`User created: ${username}`);
+    if (!shouldCreateSessions) {
+      return [null, ''];
+    } else {
+      const sessionString = await setSession(req, data[0].id);
+
+      return [null, sessionString];
     }
-    const pass = await verifyPasswordHash(user[0].password, password);
-
-    if (!pass) {
-      logger.info('login -> password not valid');
-      return ['Invalid username or password', null];
-    }
-    const sessionString = await setSession(req, user[0].userId);
-    logger.debug(`login -> Session created for ${userId}`);
-    return [null, sessionString];
-  },
-
-  logout: async function (req: Request) {
-    const session = await getRequestSession(req);
-    try {
-      const sessionId = fromSessionTokenToSessionId(session.get('session') as string);
-      await invalidateSession(sessionId);
-      logger.debug(`logout -> Session destroyed for ${session.get('session')}`);
-    } catch (e) {
-      logger.error(e);
-    }
-    logger.debug(`logout -> Destroying session for ${session.get('session')}`);
-    destroySession(session);
-    return;
-  },
-
-  isLoggedIn: async function (request: Request): Promise<boolean> {
-    const sessionDetails = await getSession(request.headers.get('Cookie'));
-    if (sessionDetails.has('session')) {
-      logger.debug(`isLoggedIn -> Session found`);
-      const { session } = await validateSessionToken(sessionDetails.get('session') as string);
-      logger.debug(`isLoggedIn -> ${Boolean(session)}, session is valid`);
-      return Boolean(session);
-    }
-    return false;
-  },
-
-  getUserFromSession: async function (request: Request): Promise<User | null> {
-    const sessionDetails = await getSession(request.headers.get('Cookie'));
-    if (!sessionDetails.has('session')) {
-      return null;
-    }
-    const { user } = await validateSessionToken(sessionDetails.get('session') as string);
-    return user;
-  },
-
-  signUp: async function (
-    username: string,
-    password: string,
-    req: Request,
-    shouldCreateSessions = true,
-  ): Promise<[string, null] | [null, string]> {
-    const hashedPassword = await hashPassword(password);
-
-    try {
-      const data = await db.insert(users).values({ username, password: hashedPassword }).returning({ id: users.id });
-      logger.info(`User created: ${username}`);
-      if (!shouldCreateSessions) {
-        return [null, ''];
-      } else {
-        const sessionString = await setSession(req, data[0].id);
-
-        return [null, sessionString];
-      }
-    } catch (e) {
-      logger.error(e);
-      return ['User already exists', null];
-    }
-  },
-};
+  } catch (e) {
+    logger.error(e);
+    return ['User already exists', null];
+  }
+}
 
 const SESSION_REFRESH_INTERVAL_MS = 1000 * 60 * 60 * 24 * 7; // 15 days
 const SESSION_MAX_DURATION_MS = SESSION_REFRESH_INTERVAL_MS * 2;

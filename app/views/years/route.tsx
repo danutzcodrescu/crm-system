@@ -8,7 +8,7 @@ import { ClientOnly } from 'remix-utils/client-only';
 import { EditDialog } from '~/components/shared/EditDialog.client';
 import { PageContainer } from '~/components/shared/PageContainer';
 import { useEditFields } from '~/hooks/editFields';
-import { auth } from '~/utils/server/auth.server';
+import { isLoggedIn } from '~/utils/server/auth.server';
 import { FullYearData, getYearsData, updateYear } from '~/utils/server/repositories/years.server';
 
 export const meta: MetaFunction = () => {
@@ -16,8 +16,8 @@ export const meta: MetaFunction = () => {
 };
 
 export async function loader({ request }: LoaderFunctionArgs) {
-  const isLoggedIn = await auth.isLoggedIn(request);
-  if (!isLoggedIn) return redirect('/signin');
+  const isAuthenticated = await isLoggedIn(request);
+  if (!isAuthenticated) return redirect('/signin');
 
   const [error, years] = await getYearsData();
   if (error) {
@@ -27,8 +27,8 @@ export async function loader({ request }: LoaderFunctionArgs) {
 }
 
 export async function action({ request }: ActionFunctionArgs) {
-  const isLoggedIn = await auth.isLoggedIn(request);
-  if (!isLoggedIn) return redirect('/signin');
+  const isAuthenticated = await isLoggedIn(request);
+  if (!isAuthenticated) return redirect('/signin');
 
   if (request.method === 'PATCH') {
     const formData = await request.formData();

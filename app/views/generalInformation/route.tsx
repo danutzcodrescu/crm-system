@@ -14,7 +14,7 @@ import { PaginatedTable } from '~/components/shared/table/PaginatedTable';
 import { TableActionsCell } from '~/components/shared/table/TableActionsCell';
 import { UploadButton } from '~/components/shared/UploadButton.client';
 import { useEditFields } from '~/hooks/editFields';
-import { auth } from '~/utils/server/auth.server';
+import { isLoggedIn } from '~/utils/server/auth.server';
 import {
   editGeneralInformationRecord,
   GeneralInformationPerMunicipality,
@@ -35,7 +35,7 @@ export const meta: MetaFunction = () => {
 };
 
 export async function loader({ request }: LoaderFunctionArgs) {
-  if (!auth.isLoggedIn(request)) {
+  if (!isLoggedIn(request)) {
     return redirect('/signin');
   }
   const year = new URL(request.url).searchParams.get('year');
@@ -50,7 +50,7 @@ export async function loader({ request }: LoaderFunctionArgs) {
 }
 
 export async function action({ request }: ActionFunctionArgs) {
-  if (!auth.isLoggedIn(request)) {
+  if (!isLoggedIn(request)) {
     return redirect('/signin');
   }
   if (request.method === 'PATCH') {
@@ -104,7 +104,6 @@ export default function Reporting() {
             {getValue() as string}
           </Link>
         ),
-         
       },
       {
         header: 'Land area(km²)',

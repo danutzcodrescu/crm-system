@@ -7,7 +7,7 @@ import { Fragment } from 'react/jsx-runtime';
 
 import { PageContainer } from '~/components/shared/PageContainer';
 import { formatDate } from '~/utils/client/dates';
-import { auth } from '~/utils/server/auth.server';
+import { isLoggedIn } from '~/utils/server/auth.server';
 import { getInAgreementCount } from '~/utils/server/repositories/agreement.server';
 import { ConsultationPerYear, getCompaniesWithConsultationInYear } from '~/utils/server/repositories/companies.server';
 import {
@@ -39,7 +39,7 @@ interface LoaderResponse {
 }
 
 export async function loader({ request }: LoaderFunctionArgs) {
-  if (!auth.isLoggedIn(request)) {
+  if (!isLoggedIn(request)) {
     return redirect('/signin');
   }
   const currentYear = new Date().getFullYear();

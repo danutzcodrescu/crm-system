@@ -8,7 +8,7 @@ import {
 } from '@remix-run/node';
 import { read, utils } from 'xlsx';
 
-import { auth } from '~/utils/server/auth.server';
+import { isLoggedIn } from '~/utils/server/auth.server';
 import { logger } from '~/utils/server/logger.server';
 import { getCompaniesWithCode } from '~/utils/server/repositories/companies.server';
 import { bulkImportInvoicing } from '~/utils/server/repositories/invoicing.server';
@@ -22,8 +22,8 @@ interface InvoicingData {
 }
 
 export async function action({ request }: ActionFunctionArgs) {
-  const isLoggedIn = await auth.isLoggedIn(request);
-  if (!isLoggedIn) return redirect('/signin');
+  const isAuthenticated = await isLoggedIn(request);
+  if (!isAuthenticated) return redirect('/signin');
   let dt: InvoicingData[] = [];
   const uploadHandler = unstable_composeUploadHandlers(
     async ({ name, data }) => {

@@ -15,7 +15,7 @@ import { PaginatedTable } from '~/components/shared/table/PaginatedTable';
 import { TableActionsCell } from '~/components/shared/table/TableActionsCell';
 import { useEditFields } from '~/hooks/editFields';
 import { formatDate } from '~/utils/client/dates';
-import { auth } from '~/utils/server/auth.server';
+import { isLoggedIn } from '~/utils/server/auth.server';
 import { getCompanies } from '~/utils/server/repositories/companies.server';
 import { getRecentLogs, LogsWithCompanyDetails } from '~/utils/server/repositories/notes-log.server';
 
@@ -30,8 +30,8 @@ export const meta: MetaFunction = () => {
 };
 
 export async function loader({ request }: LoaderFunctionArgs) {
-  const isLoggedIn = await auth.isLoggedIn(request);
-  if (!isLoggedIn) return redirect('/signin');
+  const isAuthenticated = await isLoggedIn(request);
+  if (!isAuthenticated) return redirect('/signin');
 
   const [logs, companies] = await Promise.all([getRecentLogs(), getCompanies()]);
 

@@ -1,12 +1,12 @@
 import { ActionFunctionArgs, json, redirect } from '@remix-run/node';
 import { Outlet } from '@remix-run/react';
 
-import { auth } from '~/utils/server/auth.server';
+import { isLoggedIn } from '~/utils/server/auth.server';
 import { createNewResponsible, getEmailAddressesByCompanyId } from '~/utils/server/repositories/responsibles.server';
 
 export async function action({ request }: ActionFunctionArgs) {
-  const isLoggedIn = await auth.isLoggedIn(request);
-  if (!isLoggedIn) return redirect('/signin');
+  const isAuthenticated = await isLoggedIn(request);
+  if (!isAuthenticated) return redirect('/signin');
   if (request.method === 'POST') {
     const formData = await request.formData();
     if (formData.get('companyId')) {
