@@ -44,6 +44,7 @@ export function ReportingCard({ data, fetcher }: Props) {
           label: 'Cigarette butts (kg)',
           name: 'cigaretteButts',
           type: 'number',
+          inputProps: { step: '0.01' },
           defaultValue: year.cigaretteButts || undefined,
         },
         {

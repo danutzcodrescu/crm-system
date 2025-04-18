@@ -64,7 +64,7 @@ export async function action({ request }: ActionFunctionArgs) {
       year: parseInt(year as string),
       // @ts-expect-error we know that the value is a string
       reportingDate: body.get('reportingDate') as string,
-      cigaretteButts: body.get('cigaretteButts') ? parseInt(body.get('cigaretteButts') as string) : null,
+      cigaretteButts: body.get('cigaretteButts') ? parseFloat(body.get('cigaretteButts') as string) : null,
       motivation: body.get('motivation') as string,
     });
 
@@ -270,6 +270,7 @@ export default function Reporting() {
         label: 'Cigarette butts (kg)',
         name: 'cigaretteButts',
         type: 'number',
+        inputProps: { step: '0.01' },
         defaultValue: data.cigaretteButts || undefined,
       },
       {
