@@ -14,7 +14,7 @@ import { formatDate } from '~/utils/client/dates';
 interface InitialConsultationCardProps {
   data: {
     id: string;
-    documentSent: boolean;
+    documentSent: Date | null;
     isSigned: boolean;
     dateSigned: Date | null;
     isShared: boolean;
@@ -45,14 +45,9 @@ export function InitialConsultationCard({ data, fetcher }: InitialConsultationCa
       },
       {
         label: 'Document sent',
-        name: 'documentSent',
-        type: 'text',
-        select: true,
-        options: [
-          { label: 'Yes', value: 'true' },
-          { label: 'No', value: 'false' },
-        ],
-        defaultValue: data.documentSent,
+        name: 'documentDateSent',
+        type: 'date',
+        defaultValue: data.documentSent as unknown as string,
       },
       {
         label: 'Date signed',
@@ -87,6 +82,17 @@ export function InitialConsultationCard({ data, fetcher }: InitialConsultationCa
           </IconButton>
         </Box>
         <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+            <Typography variant="body1">Initial consultation sent:</Typography>
+            {data.isSigned || data.documentSent ? (
+              <CheckBox sx={{ color: (theme) => theme.palette.success.main }} />
+            ) : (
+              <Cancel sx={{ color: (theme) => theme.palette.error.main }} />
+            )}
+            {data.documentSent ? (
+              <Typography variant="body1">{formatDate(data.documentSent as unknown as string)}</Typography>
+            ) : null}
+          </Box>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
             <Typography variant="body1">Has signed initial consultation document:</Typography>
             {data.isSigned ? (

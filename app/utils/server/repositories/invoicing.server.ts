@@ -17,6 +17,7 @@ export interface InvoicingData {
   totalCompensation: number;
   inAgreement: boolean;
   entitled: boolean;
+  invoiceInfoSent: Date | null;
 }
 
 export async function getInvoicingDataByYear(year: number): Promise<[null, InvoicingData[]] | [string, null]> {
@@ -31,6 +32,7 @@ export async function getInvoicingDataByYear(year: number): Promise<[null, Invoi
         invoiceDate: invoicing.invoiceDate,
         datePaid: invoicing.datePaid,
         invoiceAmount: invoicing.invoiceAmount,
+        invoiceInfoSent: invoicing.invoiceInfoSent,
         invoiceReceived: sql<boolean>`CASE
 		WHEN invoicing.invoice_date IS NOT NULL
 		OR invoicing.invoice_amount IS NOT NULL THEN TRUE
@@ -108,6 +110,7 @@ export async function getInvoicingForCompany(
         invoiceDate: invoicing.invoiceDate,
         datePaid: invoicing.datePaid,
         invoiceAmount: invoicing.invoiceAmount,
+        invoiceInfoSent: invoicing.invoiceInfoSent,
         invoiceReceived: sql<boolean>`CASE
     WHEN invoicing.invoice_date IS NOT NULL
     OR invoicing.invoice_amount IS NOT NULL THEN TRUE
@@ -183,6 +186,7 @@ export async function editInvoicingRecord(
         ...args,
         invoiceDate: args.invoiceDate ? new Date(args.invoiceDate) : null,
         datePaid: args.datePaid ? new Date(args.datePaid) : null,
+        invoiceInfoSent: args.invoiceInfoSent ? new Date(args.invoiceInfoSent) : null,
       })
       .onConflictDoUpdate({
         target: [invoicing.companyId, invoicing.year],
@@ -190,6 +194,7 @@ export async function editInvoicingRecord(
           invoiceDate: args.invoiceDate ? new Date(args.invoiceDate) : null,
           datePaid: args.datePaid ? new Date(args.datePaid) : null,
           invoiceAmount: args.invoiceAmount,
+          invoiceInfoSent: args.invoiceInfoSent ? new Date(args.invoiceInfoSent) : null,
           vat: args.vat,
         },
       });

@@ -5,7 +5,7 @@ import { Box, IconButton, Link, Stack, Typography } from '@mui/material';
 import { json, LoaderFunctionArgs, MetaFunction, redirect } from '@remix-run/node';
 import { Link as RLink, ShouldRevalidateFunctionArgs, useFetcher, useLoaderData } from '@remix-run/react';
 import { ColumnDef, ColumnFiltersState, Row } from '@tanstack/react-table';
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useMemo } from 'react';
 import { ClientOnly } from 'remix-utils/client-only';
 
 import { EditDialog } from '~/components/shared/EditDialog.client';
@@ -15,6 +15,7 @@ import { PaginatedTable } from '~/components/shared/table/PaginatedTable';
 import { TableActionsCell } from '~/components/shared/table/TableActionsCell';
 import { UploadButton } from '~/components/shared/UploadButton.client';
 import { useEditFields } from '~/hooks/editFields';
+import { filterWaveUnderCategory, useWorkingWaveFiltering } from '~/hooks/waveFiltering';
 import { formatDate } from '~/utils/client/dates';
 import { isLoggedIn } from '~/utils/server/auth.server';
 import { getMunicipalitiesData, MunicipalityData } from '~/utils/server/repositories/municipalities.server';
@@ -52,26 +53,12 @@ export const meta: MetaFunction<typeof loader> = () => {
   return [{ title: `CRM System - Municipalities`, description: 'Municipalities overview information' }];
 };
 
-const defaultFilterList = [
-  { label: 'Blank', value: '' },
-  { label: 'A', value: 'A' },
-  { label: 'B', value: 'B' },
-  { label: 'C', value: 'C' },
-  { label: 'D', value: 'D' },
-  { label: 'E', value: 'E' },
-  { label: 'F', value: 'F' },
-  { label: 'G', value: 'G' },
-  { label: 'H', value: 'H' },
-  { label: 'Z', value: 'Z' },
-  { label: 'X', value: 'X' },
-];
-
 export default function Companies() {
   const data = useLoaderData<typeof loader>();
   const fetcher = useFetcher();
   const { setEditableData, fields, setFields } = useEditFields(fetcher);
-  const [waveFilterList, setWaveFilterList] = useState<{ label: string; value: string }[]>(defaultFilterList);
   const setIds = useIds((state) => state.setIds);
+  const { filterItems, waveFilterList } = useWorkingWaveFiltering();
   const columns = useMemo<ColumnDef<MunicipalityData>[]>(
     () => [
       {
@@ -211,21 +198,7 @@ export default function Companies() {
         header: 'Wave under category',
         accessorKey: 'wave',
         id: 'wave',
-        filterFn: (row: Row<MunicipalityData>, columnId: string, filterValue: string[]) => {
-          if (filterValue.length === 0) return true;
-          // @ts-expect-error it works , type is not correct
-          const value = row.original[columnId] as string;
-          if (filterValue.includes('')) {
-            // @ts-expect-error it is for blank values
-            filterValue = filterValue.map((item) => {
-              if (item === '') {
-                return null;
-              }
-              return item;
-            });
-          }
-          return filterValue.includes(value);
-        },
+        filterFn: filterWaveUnderCategory,
         meta: {
           filterOptions: waveFilterList,
           filterOptionsLabel: 'Filter wave by subcategory',
@@ -458,31 +431,7 @@ export default function Companies() {
 
   const setFilter = (rows: Row<MunicipalityData>[], filters: ColumnFiltersState) => {
     setIds(rows.map((row) => row.original.id));
-    const workingCategoryFilter = filters.find((filter) => filter.id === 'workingCategory');
-    if (workingCategoryFilter) {
-      const filterList = [{ label: 'Blank', value: '' }] as { label: string; value: string }[];
-      if ((workingCategoryFilter.value as string[]).includes('Wave 2')) {
-        filterList.push(
-          ...[
-            { label: 'A', value: 'A' },
-            { label: 'B', value: 'B' },
-            { label: 'C', value: 'C' },
-            { label: 'D', value: 'D' },
-            { label: 'E', value: 'E' },
-            { label: 'F', value: 'F' },
-            { label: 'G', value: 'G' },
-            { label: 'H', value: 'H' },
-            { label: 'Z', value: 'Z' },
-          ],
-        );
-      }
-      if ((workingCategoryFilter.value as string[]).includes('Wave 3')) {
-        filterList.push(...[{ label: 'X', value: 'X' }]);
-      }
-      setWaveFilterList(filterList);
-    } else if (!workingCategoryFilter && waveFilterList.length !== defaultFilterList.length) {
-      setWaveFilterList(defaultFilterList);
-    }
+    filterItems(filters);
   };
 
   return (

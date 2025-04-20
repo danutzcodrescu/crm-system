@@ -1,6 +1,6 @@
 {
   "name": "crm",
-  "version": "0.11.0",
+  "version": "0.12.0",
   "private": true,
   "sideEffects": false,
   "type": "module",
@@ -21,6 +21,7 @@
     "db:migrate": "env-cmd -f .env.local drizzle-kit migrate --config=drizzle-dev.config.ts ",
     "db:seed": "env-cmd -f .env.local tsx ./scripts/seed.ts",
     "db:replace": "env-cmd -f .env.local tsx ./scripts/replaceNames.ts",
+    "db:consultation": "env-cmd -f .env.local tsx ./scripts/importInitialConsultationDates.ts",
     "build-image": "env-cmd -f .env.production tsx ./scripts/build.ts"
   },
   "dependencies": {

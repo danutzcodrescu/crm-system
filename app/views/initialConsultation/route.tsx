@@ -46,7 +46,8 @@ export async function action({ request }: ActionFunctionArgs) {
       dateShared: body.get('dateShared') as string,
       // @ts-expect-error - we know that these values are strings
       dateSigned: body.get('dateSigned') as string,
-      documentSent: body.get('documentSent') === 'true',
+      // @ts-expect-error - we know that these values are strings
+      documentDateSent: body.get('documentDateSent') as string,
       link: body.get('link') as string,
     });
 
@@ -94,15 +95,10 @@ export default function InitialConsultation() {
         hidden: true,
       },
       {
-        label: 'Document sent',
-        name: 'documentSent',
-        type: 'text',
-        select: true,
-        options: [
-          { label: 'Yes', value: 'true' },
-          { label: 'No', value: 'false' },
-        ],
-        defaultValue: data.documentSent,
+        label: 'Time for sending initial consultation',
+        name: 'documentDateSent',
+        type: 'date',
+        defaultValue: data.dateSent as unknown as string,
       },
       {
         label: 'Date signed',
@@ -159,6 +155,19 @@ export default function InitialConsultation() {
           ) : (
             <Cancel sx={{ color: (theme) => theme.palette.error.main }} />
           ),
+      },
+      {
+        header: 'Time for sending initial consultation',
+        accessorKey: 'dateSent',
+        id: 'dateSent',
+        cell: ({ getValue }) => (getValue() ? formatDate(getValue() as string) : ''),
+        enableSorting: false,
+        size: 150,
+        filterFn: 'dateRange',
+        meta: {
+          filterOptionsLabel: 'Time for sending initial consultation document',
+          filterByDate: true,
+        },
       },
       {
         header: 'Initial consultation document signed',

@@ -9,6 +9,7 @@ import { GeneralInformationCard } from '~/components/municipality/GeneralInforma
 import { InitialConsultationCard } from '~/components/municipality/InitialConsultationCard';
 import { InvoicingCard } from '~/components/municipality/InvoicingCard';
 import { LogsTable } from '~/components/municipality/LogsTable';
+import { ProcessCard } from '~/components/municipality/ProcessCard';
 import { RecurringConsultation } from '~/components/municipality/RecurringConsultationCard';
 import { ReportingCard } from '~/components/municipality/ReportingCard';
 import { ResponsiblesTable } from '~/components/municipality/ResponsiblesTable';
@@ -45,7 +46,7 @@ interface LoaderResponse {
   responsibles: ResponsibleData[];
   initialConsultation: {
     id: string;
-    documentSent: boolean;
+    documentSent: Date | null;
     isSigned: boolean;
     dateSigned: Date | null;
     isShared: boolean;
@@ -179,6 +180,18 @@ export default function Municipality() {
           gap: 3,
         }}
       >
+        <ProcessCard
+          invoicing={municipalityData.invoicing}
+          initialConsultation={municipalityData.initialConsultation}
+          agreement={municipalityData.agreement}
+        />
+
+        <Card>
+          <CardContent>
+            <LogsTable data={municipalityData.logs} companyId={municipalityData.municipality.id} fetcher={fetcher} />
+          </CardContent>
+        </Card>
+
         <Card>
           <CardContent>
             <ResponsiblesTable
@@ -190,26 +203,21 @@ export default function Municipality() {
           </CardContent>
         </Card>
 
-        <Card>
-          <CardContent>
-            <LogsTable data={municipalityData.logs} companyId={municipalityData.municipality.id} fetcher={fetcher} />
-          </CardContent>
-        </Card>
-
         <InitialConsultationCard data={municipalityData.initialConsultation} fetcher={fetcher} />
 
         <AgreementCard data={municipalityData.agreement} fetcher={fetcher} />
-        <RecurringConsultation
-          years={municipalityData.recurringConsultation.years}
-          data={municipalityData.recurringConsultation.data}
-          fetcher={fetcher}
-        />
 
         <ReportingCard data={municipalityData.reporting} fetcher={fetcher} />
 
         <CompensationCard data={municipalityData.compensation} />
 
         <InvoicingCard data={municipalityData.invoicing} fetcher={fetcher} />
+
+        <RecurringConsultation
+          years={municipalityData.recurringConsultation.years}
+          data={municipalityData.recurringConsultation.data}
+          fetcher={fetcher}
+        />
 
         <GeneralInformationCard data={municipalityData.generalInformation} fetcher={fetcher} />
         {municipalityData.emailAddress ? <EmailsCard email={municipalityData.emailAddress} /> : null}

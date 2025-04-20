@@ -84,6 +84,8 @@ export async function action({ request }: ActionFunctionArgs) {
       // @ts-expect-error - we know that the values are strings
       datePaid: body.get('datePaid'),
       invoiceAmount: body.get('invoiceAmount') ? parseFloat(body.get('invoiceAmount') as string) : 0,
+      // @ts-expect-error - we know that the values are strings
+      invoiceInfoSent: body.get('invoiceInfoSent'),
     });
 
     if (error) {
@@ -161,7 +163,7 @@ export default function Invoicing() {
             { label: 'Yes', value: true },
             { label: 'No', value: false },
           ],
-          filterOptionsLabel: 'Recurring consultation',
+          filterOptionsLabel: 'Entitled',
         },
         cell: ({ getValue }) =>
           getValue() ? (
@@ -176,6 +178,19 @@ export default function Invoicing() {
         id: 'eligibleAmount',
         enableColumnFilter: false,
         cell: ({ getValue, row }) => Intl.NumberFormat('sv-SE').format(getValue() ? row.original.totalCompensation : 0),
+      },
+      {
+        header: 'Invoice info sent',
+        id: 'invoiceInfoSent',
+        accessorKey: 'invoiceInfoSent',
+        filterFn: 'dateRange',
+        cell: ({ getValue }) => (getValue() ? formatDate(getValue() as string) : ''),
+        enableSorting: false,
+        size: 150,
+        meta: {
+          filterOptionsLabel: 'Invoice info sent',
+          filterByDate: true,
+        },
       },
       {
         header: 'Invoice received from municipality',
@@ -280,6 +295,12 @@ export default function Invoicing() {
         type: 'number',
         defaultValue: data.year,
         hidden: true,
+      },
+      {
+        label: 'Invoice info sent',
+        name: 'invoiceInfoSent',
+        type: 'date',
+        defaultValue: data.invoiceInfoSent as unknown as string,
       },
       {
         label: 'Invoice date',

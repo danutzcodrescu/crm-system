@@ -56,6 +56,12 @@ export function InvoicingCard({ data, fetcher }: Props) {
           hidden: true,
         },
         {
+          label: 'Invoice info sent',
+          name: 'invoiceInfoSent',
+          type: 'date',
+          defaultValue: yearData.invoiceInfoSent as unknown as string,
+        },
+        {
           label: 'Invoice date',
           name: 'invoiceDate',
           type: 'date',
@@ -121,9 +127,16 @@ export function InvoicingCard({ data, fetcher }: Props) {
                         <Box>
                           <Stack spacing={1}>
                             <Typography>
+                              Payment info sent:&nbsp;
+                              {yearData.invoiceInfoSent
+                                ? formatDate(yearData.invoiceInfoSent as unknown as string)
+                                : yearData.invoiceDate
+                                  ? formatDate(yearData.invoiceDate as unknown as string)
+                                  : 'No'}
+                            </Typography>
+                            <Typography>
                               Invoice received from municipality:{' '}
-                              <Box component="span">{yearData.invoiceReceived ? 'Yes' : 'No'}</Box> /{' '}
-                              <Box component="span">N/A</Box>
+                              <Box component="span">{yearData.invoiceReceived ? 'Yes' : 'No'}</Box>
                             </Typography>
                             <Typography>
                               Time for receiving invoice:{' '}
@@ -135,8 +148,7 @@ export function InvoicingCard({ data, fetcher }: Props) {
                             </Typography>
                             <Typography>
                               Invoice paid by SUP Filter:{' '}
-                              <Box component="span">{yearData.invoicePaid ? 'Yes' : 'No'}</Box> /{' '}
-                              <Box component="span">N/A</Box>
+                              <Box component="span">{yearData.invoicePaid ? 'Yes' : 'No'}</Box>
                             </Typography>
                             <Typography>
                               Time for paying the invoice:{' '}
