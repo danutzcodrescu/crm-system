@@ -93,7 +93,7 @@ export const initialConsultation = pgTable('initial_consultations', {
   companyId: uuid()
     .notNull()
     .references(() => companies.id, { onDelete: 'cascade', onUpdate: 'no action' }),
-  documentSent: boolean().default(false),
+  documentDateSent: timestamp({ mode: 'date', withTimezone: true }),
   dateSigned: timestamp({ mode: 'date', withTimezone: true }),
   dateShared: timestamp({ mode: 'date', withTimezone: true }),
   link: text(),
@@ -112,7 +112,7 @@ export const agreement = pgTable('agreements', {
   oldAgreementDateShared: timestamp({ mode: 'date', withTimezone: true }),
   oldAgreementLinkToAgreement: text(),
   oldAgreementLinkToAppendix: text(),
-  newAgreementSent: boolean().default(false),
+  newAgreementDateSent: timestamp({ mode: 'date', withTimezone: true }),
   newAgreementDateSigned: timestamp({ mode: 'date', withTimezone: true }),
   newAgreementDateShared: timestamp({ mode: 'date', withTimezone: true }),
   newAgreementLinkToAgreement: text(),
@@ -196,6 +196,7 @@ export const invoicing = pgTable(
     year: smallint()
       .notNull()
       .references(() => years.name),
+    invoiceInfoSent: timestamp({ mode: 'date', withTimezone: true }),
     invoiceDate: timestamp({ mode: 'date', withTimezone: true }),
     datePaid: timestamp({ mode: 'date', withTimezone: true }),
     invoiceAmount: numeric({ precision: 10, scale: 2 }) as unknown as PgDoublePrecisionBuilderInitial<'invoiceAmount'>,

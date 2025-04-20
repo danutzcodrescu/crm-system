@@ -21,6 +21,7 @@ export interface AgreementData {
   newAgreementSent: boolean;
   newAgreementSigned?: Date | null;
   newAgreementShared?: Date | null;
+  newAgreementDateSent?: Date | null;
   newAgreementLink: string;
   inAgreement: boolean;
   firstTimeAnyAgreement: Date | null;
@@ -46,10 +47,11 @@ export async function getAgreementData(): Promise<[null, AgreementData[]] | [str
         oldAgreementShared: agreement.oldAgreementDateShared,
         oldAgreementLink: agreement.oldAgreementLinkToAgreement,
         oldAgreementAppendix: agreement.oldAgreementLinkToAppendix,
-        newAgreementSent: agreement.newAgreementSent,
+        newAgreementSent: sql<boolean>`CASE WHEN ${agreement.newAgreementDateSent} IS NOT NULL THEN TRUE ELSE FALSE END`,
         newAgreementSigned: agreement.newAgreementDateSigned,
         newAgreementShared: agreement.newAgreementDateShared,
         newAgreementLink: agreement.newAgreementLinkToAgreement,
+        newAgreementDateSent: agreement.newAgreementDateSent,
       })
       .from(agreement)
       .leftJoin(companies, eq(agreement.companyId, companies.id))
@@ -72,7 +74,7 @@ interface EditAgreementRecordArgs {
   newAgreementDateSigned: string | null;
   newAgreementDateShared: string | null;
   newAgreementLinkToAgreement: string | null;
-  newAgreementSent: boolean | null;
+  newAgreementDateSent: string | null;
   typeOfAgreement: 'old' | 'new';
 }
 
@@ -87,6 +89,7 @@ export async function editAgreementRecord(args: EditAgreementRecordArgs) {
         oldAgreementDateSigned: args.oldAgreementDateSigned ? new Date(args.oldAgreementDateSigned) : undefined,
         newAgreementDateShared: args.newAgreementDateShared ? new Date(args.newAgreementDateShared) : undefined,
         newAgreementDateSigned: args.newAgreementDateSigned ? new Date(args.newAgreementDateSigned) : undefined,
+        newAgreementDateSent: args.newAgreementDateSent ? new Date(args.newAgreementDateSent) : undefined,
       })
       .where(eq(agreement.id, args.id));
     logger.info('Agreement data edited successfully');
@@ -131,6 +134,7 @@ export interface MunicipalityAgreementData {
   newAgreementDateSigned: Date | null;
   newAgreementShared: boolean;
   newAgreementDateShared: Date | null;
+  newAgreementDateSent: Date | null;
 }
 
 export async function getAgreementForMunicipality(
@@ -149,6 +153,7 @@ export async function getAgreementForMunicipality(
         newAgreementLink: agreement.newAgreementLinkToAgreement,
         newAgreementDateSigned: agreement.newAgreementDateSigned,
         newAgreementShared: sql<boolean>`CASE WHEN ${agreement.newAgreementDateShared} IS NOT NULL THEN TRUE ELSE FALSE END`,
+        newAgreementDateSent: agreement.newAgreementDateSent,
         newAgreementDateShared: agreement.newAgreementDateShared,
       })
       .from(agreement)

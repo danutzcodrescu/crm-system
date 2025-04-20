@@ -1,7 +1,7 @@
 import { asc, count, eq, isNotNull, sql } from 'drizzle-orm';
 
 import { logger } from '../logger.server';
-import { companies, initialConsultation } from '../schema.server';
+import { agreement, companies, initialConsultation } from '../schema.server';
 import { db } from './db.server';
 
 export interface InitialConsultation {
@@ -9,6 +9,7 @@ export interface InitialConsultation {
   companyId: string;
   companyName: string;
   documentSent: boolean;
+  dateSent: Date | null;
   dateSigned?: Date | null;
   dateShared?: Date | null;
   link: string;
@@ -24,7 +25,8 @@ export async function getInitialConsultationData(): Promise<[null, InitialConsul
         id: initialConsultation.id,
         companyId: initialConsultation.companyId,
         companyName: companies.name,
-        documentSent: initialConsultation.documentSent,
+        dateSent: initialConsultation.documentDateSent,
+        documentSent: sql<boolean>`CASE WHEN ${initialConsultation.documentDateSent} IS NOT NULL OR ${agreement.oldAgreementDateSigned} IS NOT NULL THEN TRUE ELSE FALSE END`,
         dateSigned: initialConsultation.dateSigned,
         dateShared: initialConsultation.dateShared,
         link: initialConsultation.link,
@@ -33,6 +35,7 @@ export async function getInitialConsultationData(): Promise<[null, InitialConsul
       })
       .from(initialConsultation)
       .leftJoin(companies, eq(initialConsultation.companyId, companies.id))
+      .leftJoin(agreement, eq(initialConsultation.companyId, agreement.companyId))
       .orderBy(asc(companies.name));
     logger.info('Initial consultation data fetched');
     return [null, data as InitialConsultation[]];
@@ -47,7 +50,7 @@ interface EditInitialConsultationArgs {
   dateSigned: Date | null;
   dateShared: Date | null;
   link: string | null;
-  documentSent: boolean;
+  documentDateSent: Date | null;
 }
 
 export async function editInitialConsultationRecord(args: EditInitialConsultationArgs) {
@@ -59,7 +62,7 @@ export async function editInitialConsultationRecord(args: EditInitialConsultatio
         ...args,
         dateSigned: args.dateSigned ? new Date(args.dateSigned) : null,
         dateShared: args.dateShared ? new Date(args.dateShared) : null,
-        documentSent: !!args.documentSent,
+        documentDateSent: args.documentDateSent ? new Date(args.documentDateSent) : null,
       })
       .where(eq(initialConsultation.id, args.id));
     logger.info('Initial consultation data edited');
@@ -89,8 +92,8 @@ export async function getSignedInitialConsultation(): Promise<[null, InitialCons
   }
 }
 
-interface InitialConsultationData {
-  documentSent: boolean;
+export interface InitialConsultationData {
+  documentSent: Date | null;
   isSigned: boolean;
   dateSigned: Date | null;
   isShared: boolean;
@@ -105,7 +108,7 @@ export async function getInitialConsultationForMunicipality(
     logger.info('Getting initial consultation data for municipality:', municipalityId);
     const data = await db
       .select({
-        documentSent: initialConsultation.documentSent,
+        documentSent: initialConsultation.documentDateSent,
         isSigned: sql<boolean>`CASE WHEN ${initialConsultation.dateSigned} IS NOT NULL THEN TRUE ELSE FALSE END`,
         dateSigned: initialConsultation.dateSigned,
         isShared: initialConsultation.dateShared,
@@ -131,7 +134,7 @@ export async function getInitialConsultationForMunicipality(
       null,
       {
         ...result,
-        documentSent: result.documentSent ?? false,
+        documentSent: result.documentSent ?? null,
         isSigned: result.isSigned ?? false,
         isShared: result.dateShared !== null,
         dateSigned: result.dateSigned ?? null,

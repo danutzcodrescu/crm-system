@@ -5,6 +5,79 @@ import { logger } from '../logger.server';
 import { agreement, companies, initialConsultation, responsibles, status, users } from '../schema.server';
 import { db } from './db.server';
 
+const processQuery = sql`SELECT
+	c.id,
+	c.name,
+	initcap(c.working_category::text) AS "workingCategory",
+	c.wave,
+	ic.document_date_sent AS "initialConsultationDateSent",
+	(
+		CASE
+			WHEN ic.document_date_sent IS NOT NULL
+			OR ic.date_signed IS NOT NULL THEN TRUE
+			ELSE FALSE
+		END
+	) AS "isInitialConsultationDocumentSent",
+	ic.date_signed AS "initialConsultationDateSigned",
+	(
+		CASE
+			WHEN ic.date_signed IS NOT NULL THEN TRUE
+			ELSE FALSE
+		END
+	) AS "isInitialConsultationSigned",
+	(
+		CASE
+			WHEN ic.date_shared IS NOT NULL THEN TRUE
+			ELSE FALSE
+		END
+	) AS "isInitialConsultationShared",
+	a.new_agreement_date_sent AS "agreementSentDate",
+	(
+		CASE
+			WHEN a.new_agreement_date_sent IS NOT NULL
+			OR old_agreement_date_signed IS NOT NULL THEN TRUE
+			ELSE FALSE
+		END
+	) AS "isAgreementSentDate",
+	a.new_agreement_date_signed AS "agreementDateSigned",
+	(
+		CASE
+			WHEN a.new_agreement_date_signed IS NOT NULL
+			OR a.old_agreement_date_signed IS NOT NULL THEN TRUE
+			ELSE FALSE
+		END
+	) AS "isAgreementSigned",
+	(
+		CASE
+			WHEN a.old_agreement_date_shared IS NOT NULL
+			OR a.new_agreement_date_shared IS NOT NULL THEN TRUE
+			ELSE FALSE
+		END
+	) AS isAgreementShared,
+  invoice_data.result AS "invoiceData",
+	GREATEST(ic.document_date_sent, ic.date_signed, a.new_agreement_date_sent, a.new_agreement_date_signed) as latest
+FROM
+	companies c
+	LEFT JOIN initial_consultations AS ic ON ic.company_id = c.id
+	LEFT JOIN agreements AS a ON a.company_id = c.id
+`;
+
+function invoicingProcessAggregation(currentYear: number) {
+  return sql`LEFT JOIN LATERAL (
+		SELECT
+			jsonb_object_agg(i."year"::int, CASE
+					WHEN i.invoice_info_sent IS NOT NULL THEN i.invoice_info_sent::TIMESTAMP
+					WHEN i.invoice_date IS NOT NULL THEN i.invoice_date::TIMESTAMP
+					ELSE NULL
+				END) AS result
+		FROM
+			invoicing i
+		WHERE
+			i.company_id = c.id
+			AND i."year" < ${currentYear}
+	) invoice_data ON TRUE`;
+}
+
 export interface MunicipalityData {
   id: string;
   name: string;
@@ -147,5 +220,44 @@ export async function updateMunicipality(
   } catch (e) {
     logger.error(e);
     return ['could not update municipalities data', null];
+  }
+}
+
+export interface ProcessData {
+  id: string;
+  name: string;
+  wave: string;
+  workingCategory: string;
+  initialConsultationSentDate: Date | null;
+  initialConsultationSignedDate: Date | null;
+  agreementSentDate: Date | null;
+  agreementDateSigned: Date | null;
+  isInitialConsultationDateSent: boolean;
+  isInitialConsultationSigned: boolean;
+  isInitialConsultationShared: boolean;
+  isAgreementSentDate: boolean;
+  isAgreementSigned: boolean;
+  isAgreementShared: boolean;
+  invoiceData: {
+    year: string;
+    date: string | null;
+    [key: string]: string | null;
+  };
+  latestChange: Date | null;
+}
+
+export async function getProcessDataForMunicipalities(): Promise<[null, ProcessData[]] | [string, null]> {
+  try {
+    logger.info('Getting process data for municipalities');
+    const query = sql.empty();
+    query.append(processQuery);
+    query.append(invoicingProcessAggregation(new Date().getFullYear()));
+    query.append(sql` ORDER BY latest DESC NULLS LAST`);
+
+    const data = await db.execute(query);
+    return [null, data.rows as unknown as ProcessData[]];
+  } catch (e) {
+    logger.error(e);
+    return ['could not fetch process data for municipalities', null];
   }
 }

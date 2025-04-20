@@ -11,6 +11,7 @@ import { SearchBox } from './topbar/SearchBox';
 
 const links = [
   { title: 'Dashboard', href: '/' },
+  { title: 'Process', href: '/process' },
   { title: 'Municipalities', href: '/municipalities' },
   { title: 'Initial Consultation', href: '/initial-consultation' },
   { title: 'Agreement', href: '/agreement' },
@@ -20,7 +21,7 @@ const links = [
   { title: 'Invoicing', href: `/invoicing?year=${getYear(new Date()) - 1}` },
   { title: 'General information', href: `/general-information?year=${getYear(new Date())}` },
   { title: 'Years', href: '/years' },
-  { title: 'Statuses', href: '/statuses' },
+  // { title: 'Statuses', href: '/statuses' },
   { title: 'Recent logs', href: '/logs' },
 ];
 

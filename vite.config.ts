@@ -60,6 +60,7 @@ export default defineConfig(({ isSsrBuild }) => ({
             route('/logs', 'views/logsPerPeriod/route.tsx');
             route('/statuses', 'views/statuses/route.tsx');
             route('/years', 'views/years/route.tsx');
+            route('/process', 'views/process/route.tsx');
           });
           route('/gmail-auth-redirect', 'views/gmail/route.tsx');
         });

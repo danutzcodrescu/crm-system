@@ -52,7 +52,7 @@ export async function action({ request }: ActionFunctionArgs) {
       newAgreementDateShared: body.get('newAgreementShared') as string,
       newAgreementLinkToAgreement: body.get('newAgreementLink') as string,
       typeOfAgreement: typeOfAgreement as 'new' | 'old',
-      newAgreementSent: body.get('newAgreementSent') === 'true',
+      newAgreementDateSent: body.get('newAgreementDateSent') as string,
     });
 
     if (error) {
@@ -151,17 +151,13 @@ export default function Agreement() {
         defaultValue: data.oldAgreementAppendix || undefined,
         condition: ['typeOfAgreement', 'old'],
       },
+
       {
-        label: 'New agreement sent',
-        name: 'newAgreementSent',
-        type: 'text',
-        select: true,
-        defaultValue: data.newAgreementSent,
+        label: 'Time for sending new agreement',
+        name: 'newAgreementDateSent',
+        type: 'date',
+        defaultValue: data.newAgreementDateSent as unknown as string,
         condition: ['typeOfAgreement', 'new'],
-        options: [
-          { label: 'Sent', value: 'true' },
-          { label: 'Not sent', value: 'false' },
-        ],
       },
 
       {
@@ -295,7 +291,7 @@ export default function Agreement() {
         id: 'oldAgreementSigned',
         filterFn: 'dateRange',
         meta: {
-          filterOptionsLabel: '==Old agreement agreement signed date',
+          filterOptionsLabel: 'Old agreement agreement signed date',
           filterByDate: true,
           defaultHidden: true,
         },
@@ -354,6 +350,17 @@ export default function Agreement() {
           ) : (
             <Cancel sx={{ color: (theme) => theme.palette.error.main }} />
           ),
+      },
+      {
+        header: 'Time for sending new agreement',
+        accessorKey: 'newAgreementDateSent',
+        id: 'newAgreementDateSent',
+        filterFn: 'dateRange',
+        meta: {
+          filterOptionsLabel: 'Time for sending new agreement',
+          filterByDate: true,
+        },
+        cell: ({ getValue }) => (getValue() ? formatDate(getValue() as string) : ''),
       },
       {
         header: 'New agreement agreement signed',

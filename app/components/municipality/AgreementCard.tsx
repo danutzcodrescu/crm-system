@@ -104,15 +104,10 @@ export function AgreementCard({ data, fetcher }: AgreementCardProps) {
       },
       {
         label: 'New agreement sent',
-        name: 'newAgreementSent',
-        type: 'text',
-        select: true,
-        defaultValue: 'false',
+        name: 'newAgreementDateSent',
+        type: 'date',
+        defaultValue: data.newAgreementDateSent as unknown as string,
         condition: ['typeOfAgreement', 'new'],
-        options: [
-          { label: 'Sent', value: 'true' },
-          { label: 'Not sent', value: 'false' },
-        ],
       },
       {
         label: 'New agreement signed',
@@ -168,6 +163,38 @@ export function AgreementCard({ data, fetcher }: AgreementCardProps) {
               </TableRow>
             </TableHead>
             <TableBody>
+              <TableRow>
+                <TableCell>Agreement sent</TableCell>
+                <TableCell>
+                  {data.newAgreementDateSent ? (
+                    'N/A'
+                  ) : data.oldAgreementDateSigned ? (
+                    <CheckBox sx={{ color: (theme) => theme.palette.success.main }} />
+                  ) : (
+                    <Cancel sx={{ color: (theme) => theme.palette.error.main }} />
+                  )}
+                </TableCell>
+                <TableCell>
+                  {data.oldAgreementDateSigned ? (
+                    'N/A'
+                  ) : data.newAgreementDateSent ? (
+                    <CheckBox sx={{ color: (theme) => theme.palette.success.main }} />
+                  ) : (
+                    <Cancel sx={{ color: (theme) => theme.palette.error.main }} />
+                  )}
+                </TableCell>
+              </TableRow>
+              <TableRow>
+                <TableCell>Date sent</TableCell>
+                <TableCell>{data.newAgreementDateSent ? 'N/A' : ''}</TableCell>
+                <TableCell>
+                  {data?.oldAgreementDateSigned
+                    ? 'N/A'
+                    : data.newAgreementDateSent
+                      ? formatDate(data.newAgreementDateSent as unknown as string)
+                      : ''}
+                </TableCell>
+              </TableRow>
               <TableRow>
                 <TableCell>Agreement link</TableCell>
                 <TableCell>
