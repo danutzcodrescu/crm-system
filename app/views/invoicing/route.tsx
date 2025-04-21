@@ -83,7 +83,7 @@ export async function action({ request }: ActionFunctionArgs) {
       vat: body.get('vat') ? parseFloat(body.get('vat') as string) : 0,
       // @ts-expect-error - we know that the values are strings
       datePaid: body.get('datePaid'),
-      invoiceAmount: body.get('invoiceAmount') ? parseFloat(body.get('invoiceAmount') as string) : 0,
+      invoiceAmount: body.get('invoiceAmount') ? parseFloat(body.get('invoiceAmount') as string) : null,
       // @ts-expect-error - we know that the values are strings
       invoiceInfoSent: body.get('invoiceInfoSent'),
     });

@@ -1,7 +1,7 @@
 import { and, asc, eq, gte, lte, sql, sum } from 'drizzle-orm';
 
 import { logger } from '../logger.server';
-import { agreement, compensationView, reporting, years } from '../schema.server';
+import { agreement, compensationView, years } from '../schema.server';
 import { db } from './db.server';
 
 export interface CompensationData {
@@ -138,13 +138,11 @@ export async function getAggregatedCompensationPerYear(
       .select({
         year: compensationView.year,
         totalCompensation: sum(compensationView.totalCompensation),
-        // TODO check if this is correct
-        eligible: sql<number>`SUM(CASE WHEN ${compensationView.year} < EXTRACT(YEAR FROM ${agreement.oldAgreementDateSigned}) THEN ${compensationView.totalCompensation} WHEN ${compensationView.year} < EXTRACT(YEAR FROM ${agreement.newAgreementDateSigned}) THEN ${compensationView.totalCompensation} WHEN ${compensationView.year} >= EXTRACT(YEAR FROM ${agreement.newAgreementDateSigned}) AND ${reporting.reportingDate} IS NOT NULL THEN ${compensationView.totalCompensation} WHEN ${compensationView.year} >= EXTRACT(YEAR FROM ${agreement.oldAgreementDateShared}) AND ${reporting.reportingDate} IS NOT NULL THEN ${compensationView.totalCompensation} ELSE 0 END)`,
+        eligible: sql<number>`SUM(CASE WHEN EXTRACT(YEAR FROM ${agreement.oldAgreementDateSigned}) <= (${compensationView.year} + 1) OR EXTRACT(YEAR FROM ${agreement.newAgreementDateSigned}) <= (${compensationView.year} + 1) THEN ${compensationView.totalCompensation} END)`,
       })
       .from(compensationView)
       .where(and(gte(compensationView.year, startYear), lte(compensationView.year, endYear)))
       .leftJoin(agreement, eq(agreement.companyId, compensationView.id))
-      .leftJoin(reporting, and(eq(compensationView.id, reporting.companyId), eq(compensationView.year, reporting.year)))
       .groupBy(compensationView.year);
     logger.debug('Aggregated compensation per year fetched');
     return [null, data as unknown as AggregatedCompensationPerYear[]];
