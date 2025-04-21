@@ -106,6 +106,7 @@ export async function getInvoicingForCompany(
     const data = await db
       .select({
         id: invoicing.companyId,
+        companyName: compensationView.companyName,
         year: invoicing.year,
         invoiceDate: invoicing.invoiceDate,
         datePaid: invoicing.datePaid,

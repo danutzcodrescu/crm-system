@@ -1,4 +1,3 @@
-import { LoadingButton } from '@mui/lab';
 import { Button, DialogActions, DialogContent, DialogTitle } from '@mui/material';
 import Dialog from '@mui/material/Dialog';
 import { FetcherWithComponents } from '@remix-run/react';
@@ -27,7 +26,7 @@ export function EditDialog({ title, fetcher, fields, url, isOpen, method = 'PATC
           <Button onClick={handleClose} color="secondary">
             Cancel
           </Button>
-          <LoadingButton
+          <Button
             loading={fetcher.state !== 'idle'}
             type="submit"
             color="primary"
@@ -35,7 +34,7 @@ export function EditDialog({ title, fetcher, fields, url, isOpen, method = 'PATC
             variant="contained"
           >
             {method === 'POST' ? 'Create' : 'Update'}
-          </LoadingButton>
+          </Button>
         </DialogActions>
       </fetcher.Form>
     </Dialog>

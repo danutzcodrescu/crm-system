@@ -1,4 +1,3 @@
-import { LoadingButton } from '@mui/lab';
 import { Button, Dialog, DialogActions, DialogContent, DialogTitle, Stack, TextField } from '@mui/material';
 import { FetcherWithComponents } from '@remix-run/react';
 import { Fragment, ReactNode, useEffect, useState } from 'react';
@@ -59,9 +58,14 @@ export function AddItem({ title, fields, renderAddButton, fetcher }: Props) {
             <Button onClick={() => setModalState(false)} color="secondary">
               Cancel
             </Button>
-            <LoadingButton type="submit" color="primary" disabled={fetcher.state !== 'idle'}>
+            <Button
+              type="submit"
+              color="primary"
+              disabled={fetcher.state !== 'idle'}
+              loading={fetcher.state !== 'idle'}
+            >
               Create
-            </LoadingButton>
+            </Button>
           </DialogActions>
         </fetcher.Form>
       </Dialog>
