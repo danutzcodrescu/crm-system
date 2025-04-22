@@ -19,7 +19,6 @@ WORKDIR /crm_system
 
 ADD package.json pnpm-lock.yaml ./
 RUN npm install -g pnpm
-RUN pnpm approve-builds -g
 RUN pnpm install --frozen-lockfile
 
 # Setup production node_modules

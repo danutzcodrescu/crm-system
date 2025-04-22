@@ -34,23 +34,20 @@ const processQuery = sql`SELECT
 	a.new_agreement_date_sent AS "agreementSentDate",
 	(
 		CASE
-			WHEN a.new_agreement_date_sent IS NOT NULL
-			OR old_agreement_date_signed IS NOT NULL THEN TRUE
+			WHEN a.new_agreement_date_sent IS NOT NULL THEN TRUE
 			ELSE FALSE
 		END
 	) AS "isAgreementSentDate",
 	a.new_agreement_date_signed AS "agreementDateSigned",
 	(
 		CASE
-			WHEN a.new_agreement_date_signed IS NOT NULL
-			OR a.old_agreement_date_signed IS NOT NULL THEN TRUE
+			WHEN a.new_agreement_date_signed IS NOT NULL THEN TRUE
 			ELSE FALSE
 		END
 	) AS "isAgreementSigned",
 	(
 		CASE
-			WHEN a.old_agreement_date_shared IS NOT NULL
-			OR a.new_agreement_date_shared IS NOT NULL THEN TRUE
+			WHEN a.new_agreement_date_shared IS NOT NULL THEN TRUE
 			ELSE FALSE
 		END
 	) AS isAgreementShared,

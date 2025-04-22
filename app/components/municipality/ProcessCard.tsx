@@ -65,7 +65,7 @@ export function ProcessCard({ initialConsultation, agreement, invoicing }: Props
             <Stack direction="row" spacing={2} alignItems="center">
               <Typography>Sent</Typography>
 
-              {agreement.newAgreementDateSent || agreement.oldAgreementDateSigned ? (
+              {agreement.newAgreementDateSent ? (
                 <CheckBox sx={{ color: (theme) => theme.palette.success.main }} />
               ) : (
                 <List sx={{ color: (theme) => theme.palette.warning.main }} />
@@ -78,22 +78,20 @@ export function ProcessCard({ initialConsultation, agreement, invoicing }: Props
               </Typography>
               <Typography>Signed</Typography>
 
-              {agreement.oldAgreementDateSigned || agreement.newAgreementDateSigned ? (
+              {agreement.newAgreementDateSigned ? (
                 <CheckBox sx={{ color: (theme) => theme.palette.success.main }} />
               ) : (
                 <List sx={{ color: (theme) => theme.palette.warning.main }} />
               )}
 
               <Typography>
-                {agreement.oldAgreementDateSigned
-                  ? formatDate(agreement.oldAgreementDateSigned as unknown as string)
-                  : agreement.newAgreementDateSigned
-                    ? formatDate(agreement.newAgreementDateSigned as unknown as string)
-                    : null}
+                {agreement.newAgreementDateSigned
+                  ? formatDate(agreement.newAgreementDateSigned as unknown as string)
+                  : null}
               </Typography>
               <Typography>Shared</Typography>
 
-              {agreement.oldAgreementDateShared || agreement.newAgreementShared ? (
+              {agreement.newAgreementShared ? (
                 <CheckBox sx={{ color: (theme) => theme.palette.success.main }} />
               ) : (
                 <List sx={{ color: (theme) => theme.palette.warning.main }} />
