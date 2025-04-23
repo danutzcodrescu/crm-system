@@ -194,25 +194,23 @@ export function ResponsiblesTable({ data, companyId, fetcher, infoVerified }: Pr
           data={data}
         />
       </Box>
-      {infoVerified ? (
-        <Stack direction="row" gap={1} alignItems="center" sx={{ mt: 2 }}>
-          <Typography variant="body2" component="p">
-            Last verification date:{' '}
-            <Box component="span" sx={{ fontWeight: 'bold' }}>
-              {formatDate(infoVerified)}
-            </Box>
-          </Typography>
-          <Tooltip title="Edit last verification date">
-            <IconButton
-              size="small"
-              aria-label="Edit last verification date"
-              onClick={() => setContactVerificationFields()}
-            >
-              <Edit />
-            </IconButton>
-          </Tooltip>
-        </Stack>
-      ) : null}
+      <Stack direction="row" gap={1} alignItems="center" sx={{ mt: 2 }}>
+        <Typography variant="body2" component="p">
+          Last verification date:{' '}
+          <Box component="span" sx={{ fontWeight: 'bold' }}>
+            {infoVerified ? formatDate(infoVerified) : 'No date set'}
+          </Box>
+        </Typography>
+        <Tooltip title="Edit last verification date">
+          <IconButton
+            size="small"
+            aria-label="Edit last verification date"
+            onClick={() => setContactVerificationFields()}
+          >
+            <Edit />
+          </IconButton>
+        </Tooltip>
+      </Stack>
       <ClientOnly>
         {() => (
           <EditDialog

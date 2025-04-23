@@ -97,7 +97,9 @@ export function MunicipalityTitle({ municipality, fetcher, users }: Props) {
         condition: ['workingCategory', 'wave 3'],
         options: [
           { label: 'X', value: 'X' },
-          { label: 'Blank', value: '' },
+          { label: 'X1', value: 'X1' },
+          { label: 'X2', value: 'X2' },
+          { label: 'X3', value: 'X3' },
         ],
       },
       {
