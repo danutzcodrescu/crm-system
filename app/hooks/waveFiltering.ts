@@ -13,6 +13,9 @@ const defaultFilterList = [
   { label: 'H', value: 'H' },
   { label: 'Z', value: 'Z' },
   { label: 'X', value: 'X' },
+  { label: 'X1', value: 'X1' },
+  { label: 'X2', value: 'X2' },
+  { label: 'X3', value: 'X3' },
 ];
 
 export function useWorkingWaveFiltering() {
@@ -39,7 +42,14 @@ export function useWorkingWaveFiltering() {
           );
         }
         if ((workingCategoryFilter.value as string[]).includes('Wave 3')) {
-          filterList.push(...[{ label: 'X', value: 'X' }]);
+          filterList.push(
+            ...[
+              { label: 'X', value: 'X' },
+              { label: 'X1', value: 'X1' },
+              { label: 'X2', value: 'X2' },
+              { label: 'X3', value: 'X3' },
+            ],
+          );
         }
         setWaveFilterList(filterList);
       } else if (!workingCategoryFilter && waveFilterList.length !== defaultFilterList.length) {
