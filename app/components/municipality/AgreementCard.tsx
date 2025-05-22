@@ -55,7 +55,7 @@ export function AgreementCard({ data, fetcher }: AgreementCardProps) {
         name: 'typeOfAgreement',
         type: 'text',
         select: true,
-        defaultValue: data.oldAgreementDateSigned ? 'old' : 'new',
+        defaultValue: data.typeOfAgreement,
         watchable: true,
         options: [
           { label: 'New agreement', value: 'new' },
@@ -67,7 +67,7 @@ export function AgreementCard({ data, fetcher }: AgreementCardProps) {
         name: 'oldAgreementSent',
         type: 'text',
         select: true,
-        defaultValue: 'false',
+        defaultValue: data.oldAgreementSent as boolean,
         condition: ['typeOfAgreement', 'old'],
         options: [
           { label: 'Sent', value: 'true' },
@@ -166,19 +166,19 @@ export function AgreementCard({ data, fetcher }: AgreementCardProps) {
               <TableRow>
                 <TableCell>Agreement sent</TableCell>
                 <TableCell>
-                  {data.newAgreementDateSent ? (
-                    'N/A'
-                  ) : data.oldAgreementDateSigned ? (
+                  {data.oldAgreementDateSigned || data.oldAgreementSent ? (
                     <CheckBox sx={{ color: (theme) => theme.palette.success.main }} />
+                  ) : !data.oldAgreementDateSigned && !data.oldAgreementSent && data.newAgreementDateSent ? (
+                    'N/A'
                   ) : (
                     <Cancel sx={{ color: (theme) => theme.palette.error.main }} />
                   )}
                 </TableCell>
                 <TableCell>
-                  {data.oldAgreementDateSigned ? (
-                    'N/A'
-                  ) : data.newAgreementDateSent ? (
+                  {data.newAgreementDateSent ? (
                     <CheckBox sx={{ color: (theme) => theme.palette.success.main }} />
+                  ) : !data.newAgreementDateSent && data.oldAgreementDateSigned ? (
+                    'N/A'
                   ) : (
                     <Cancel sx={{ color: (theme) => theme.palette.error.main }} />
                   )}
@@ -186,13 +186,9 @@ export function AgreementCard({ data, fetcher }: AgreementCardProps) {
               </TableRow>
               <TableRow>
                 <TableCell>Date sent</TableCell>
-                <TableCell>{data.newAgreementDateSent ? 'N/A' : ''}</TableCell>
+                <TableCell>{data.oldAgreementSent ? 'N/A' : ''}</TableCell>
                 <TableCell>
-                  {data?.oldAgreementDateSigned
-                    ? 'N/A'
-                    : data.newAgreementDateSent
-                      ? formatDate(data.newAgreementDateSent as unknown as string)
-                      : ''}
+                  {data.newAgreementDateSent ? formatDate(data.newAgreementDateSent as unknown as string) : 'N/A'}
                 </TableCell>
               </TableRow>
               <TableRow>
@@ -217,15 +213,6 @@ export function AgreementCard({ data, fetcher }: AgreementCardProps) {
                         <AddLink /> View appendix
                       </Link>
                     </Stack>
-                  ) : data.newAgreementLink ? (
-                    <Link
-                      href={data.newAgreementLink}
-                      target="_blank"
-                      rel="noreferrer"
-                      sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}
-                    >
-                      <LinkIcon /> View document
-                    </Link>
                   ) : (
                     'N/A'
                   )}

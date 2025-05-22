@@ -43,16 +43,22 @@ export async function action({ request }: ActionFunctionArgs) {
     }
     const [error] = await editAgreementRecord({
       id: id as string,
-      oldAgreementDateSigned: body.get('oldAgreementSigned') as string,
-      oldAgreementDateShared: body.get('oldAgreementShared') as string,
-      oldAgreementLinkToAgreement: body.get('oldAgreementLink') as string,
-      oldAgreementLinkToAppendix: body.get('oldAgreementAppendix') as string,
-      oldAgreementSent: body.get('oldAgreementSent') === 'true',
-      newAgreementDateSigned: body.get('newAgreementSigned') as string,
-      newAgreementDateShared: body.get('newAgreementShared') as string,
-      newAgreementLinkToAgreement: body.get('newAgreementLink') as string,
       typeOfAgreement: typeOfAgreement as 'new' | 'old',
-      newAgreementDateSent: body.get('newAgreementDateSent') as string,
+      ...(typeOfAgreement === 'old'
+        ? {
+            oldAgreementDateSigned: body.get('oldAgreementSigned') as string,
+            oldAgreementDateShared: body.get('oldAgreementShared') as string,
+            oldAgreementLinkToAgreement: body.get('oldAgreementLink') as string,
+            oldAgreementLinkToAppendix: body.get('oldAgreementAppendix') as string,
+            oldAgreementSent: body.get('oldAgreementSent') === 'true',
+          }
+        : ({
+            newAgreementDateSigned: body.get('newAgreementSigned') as string,
+            newAgreementDateShared: body.get('newAgreementShared') as string,
+            newAgreementLinkToAgreement: body.get('newAgreementLink') as string,
+            newAgreementDateSent: body.get('newAgreementDateSent') as string,
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          } as any)),
     });
 
     if (error) {
@@ -500,7 +506,8 @@ export default function Agreement() {
             <Typography>In agreement: {rows.filter((row) => row.original.inAgreement).length}</Typography>
             <Typography>Old agreement sent: {rows.filter((row) => row.original.oldAgreementSent).length}</Typography>
             <Typography>
-              Old agreement signed: {rows.filter((row) => row.original.oldAgreementSigned).length}
+              Old agreement signed:{' '}
+              {rows.filter((row) => row.original.oldAgreementSigned && !row.original.newAgreementSigned).length}
             </Typography>
             <Typography>
               Old agreement shared with EPA: {rows.filter((row) => row.original.oldAgreementShared).length}

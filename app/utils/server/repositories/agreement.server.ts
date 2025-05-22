@@ -85,12 +85,18 @@ export async function editAgreementRecord(args: EditAgreementRecordArgs) {
       .update(agreement)
       .set({
         ...args,
-        oldAgreementDateShared: args.oldAgreementDateShared ? new Date(args.oldAgreementDateShared) : undefined,
-        oldAgreementDateSigned: args.oldAgreementDateSigned ? new Date(args.oldAgreementDateSigned) : undefined,
-        newAgreementDateShared: args.newAgreementDateShared ? new Date(args.newAgreementDateShared) : undefined,
-        newAgreementDateSigned: args.newAgreementDateSigned ? new Date(args.newAgreementDateSigned) : undefined,
-        newAgreementDateSent: args.newAgreementDateSent ? new Date(args.newAgreementDateSent) : undefined,
-      })
+        ...(args.typeOfAgreement === 'old'
+          ? {
+              oldAgreementDateShared: args.oldAgreementDateShared ? new Date(args.oldAgreementDateShared) : undefined,
+              oldAgreementDateSigned: args.oldAgreementDateSigned ? new Date(args.oldAgreementDateSigned) : undefined,
+            }
+          : {
+              newAgreementDateShared: args.newAgreementDateShared ? new Date(args.newAgreementDateShared) : undefined,
+              newAgreementDateSigned: args.newAgreementDateSigned ? new Date(args.newAgreementDateSigned) : undefined,
+              newAgreementDateSent: args.newAgreementDateSent ? new Date(args.newAgreementDateSent) : undefined,
+            }),
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      } as any)
       .where(eq(agreement.id, args.id));
     logger.info('Agreement data edited successfully');
     return [null, ''];
@@ -110,7 +116,8 @@ export async function getInAgreementCount(): Promise<[null, GetInAgreementCount[
     logger.info('Getting in agreement count');
     const data = await db
       .select({
-        inOldAgreement: count(agreement.oldAgreementDateSigned),
+        inOldAgreement: sql<number>`COUNT(${agreement.oldAgreementDateSigned}) FILTER (
+    WHERE ${agreement.newAgreementDateSigned} IS NULL)::int`,
         inNewAgreement: count(agreement.newAgreementDateSigned),
       })
       .from(agreement)
@@ -130,11 +137,13 @@ export interface MunicipalityAgreementData {
   oldAgreementDateSigned: Date | null;
   oldAgreementShared: boolean;
   oldAgreementDateShared: Date | null;
+  oldAgreementSent: boolean | null;
   newAgreementLink: string | null;
   newAgreementDateSigned: Date | null;
   newAgreementShared: boolean;
   newAgreementDateShared: Date | null;
   newAgreementDateSent: Date | null;
+  typeOfAgreement: 'old' | 'new';
 }
 
 export async function getAgreementForMunicipality(
@@ -145,10 +154,12 @@ export async function getAgreementForMunicipality(
     const data = await db
       .select({
         id: agreement.id,
+        typeOfAgreement: agreement.typeOfAgreement,
         oldAgreementLink: agreement.oldAgreementLinkToAgreement,
         oldAgreementAppendix: agreement.oldAgreementLinkToAppendix,
         oldAgreementDateSigned: agreement.oldAgreementDateSigned,
         oldAgreementShared: sql<boolean>`CASE WHEN ${agreement.oldAgreementDateShared} IS NOT NULL THEN TRUE ELSE FALSE END`,
+        oldAgreementSent: agreement.oldAgreementSent,
         oldAgreementDateShared: agreement.oldAgreementDateShared,
         newAgreementLink: agreement.newAgreementLinkToAgreement,
         newAgreementDateSigned: agreement.newAgreementDateSigned,
