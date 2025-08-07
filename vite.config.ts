@@ -27,6 +27,7 @@ export default defineConfig(({ isSsrBuild }) => ({
           route('/api/emails', 'api/emails/route.tsx', () => {
             route('/api/emails/:messageId/attachments/:attachmentId', 'api/emails/attachment.ts');
           });
+          route('/api/reminders', 'api/reminders/route.tsx');
           route('/api/auth', 'api/auth/route.ts');
           route('/api/reporting/import', 'api/reporting/import.ts');
           route('/api/general-information/import', 'api/general-information/import.ts');

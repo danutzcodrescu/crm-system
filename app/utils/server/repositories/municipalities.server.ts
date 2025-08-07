@@ -50,7 +50,7 @@ const processQuery = sql`SELECT
 			WHEN a.new_agreement_date_shared IS NOT NULL THEN TRUE
 			ELSE FALSE
 		END
-	) AS isAgreementShared,
+	) AS "isAgreementShared",
   invoice_data.result AS "invoiceData",
 	GREATEST(ic.document_date_sent, ic.date_signed, a.new_agreement_date_sent, a.new_agreement_date_signed) as latest
 FROM

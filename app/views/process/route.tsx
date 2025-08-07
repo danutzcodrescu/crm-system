@@ -295,7 +295,7 @@ export default function ProcessRoute() {
         onFilter={setFilter}
         data={(data as { data: ProcessData[] }).data}
         columns={columns}
-        defaultSorting={{ id: 'latestChange', desc: true }}
+        defaultSorting={{ id: 'latest', desc: true }}
       />
     </PageContainer>
   );
