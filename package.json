@@ -1,6 +1,6 @@
 {
   "name": "crm",
-  "version": "0.12.7",
+  "version": "0.12.8",
   "private": true,
   "sideEffects": false,
   "type": "module",

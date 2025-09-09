@@ -81,7 +81,7 @@ export default function Reminders({ reminders, remindersCount }: RemindersProps)
                   <Alarm color={isAfter(new Date(reminder.date), new Date()) ? 'primary' : 'error'} />
                   <Tooltip title={reminder.description}>
                     <Typography variant="body2" component="span">
-                      {formatDate(reminder.date.toISOString())}
+                      {formatDate(typeof reminder.date === 'string' ? reminder.date : reminder.date.toISOString())}
                     </Typography>
                   </Tooltip>
                 </Stack>
