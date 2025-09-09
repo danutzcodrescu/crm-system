@@ -24,6 +24,7 @@ export default defineConfig(({ isSsrBuild }) => ({
         return defineRoutes((route) => {
           route('/signin', 'views/login/route.tsx');
           route('/signup', 'views/signup/route.tsx');
+          route('/reset-password', 'views/reset-password/route.tsx');
           route('/api/emails', 'api/emails/route.tsx', () => {
             route('/api/emails/:messageId/attachments/:attachmentId', 'api/emails/attachment.ts');
           });

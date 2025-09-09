@@ -2,7 +2,7 @@ import { and, asc, eq, InferSelectModel, sql } from 'drizzle-orm';
 import { DatabaseError } from 'pg';
 
 import { logger } from '../logger.server';
-import { companies, recurringConsultation } from '../schema.server';
+import { agreement, companies, recurringConsultation } from '../schema.server';
 import { db } from './db.server';
 
 export type CompanyTable = Pick<InferSelectModel<typeof companies>, 'id' | 'name' | 'statusId'> & {
@@ -65,7 +65,14 @@ export async function getCompaniesWithConsultationInYear(
         .select({ id: companies.id, name: companies.name, meetingDate: recurringConsultation.meetingDate })
         .from(companies)
         .leftJoin(recurringConsultation, eq(recurringConsultation.companyId, companies.id))
-        .where(and(sql`${companies.consultations} @> ARRAY[${year}::SMALLINT]`, eq(recurringConsultation.year, year)))
+        .leftJoin(agreement, eq(recurringConsultation.companyId, agreement.companyId))
+        .where(
+          and(
+            sql`${agreement.newAgreementDateSigned} IS NULL`,
+            sql`${companies.consultations} @> ARRAY[${year}::SMALLINT]`,
+            eq(recurringConsultation.year, year),
+          ),
+        )
         .orderBy(asc(companies.name)),
     ];
   } catch (e) {

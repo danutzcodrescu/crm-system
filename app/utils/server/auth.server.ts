@@ -1,7 +1,7 @@
 import { hash, verify } from '@node-rs/argon2';
 import { sha256 } from '@oslojs/crypto/sha2';
 import { encodeBase32LowerCaseNoPadding, encodeHexLowerCase } from '@oslojs/encoding';
-import { eq } from 'drizzle-orm';
+import { and, eq } from 'drizzle-orm';
 
 import { logger } from './logger.server';
 import { db } from './repositories/db.server';
@@ -64,6 +64,14 @@ export async function getUserFromSession(request: Request): Promise<User | null>
   return user;
 }
 
+export async function getUserByIdAndUsername(id: number, username: string): Promise<User | null> {
+  const user = await db
+    .select()
+    .from(users)
+    .where(and(eq(users.id, id), eq(users.username, username)));
+  return user[0] || null;
+}
+
 export async function signUp(
   username: string,
   password: string,
@@ -85,6 +93,23 @@ export async function signUp(
   } catch (e) {
     logger.error(e);
     return ['User already exists', null];
+  }
+}
+
+export async function resetPassword(id: number, password: string, req: Request, shouldCreateSessions = true) {
+  const hashedPassword = await hashPassword(password);
+  try {
+    await db.update(users).set({ password: hashedPassword }).where(eq(users.id, id));
+    if (!shouldCreateSessions) {
+      return [null, ''];
+    } else {
+      const sessionString = await setSession(req, id);
+
+      return [null, sessionString];
+    }
+  } catch (e) {
+    logger.error(e);
+    return ['Could not reset password', null];
   }
 }
 

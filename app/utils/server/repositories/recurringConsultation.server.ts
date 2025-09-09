@@ -141,6 +141,7 @@ export async function getUpcomingMeetings(year: number): Promise<[string | null,
       })
       .from(recurringConsultation)
       .leftJoin(companies, eq(recurringConsultation.companyId, companies.id))
+      .leftJoin(agreement, eq(recurringConsultation.companyId, agreement.companyId))
       .where(
         and(
           eq(recurringConsultation.year, year),
