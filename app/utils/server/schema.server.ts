@@ -342,7 +342,7 @@ SELECT
 	totalval.year,
 	"totalval".company_id AS id,
 	"companies"."name" AS company_name,
-	"agreements"."type_of_agreement" AS type_of_agreement,
+	CASE WHEN "agreements"."new_agreement_date_signed" IS NULL AND "agreements"."old_agreement_date_signed" IS NOT NULL THEN 'old' ELSE 'new' END AS type_of_agreement,
 	inhabitants,
 	CASE
 		WHEN "agreements"."new_agreement_date_signed" IS NOT NULL
