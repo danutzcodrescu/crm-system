@@ -86,7 +86,7 @@ export async function getEmailAddressesByCompanyId(ids: string[]): Promise<[null
     return [null, data.map((item) => item.emailAddress as string)];
   } catch (e) {
     console.log(e);
-    logger.error('Could not retrieve email addresses', e);
+    logger.error(`Could not retrieve email addresses: ${e}`);
     return ['could not get email addresses', null];
   }
 }

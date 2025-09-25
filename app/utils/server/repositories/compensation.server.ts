@@ -55,7 +55,7 @@ export async function getCompensationForCompany(
   limitYear: number,
 ): Promise<[null, CompensationDataPerCompany[]] | [string, null]> {
   try {
-    logger.info('Getting compensation data for company:', companyId);
+    logger.info(`Getting compensation data for company: ${companyId}`);
     const data = await db
       .select({
         id: compensationView.id,
@@ -96,7 +96,7 @@ export async function getCompensationForCompanyByYear(
   year: number,
 ): Promise<[null, CompensationDataPerCompanyPerYear] | [string, null]> {
   try {
-    logger.debug('Getting compensation data for company:', companyId);
+    logger.debug(`Getting compensation data for company: ${companyId}`);
 
     return [
       null,

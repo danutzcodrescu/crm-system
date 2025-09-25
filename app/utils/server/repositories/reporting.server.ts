@@ -51,7 +51,7 @@ export async function editReportingRecord(
   args: typeof reporting.$inferInsert,
 ): Promise<[null, string] | [string, null]> {
   try {
-    logger.info('Trying to update reporting data for id: ', args.companyId, ' and year: ', args.year);
+    logger.info(`Trying to update reporting data for id: ${args.companyId} and year: ${args.year}`);
     await db
       .update(reporting)
       .set({
@@ -105,7 +105,7 @@ export async function getReportingForCompany(
   limitYear: number,
 ): Promise<[null, ReportingData[]] | [string, null]> {
   try {
-    logger.info('Getting reporting data for company:', companyId);
+    logger.info(`Getting reporting data for company: ${companyId}`);
     const data = await db
       .select({
         companyName: companies.name,

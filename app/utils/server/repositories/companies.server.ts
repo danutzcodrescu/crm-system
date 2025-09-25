@@ -13,7 +13,7 @@ export async function getFistRecurringConsultationYearFormCompany(
   id: string,
 ): Promise<[string | undefined, number | undefined]> {
   try {
-    logger.info('Getting first recurring consultation year for company id: ', id);
+    logger.info(`Getting first recurring consultation year for company id: ${id}`);
     const result = await db
       .select({ year: sql<number>`${companies.consultations}[1]` })
       .from(companies)
@@ -30,7 +30,7 @@ export async function updateRecurringConsultations(
   years: number[],
 ): Promise<[string, null] | [null, string]> {
   try {
-    logger.info('Updating recurring consultations for company id: ', id);
+    logger.info(`Updating recurring consultations for company id: ${id}`);
     await db.update(companies).set({ consultations: years }).where(eq(companies.id, id));
     return [null, 'successfully updated'];
   } catch (e) {

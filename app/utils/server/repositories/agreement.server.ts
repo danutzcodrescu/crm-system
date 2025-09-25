@@ -80,7 +80,7 @@ interface EditAgreementRecordArgs {
 
 export async function editAgreementRecord(args: EditAgreementRecordArgs) {
   try {
-    logger.info('Trying to update agreement data for id: ', args.id);
+    logger.info(`Trying to update agreement data for id: ${args.id}`);
     await db
       .update(agreement)
       .set({
@@ -150,7 +150,7 @@ export async function getAgreementForMunicipality(
   municipalityId: string,
 ): Promise<[null, MunicipalityAgreementData] | [string, null]> {
   try {
-    logger.info('Getting agreement data for municipality:', municipalityId);
+    logger.info(`Getting agreement data for municipality: ${municipalityId}`);
     const data = await db
       .select({
         id: agreement.id,
@@ -178,17 +178,20 @@ export async function getAgreementForMunicipality(
       oldAgreementDateSigned: null,
       oldAgreementShared: false,
       oldAgreementDateShared: null,
+      oldAgreementSent: null,
       newAgreementLink: null,
       newAgreementDateSigned: null,
       newAgreementShared: false,
       newAgreementDateShared: null,
+      newAgreementDateSent: null,
+      typeOfAgreement: 'old' as const,
     };
 
-    logger.info('Agreement data fetched for municipality:', municipalityId);
+    logger.info(`Agreement data fetched for municipality: ${municipalityId}`);
     await db.refreshMaterializedView(compensationView);
     return [null, result];
   } catch (error) {
-    logger.error('Error fetching agreement data for municipality:', municipalityId, error);
+    logger.error({ error, municipalityId }, 'Error fetching agreement data for municipality');
     return ['could not retrieve agreement data', null];
   }
 }

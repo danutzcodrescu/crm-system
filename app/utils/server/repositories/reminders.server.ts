@@ -15,7 +15,7 @@ export async function createReminder(data: InferInsertModel<typeof reminders>, l
     });
     return null;
   } catch (e) {
-    logger.error('Error creating reminder', e);
+    logger.error(`Error creating reminder: ${e}`);
     return 'Error creating reminder';
   }
 }
@@ -26,7 +26,7 @@ export async function changeReminderStatus(reminderId: string, status: boolean):
     await db.update(reminders).set({ status }).where(eq(reminders.id, reminderId));
     return null;
   } catch (e) {
-    logger.error('Error changing reminder status', e);
+    logger.error(`Error changing reminder status: ${e}`);
     return 'Error changing reminder status';
   }
 }
@@ -58,7 +58,7 @@ export async function getAllRecentReminders(): Promise<[string | null, ReminderD
       .orderBy(asc(reminders.dueDate));
     return [null, remindersData];
   } catch (e) {
-    logger.error('Error getting all reminders', e);
+    logger.error(`Error getting all reminders: ${e}`);
     return ['Error getting all reminders', null];
   }
 }
@@ -69,7 +69,7 @@ export async function getRemindersCount(): Promise<[string | null, number | null
     const remindersData = await db.select({ count: count() }).from(reminders).where(eq(reminders.status, false));
     return [null, remindersData[0].count];
   } catch (e) {
-    logger.error('Error getting all reminders count', e);
+    logger.error(`Error getting all reminders count: ${e}`);
     return ['Error getting all reminders count', null];
   }
 }
@@ -91,7 +91,7 @@ export async function getAllReminders(): Promise<[string | null, ReminderData[] 
       .orderBy(asc(reminders.dueDate));
     return [null, remindersData];
   } catch (e) {
-    logger.error('Error getting all reminders', e);
+    logger.error(`Error getting all reminders: ${e}`);
     return ['Error getting all reminders', null];
   }
 }

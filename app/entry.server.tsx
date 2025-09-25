@@ -23,7 +23,7 @@ import { handlePDFRequest } from './utils/server/pdf.server';
 import { theme } from './utils/theme';
 
 export const handleError = Sentry.wrapHandleErrorWithSentry((error) => {
-  logger.error('Error in handleRequest', error);
+  logger.error(`Error in handleRequest: ${error}`);
   Sentry.captureException(error);
 });
 

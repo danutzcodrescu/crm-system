@@ -55,7 +55,7 @@ interface EditInitialConsultationArgs {
 
 export async function editInitialConsultationRecord(args: EditInitialConsultationArgs) {
   try {
-    logger.info('Trying to update initial consultation data for id: ', args.id);
+    logger.info(`Trying to update initial consultation data for id: ${args.id}`);
     await db
       .update(initialConsultation)
       .set({
@@ -105,7 +105,7 @@ export async function getInitialConsultationForMunicipality(
   municipalityId: string,
 ): Promise<[string | null, InitialConsultationData | null]> {
   try {
-    logger.info('Getting initial consultation data for municipality:', municipalityId);
+    logger.info(`Getting initial consultation data for municipality: ${municipalityId}`);
     const data = await db
       .select({
         documentSent: initialConsultation.documentDateSent,
@@ -129,7 +129,7 @@ export async function getInitialConsultationForMunicipality(
       link: null,
     };
 
-    logger.info('Initial consultation data fetched for municipality:', municipalityId);
+    logger.info(`Initial consultation data fetched for municipality: ${municipalityId}`);
     return [
       null,
       {
@@ -142,7 +142,7 @@ export async function getInitialConsultationForMunicipality(
       },
     ];
   } catch (error) {
-    logger.error('Error fetching initial consultation data for municipality:', municipalityId, error);
+    logger.error(`Error fetching initial consultation data for municipality: ${municipalityId} - ${error}`);
     return ['could not retrieve initial consultation data', null];
   }
 }

@@ -53,7 +53,7 @@ export async function editGeneralInformationRecord(
   args: typeof generalInformation.$inferInsert,
 ): Promise<[null, string] | [string, null]> {
   try {
-    logger.info('Trying to update general information for id: ', args.companyId, ' and year: ', args.year);
+    logger.info(`Trying to update general information for id: ${args.companyId} and year: ${args.year}`);
     await db
       .update(generalInformation)
       .set({
@@ -79,7 +79,7 @@ export async function getGeneralInformationForCompany(
   limitYear: number,
 ): Promise<[null, GeneralInformationPerMunicipality[]] | [string, null]> {
   try {
-    logger.info('Getting general information data for company:', companyId);
+    logger.info(`Getting general information data for company: ${companyId}`);
     const data = await db
       .select({
         companyName: companies.name,
@@ -106,7 +106,9 @@ export async function getGeneralInformationForCompany(
   }
 }
 
-export async function bulkImportGeneralInformation(values: (typeof generalInformation.$inferInsert)[]): Promise<string | null> {
+export async function bulkImportGeneralInformation(
+  values: (typeof generalInformation.$inferInsert)[],
+): Promise<string | null> {
   try {
     await db
       .insert(generalInformation)

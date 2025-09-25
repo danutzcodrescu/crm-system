@@ -102,7 +102,7 @@ export async function getInvoicingForCompany(
   limitYear: number,
 ): Promise<[null, InvoicingData[]] | [string, null]> {
   try {
-    logger.info('Getting invoicing data for company:', companyId);
+    logger.info(`Getting invoicing data for company: ${companyId}`);
     const data = await db
       .select({
         id: invoicing.companyId,
@@ -180,7 +180,7 @@ export async function editInvoicingRecord(
   args: typeof invoicing.$inferInsert,
 ): Promise<[null, string] | [string, null]> {
   try {
-    logger.info('Trying to update invoicing data for: ', args.companyId, ' and year: ', args.year);
+    logger.info(`Trying to update invoicing data for: ${args.companyId} and year: ${args.year}`);
     await db
       .insert(invoicing)
       .values({

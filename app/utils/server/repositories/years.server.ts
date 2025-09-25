@@ -68,7 +68,7 @@ interface UpdateYear {
 
 export async function updateYear(args: UpdateYear): Promise<string | null> {
   try {
-    logger.info('Trying to update year: ', args.name);
+    logger.info(`Trying to update year: ${args.name}`);
     await db
       .update(years)
       .set({

@@ -100,7 +100,7 @@ export async function getEmail(): Promise<[string | null, string | null]> {
     });
     return [null, resp.data.emailAddress as string];
   } catch (error) {
-    logger.error('Error getting email', { error });
+    logger.error(`Error getting email: ${error}`);
     return ['could not fetch email data', null];
   }
 }
@@ -141,7 +141,7 @@ export async function getAttachment(attachmentId: string, messageId: string): Pr
     });
     return [null, response.data.data as string];
   } catch (error) {
-    logger.error('Error getting attachment', { error });
+    logger.error(`Error getting attachment: ${error}`);
     return ['could not fetch email data', null];
   }
 }
@@ -160,7 +160,7 @@ export async function getRedirectUrlIfThereIsNoToken(request: Request): Promise<
 
     oauth2Client.setCredentials({ refresh_token: token });
   } catch (error) {
-    logger.error('Error checking if user has token', { error });
+    logger.error(`Error checking if user has token: ${error}`);
     return undefined;
   }
 }
@@ -265,11 +265,11 @@ export async function getEmailsPerMunicipality(id: string): Promise<[string | nu
     if (match) {
       generalEmail = match[0];
     } else {
-      logger.error('Could extract domain for the email');
+      logger.error(`Could extract domain for the email: ${data[0].email}`);
       return ['could not fetch email data', null];
     }
   } catch (e) {
-    logger.error(e);
+    logger.error(`Error in getEmailsPerMunicipality: ${e}`);
     return ['could not fetch email data', null];
   }
 

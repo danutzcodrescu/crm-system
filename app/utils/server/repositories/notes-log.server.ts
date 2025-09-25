@@ -17,7 +17,7 @@ export interface LogForCompany {
 
 export async function deleteLog(id: string): Promise<string | null> {
   try {
-    logger.info('Deleting log', id);
+    logger.info(`Deleting log ${id}`);
     await db.delete(logs).where(eq(logs.id, id));
     return null;
   } catch (e) {
@@ -39,7 +39,7 @@ export async function updateLog(
   },
 ): Promise<string | null> {
   try {
-    logger.info('Updating log', id);
+    logger.info(`Updating log ${id}`);
     db.transaction(async (tx) => {
       let reminderId: string | undefined;
       if (!reminder?.reminderId && reminder?.reminderDueDate) {
@@ -83,7 +83,7 @@ export async function createLog(
   reminderDescription?: string,
 ): Promise<string | null> {
   try {
-    logger.info('Creating log for company', companyId);
+    logger.info(`Creating log for company ${companyId}`);
     await db.transaction(async (tx) => {
       let reminderId: string | undefined;
       if (reminderDueDate) {
@@ -107,7 +107,7 @@ export async function createLog(
 
 export async function getLogsForCompany(companyId: string): Promise<[string | undefined, LogForCompany[] | undefined]> {
   try {
-    logger.info('Fetching logs for company', companyId);
+    logger.info(`Fetching logs for company ${companyId}`);
     return [
       undefined,
       await db
@@ -167,7 +167,7 @@ export async function getRecentLogs(): Promise<[string | undefined, LogsWithComp
         .orderBy(desc(logs.date))) as LogsWithCompanyDetails[],
     ];
   } catch (e) {
-    logger.error('Could not retrieve logs for period', e);
+    logger.error(`Could not retrieve logs for period: ${e}`);
     return [`Could not retrieve logs for period`, undefined];
   }
 }

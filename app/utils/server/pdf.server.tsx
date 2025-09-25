@@ -31,7 +31,7 @@ export async function handlePDFRequest(request: Request, headers: Headers) {
     stream.on('error', reject);
   });
   // return the response
-  return new Response(body, { status: 200, headers });
+  return new Response(new Uint8Array(body), { status: 200, headers });
 }
 
 export async function loader({ request }: LoaderFunctionArgs) {
@@ -42,7 +42,7 @@ export async function loader({ request }: LoaderFunctionArgs) {
   const [error, data] = await getCompensationForCompanyByYear(segments[1], parseInt(segments[2].replace('.pdf', '')));
 
   if (error) {
-    logger.error(error);
+    logger.error(`PDF generation error: ${error}`);
     return redirect('/');
   }
 
