@@ -1,4 +1,4 @@
-import { and, eq, inArray, isNotNull } from 'drizzle-orm';
+import { and, desc, eq, inArray, isNotNull } from 'drizzle-orm';
 
 import { logger } from '../logger.server';
 import { responsibles } from '../schema.server';
@@ -14,6 +14,7 @@ interface ResponsibleArgs {
 
 export interface ResponsibleData extends ResponsibleArgs {
   id: string;
+  updatedAt: Date;
 }
 
 export async function createNewResponsible(args: ResponsibleArgs): Promise<[null, string] | [string, null]> {
@@ -28,7 +29,7 @@ export async function createNewResponsible(args: ResponsibleArgs): Promise<[null
 }
 
 export async function updateResponsible(
-  args: Omit<ResponsibleData, 'companyId'> & { id: string },
+  args: Omit<ResponsibleData, 'companyId' | 'updatedAt'> & { id: string },
 ): Promise<[null, string] | [string, null]> {
   try {
     logger.info('Updating responsible');
@@ -64,9 +65,11 @@ export async function getResponsiblesForMunicipality(
         email: responsibles.email,
         title: responsibles.title,
         phoneNumber: responsibles.phoneNumber,
+        updatedAt: responsibles.updatedAt,
       })
       .from(responsibles)
-      .where(eq(responsibles.companyId, companyId));
+      .where(eq(responsibles.companyId, companyId))
+      .orderBy(desc(responsibles.updatedAt));
     return [null, data as ResponsibleData[]];
   } catch (e) {
     logger.error(e);

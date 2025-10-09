@@ -123,7 +123,7 @@ export async function getLogsForCompany(companyId: string): Promise<[string | un
         .from(logs)
         .where(eq(logs.companyId, companyId))
         .leftJoin(reminders, and(eq(logs.reminderId, reminders.id), eq(reminders.status, false)))
-        .orderBy(desc(logs.date)),
+        .orderBy(desc(logs.date), desc(logs.updatedAt)),
     ];
   } catch (e) {
     logger.error(e);

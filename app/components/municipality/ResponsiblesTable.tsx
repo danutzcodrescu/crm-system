@@ -34,6 +34,13 @@ export function ResponsiblesTable({ data, companyId, fetcher, infoVerified }: Pr
         enableColumnFilter: false,
       },
       {
+        header: 'Updated',
+        accessorFn: (row) => (row.updatedAt ? new Date(row.updatedAt) : null),
+        id: 'updatedAt',
+        enableColumnFilter: false,
+        hidden: true,
+      },
+      {
         header: 'Title',
         accessorKey: 'title',
         id: 'title',
@@ -188,7 +195,7 @@ export function ResponsiblesTable({ data, companyId, fetcher, infoVerified }: Pr
         <PaginatedTable
           tableHeight="950px"
           defaultPageSize={10}
-          defaultSorting={{ id: 'name', desc: false }}
+          defaultSorting={{ id: 'updatedAt', desc: true }}
           disablePagination
           columns={columns}
           data={data}
