@@ -1,0 +1,1 @@
+ALTER TABLE "responsibles" ADD COLUMN "mobile_number" text;

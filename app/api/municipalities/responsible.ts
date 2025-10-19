@@ -22,6 +22,7 @@ export async function action({ request, params }: ActionFunctionArgs) {
       name: data.get('name') as string,
       email: data.get('email') as string,
       phoneNumber: data.get('phoneNumber') as string,
+      mobileNumber: data.get('mobileNumber') as string,
       title: data.get('title') as string,
     });
 

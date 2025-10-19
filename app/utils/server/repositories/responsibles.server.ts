@@ -9,6 +9,7 @@ interface ResponsibleArgs {
   name: string;
   email?: string;
   phoneNumber?: string;
+  mobileNumber?: string;
   title?: string;
 }
 
@@ -65,6 +66,7 @@ export async function getResponsiblesForMunicipality(
         email: responsibles.email,
         title: responsibles.title,
         phoneNumber: responsibles.phoneNumber,
+        mobileNumber: responsibles.mobileNumber,
         updatedAt: responsibles.updatedAt,
       })
       .from(responsibles)

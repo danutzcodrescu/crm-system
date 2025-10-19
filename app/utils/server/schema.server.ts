@@ -84,6 +84,7 @@ export const responsibles = pgTable('responsibles', {
   name: text(),
   email: text(),
   phoneNumber: text(),
+  mobileNumber: text(),
   title: text(),
   companyId: uuid().references(() => companies.id, { onDelete: 'cascade', onUpdate: 'no action' }),
   updatedAt: timestamp({ withTimezone: true, mode: 'date' }).$onUpdate(() => new Date()),

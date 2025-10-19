@@ -65,6 +65,14 @@ export function ResponsiblesTable({ data, companyId, fetcher, infoVerified }: Pr
         size: 130,
       },
       {
+        header: 'Mobile',
+        enableColumnFilter: false,
+        enableSorting: false,
+        accessorKey: 'mobileNumber',
+        id: 'mobileNumber',
+        size: 130,
+      },
+      {
         id: 'actions',
         header: 'Actions',
         enableSorting: false,
@@ -127,6 +135,11 @@ export function ResponsiblesTable({ data, companyId, fetcher, infoVerified }: Pr
         name: 'phoneNumber',
         type: 'tel',
       },
+      {
+        label: 'Mobile',
+        name: 'mobileNumber',
+        type: 'tel',
+      },
     ]);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [companyId]);
@@ -164,6 +177,12 @@ export function ResponsiblesTable({ data, companyId, fetcher, infoVerified }: Pr
         name: 'phoneNumber',
         type: 'tel',
         defaultValue: data.phoneNumber,
+      },
+      {
+        label: 'Mobile',
+        name: 'mobileNumber',
+        type: 'tel',
+        defaultValue: data.mobileNumber,
       },
     ]);
     // eslint-disable-next-line react-hooks/exhaustive-deps

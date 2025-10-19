@@ -64,6 +64,13 @@
       "when": 1760038025338,
       "tag": "0008_careful_cannonball",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1760882062475,
+      "tag": "0009_ordinary_white_queen",
+      "breakpoints": true
     }
   ]
 }
