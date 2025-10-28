@@ -76,7 +76,7 @@ export default function Compensation() {
             { label: 'Yes', value: true },
             { label: 'No', value: false },
           ],
-          filterOptionsLabel: 'Recurring consultation',
+          filterOptionsLabel: 'In agreement',
         },
         cell: ({ getValue }) =>
           getValue() ? (
