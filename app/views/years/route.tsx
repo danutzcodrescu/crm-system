@@ -157,7 +157,12 @@ export default function YearsPage() {
         {(data as { years: FullYearData[] }).years.map((year) => (
           <Stack
             key={year.name}
+            direction="row"
             sx={{
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              flexWrap: 'wrap',
+              gap: 1.5,
               boxShadow: (theme) => theme.shadows[15],
               border: '1px solid',
               borderColor: (theme) => theme.palette.grey[400],
@@ -165,11 +170,6 @@ export default function YearsPage() {
               padding: 1.5,
               backgroundColor: (theme) => theme.palette.background.paper,
             }}
-            direction="row"
-            alignItems="center"
-            justifyContent="space-between"
-            flexWrap="wrap"
-            gap={1.5}
           >
             <Typography sx={{ fontWeight: 'bold', flex: '0 0 80%', fontSize: '1.5rem', pr: 1.5 }}>
               {year.name}

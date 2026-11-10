@@ -15,7 +15,14 @@ interface ThreadViewerProps {
 export function ThreadViewer({ thread, onClose, email }: ThreadViewerProps) {
   return (
     <Box sx={{ width: '100%' }}>
-      <Stack direction="row" alignItems="center" justifyContent="space-between" gap={3}>
+      <Stack
+        direction="row"
+        sx={{
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          gap: 3,
+        }}
+      >
         <Typography variant="h6" component="h2" sx={{ mb: 2 }}>
           {thread.headers.subject}
         </Typography>
@@ -42,12 +49,24 @@ export function ThreadViewer({ thread, onClose, email }: ThreadViewerProps) {
               },
             }}
           >
-            <Stack gap={2} direction="row" alignItems="center" justifyContent="space-between">
+            <Stack
+              direction="row"
+              sx={{
+                gap: 2,
+                alignItems: 'center',
+                justifyContent: 'space-between',
+              }}
+            >
               <Typography variant="subtitle2" sx={{ fontWeight: 'bold' }}>
                 {extractNameFromHeader(emailItem.headers.from)}
               </Typography>
 
-              <Typography variant="body2" fontStyle="italic">
+              <Typography
+                variant="body2"
+                sx={{
+                  fontStyle: 'italic',
+                }}
+              >
                 {Intl.DateTimeFormat(
                   'sv-SE',
                   isToday(emailItem.headers.date)
@@ -70,13 +89,21 @@ export function ThreadViewer({ thread, onClose, email }: ThreadViewerProps) {
             {emailItem.attachments?.length ? (
               <>
                 <Divider />
-                <Stack gap={2} direction="row" alignItems="center">
+                <Stack
+                  direction="row"
+                  sx={{
+                    gap: 2,
+                    alignItems: 'center',
+                  }}
+                >
                   {emailItem.attachments.map((attachment) => (
                     <Stack
                       key={attachment.filename + attachment.mimeType}
-                      gap={1}
                       direction={'row'}
-                      alignItems="center"
+                      sx={{
+                        gap: 1,
+                        alignItems: 'center',
+                      }}
                     >
                       <Typography variant="body2">{attachment.filename}</Typography>
                       <IconButton

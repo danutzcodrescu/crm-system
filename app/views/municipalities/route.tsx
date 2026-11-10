@@ -4,7 +4,6 @@ import PersonAdd from '@mui/icons-material/PersonAdd';
 import { Box, IconButton, Link, Stack, Typography } from '@mui/material';
 import { json, LoaderFunctionArgs, MetaFunction, redirect } from '@remix-run/node';
 import { Link as RLink, ShouldRevalidateFunctionArgs, useFetcher, useLoaderData } from '@remix-run/react';
-import { ColumnDef, ColumnFiltersState, Row } from '@tanstack/react-table';
 import { useCallback, useMemo } from 'react';
 import { ClientOnly } from 'remix-utils/client-only';
 
@@ -22,6 +21,7 @@ import { getMunicipalitiesData, MunicipalityData } from '~/utils/server/reposito
 import { getAllStatuses, Status } from '~/utils/server/repositories/status.server';
 import { getAllUsers, User } from '~/utils/server/repositories/users.server';
 import { useIds } from '~/utils/store';
+import { ColumnDef, ColumnFiltersState, Row } from '~/utils/table';
 
 interface LoaderResponse {
   statuses: Status[];
@@ -91,7 +91,12 @@ export default function Companies() {
         enableColumnFilter: false,
         enableSorting: false,
         cell: ({ getValue }) => (
-          <Stack direction="column" gap={1}>
+          <Stack
+            direction="column"
+            sx={{
+              gap: 1,
+            }}
+          >
             {((getValue() as MunicipalityData['responsibles']) || []).map((item) => (
               <Typography key={item.id} variant="body2">
                 {item.name} {item.title ? `- ${item.title}` : ''}
@@ -440,7 +445,13 @@ export default function Companies() {
     <PageContainer
       title="Municipalities"
       additionalTitleElement={
-        <Stack direction="row" alignItems="center" gap={1}>
+        <Stack
+          direction="row"
+          sx={{
+            alignItems: 'center',
+            gap: 1,
+          }}
+        >
           <SendEmail />
           <ClientOnly>
             {() => (

@@ -3,7 +3,6 @@ import List from '@mui/icons-material/List';
 import { Link } from '@mui/material';
 import { json, LoaderFunctionArgs, MetaFunction, redirect } from '@remix-run/node';
 import { Link as RLink, useLoaderData } from '@remix-run/react';
-import { CellContext, ColumnDef, ColumnFiltersState, Row } from '@tanstack/react-table';
 import { range } from 'lodash-es';
 import { useMemo } from 'react';
 
@@ -15,6 +14,7 @@ import { formatDate } from '~/utils/client/dates';
 import { isLoggedIn } from '~/utils/server/auth.server';
 import { getProcessDataForMunicipalities, ProcessData } from '~/utils/server/repositories/municipalities.server';
 import { useIds } from '~/utils/store';
+import { CellContext, ColumnDef, ColumnFiltersState, Row } from '~/utils/table';
 
 export async function loader({ request }: LoaderFunctionArgs) {
   const isAuthenticated = await isLoggedIn(request);

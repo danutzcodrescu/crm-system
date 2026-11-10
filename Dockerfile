@@ -1,15 +1,16 @@
 # base node image
 
 # TODO pass sentry data as secrets
-FROM node:lts-slim AS base
-ARG SENTRY_DSN=1.0.0
-ARG SENTRY_ORG=1.0.0
-ARG SENTRY_PROJECT=1.0.0
-ARG SENTRY_AUTH_TOKEN=1.0.0
+FROM node:lts  AS base
+ARG SENTRY_DSN
+ARG SENTRY_ORG
+ARG SENTRY_PROJECT
+ARG SENTRY_AUTH_TOKEN
 
 # set for base and all layer that inherit from it
 
 ENV NODE_ENV=production
+RUN npm install -g pnpm@10.18.3
 
 # Install all node_modules, including dev dependencies
 
@@ -17,9 +18,8 @@ FROM base AS deps
 
 WORKDIR /crm_system
 
-ADD package.json pnpm-lock.yaml ./
-RUN npm install -g pnpm
-RUN pnpm install --frozen-lockfile
+ADD package.json pnpm-lock.yaml pnpm-workspace.yaml ./
+RUN pnpm install --frozen-lockfile --prod=false
 
 # Setup production node_modules
 
@@ -28,8 +28,7 @@ FROM base AS production-deps
 WORKDIR /crm_system
 
 COPY --from=deps /crm_system/node_modules /crm_system/node_modules
-ADD package.json pnpm-lock.yaml ./
-RUN npm install -g pnpm
+ADD package.json pnpm-lock.yaml pnpm-workspace.yaml ./
 RUN pnpm prune --prod
 
 # Build the app
@@ -46,7 +45,6 @@ ENV SENTRY_AUTH_TOKEN=${SENTRY_AUTH_TOKEN}
 COPY --from=deps /crm_system/node_modules /crm_system/node_modules
 
 ADD . .
-RUN npm install -g pnpm
 RUN apt-get update
 RUN apt-get install -y ca-certificates
 RUN pnpm package

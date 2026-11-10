@@ -5,7 +5,6 @@ import LinkIcon from '@mui/icons-material/Link';
 import { IconButton, Link, Stack, Tooltip, Typography } from '@mui/material';
 import { ActionFunctionArgs, json, LoaderFunctionArgs, MetaFunction, redirect } from '@remix-run/node';
 import { Link as RLink, ShouldRevalidateFunctionArgs, useFetcher, useLoaderData } from '@remix-run/react';
-import { ColumnDef } from '@tanstack/react-table';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { ClientOnly } from 'remix-utils/client-only';
 
@@ -19,6 +18,7 @@ import { formatDate } from '~/utils/client/dates';
 import { isLoggedIn } from '~/utils/server/auth.server';
 import { AgreementData, editAgreementRecord, getAgreementData } from '~/utils/server/repositories/agreement.server';
 import { useIds } from '~/utils/store';
+import { ColumnDef } from '~/utils/table';
 
 export const meta: MetaFunction = () => {
   return [
@@ -28,7 +28,7 @@ export const meta: MetaFunction = () => {
 };
 
 export async function action({ request }: ActionFunctionArgs) {
-  if (!isLoggedIn(request)) {
+  if (!(await isLoggedIn(request))) {
     return redirect('/signin');
   }
   if (request.method === 'PATCH') {
@@ -74,7 +74,7 @@ export async function action({ request }: ActionFunctionArgs) {
 }
 
 export async function loader({ request }: LoaderFunctionArgs) {
-  if (!isLoggedIn(request)) {
+  if (!(await isLoggedIn(request))) {
     return redirect('/signin');
   }
   const [error, data] = await getAgreementData();

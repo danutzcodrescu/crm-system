@@ -35,9 +35,22 @@ export function PageContainer({ children, title, additionalTitleElement, actionD
         ...sx,
       }}
     >
-      <Stack direction="row" alignItems="center" sx={{ mb: 2 }}>
+      <Stack
+        direction="row"
+        sx={{
+          alignItems: 'center',
+          mb: 2,
+        }}
+      >
         {typeof title === 'string' ? (
-          <Typography variant="h5" component="h1" fontWeight="bold" sx={{ flex: 1 }}>
+          <Typography
+            variant="h5"
+            component="h1"
+            sx={{
+              fontWeight: 'bold',
+              flex: 1,
+            }}
+          >
             {title}
           </Typography>
         ) : (

@@ -3,7 +3,6 @@ import CheckBox from '@mui/icons-material/CheckBox';
 import { FormControl, InputLabel, Link, MenuItem, Select } from '@mui/material';
 import { ActionFunctionArgs, json, LoaderFunctionArgs, MetaFunction, redirect } from '@remix-run/node';
 import { Link as RLink, useFetcher, useLoaderData, useLocation, useNavigate } from '@remix-run/react';
-import { ColumnDef } from '@tanstack/react-table';
 import { getYear } from 'date-fns';
 import { useCallback, useMemo } from 'react';
 import { ClientOnly } from 'remix-utils/client-only';
@@ -21,6 +20,7 @@ import {
   getGeneralInformationData,
 } from '~/utils/server/repositories/generalInformation.server';
 import { getAllYears } from '~/utils/server/repositories/years.server';
+import { ColumnDef } from '~/utils/table';
 
 interface LoaderResponse {
   yearsData: number[];
@@ -35,7 +35,7 @@ export const meta: MetaFunction = () => {
 };
 
 export async function loader({ request }: LoaderFunctionArgs) {
-  if (!isLoggedIn(request)) {
+  if (!(await isLoggedIn(request))) {
     return redirect('/signin');
   }
   const year = new URL(request.url).searchParams.get('year');
@@ -50,7 +50,7 @@ export async function loader({ request }: LoaderFunctionArgs) {
 }
 
 export async function action({ request }: ActionFunctionArgs) {
-  if (!isLoggedIn(request)) {
+  if (!(await isLoggedIn(request))) {
     return redirect('/signin');
   }
   if (request.method === 'PATCH') {

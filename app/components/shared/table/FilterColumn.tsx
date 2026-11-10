@@ -1,10 +1,11 @@
 import FilterAlt from '@mui/icons-material/FilterAlt';
 import { Input, Popover, Stack, Typography } from '@mui/material';
 import { useDebouncedCallback } from '@react-hookz/web';
-import { Column } from '@tanstack/react-table';
 import { ChangeEvent, useState } from 'react';
 
-export function FilterColumn<T>({ column }: { column: Column<T, unknown> }) {
+import { Column } from '~/utils/table';
+
+export function FilterColumn<T extends object>({ column }: { column: Column<T, unknown> }) {
   const [filterButton, setFilterButton] = useState<SVGSVGElement | null>(null);
   const columnFilterValue = column.getFilterValue();
   const setFilter = useDebouncedCallback(
@@ -17,7 +18,13 @@ export function FilterColumn<T>({ column }: { column: Column<T, unknown> }) {
 
   return (
     <>
-      <Stack direction="row" gap={1} onClick={(e) => e.stopPropagation()}>
+      <Stack
+        direction="row"
+        onClick={(e) => e.stopPropagation()}
+        sx={{
+          gap: 1,
+        }}
+      >
         <FilterAlt
           sx={{ cursor: 'pointer' }}
           onClick={(e) => {
@@ -31,7 +38,13 @@ export function FilterColumn<T>({ column }: { column: Column<T, unknown> }) {
         onClose={() => setFilterButton(null)}
         anchorEl={filterButton}
       >
-        <Typography component="p" fontWeight="bold" gutterBottom>
+        <Typography
+          component="p"
+          gutterBottom
+          sx={{
+            fontWeight: 'bold',
+          }}
+        >
           Filter by {column.columnDef.header as string}
         </Typography>
         <Input

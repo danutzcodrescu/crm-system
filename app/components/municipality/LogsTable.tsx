@@ -3,7 +3,6 @@ import Alarm from '@mui/icons-material/Alarm';
 import PostAdd from '@mui/icons-material/PostAdd';
 import { Box, IconButton, Stack, Tooltip, Typography } from '@mui/material';
 import { useFetcher } from '@remix-run/react';
-import { ColumnDef } from '@tanstack/react-table';
 import { isAfter } from 'date-fns';
 import { useCallback, useMemo } from 'react';
 import { ClientOnly } from 'remix-utils/client-only';
@@ -11,6 +10,7 @@ import { ClientOnly } from 'remix-utils/client-only';
 import { useEditFields } from '~/hooks/editFields';
 import { formatDate } from '~/utils/client/dates';
 import { LogForCompany } from '~/utils/server/repositories/notes-log.server';
+import { ColumnDef } from '~/utils/table';
 
 import { EditDialog } from '../shared/EditDialog.client';
 import { PaginatedTable } from '../shared/table/PaginatedTable';
@@ -62,7 +62,13 @@ export function LogsTable({ data, companyId, fetcher }: Props) {
             return '';
           }
           return (
-            <Stack direction="row" gap={1} alignItems="center">
+            <Stack
+              direction="row"
+              sx={{
+                gap: 1,
+                alignItems: 'center',
+              }}
+            >
               <Alarm
                 color={
                   isAfter(new Date(row.original.reminderDueDate as unknown as string), new Date()) ? 'primary' : 'error'
@@ -249,7 +255,14 @@ export function LogsTable({ data, companyId, fetcher }: Props) {
 
   return (
     <>
-      <Stack direction="row" gap={1} alignItems="center" justifyContent="space-between">
+      <Stack
+        direction="row"
+        sx={{
+          gap: 1,
+          alignItems: 'center',
+          justifyContent: 'space-between',
+        }}
+      >
         <Typography variant="h6" component="h2" sx={{ fontWeight: 'bold', flex: 1 }} gutterBottom>
           Logs
         </Typography>

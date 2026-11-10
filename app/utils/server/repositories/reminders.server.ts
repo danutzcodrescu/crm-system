@@ -7,7 +7,7 @@ import { db } from './db.server';
 export async function createReminder(data: InferInsertModel<typeof reminders>, logId?: string): Promise<string | null> {
   try {
     logger.info('Creating reminder');
-    db.transaction(async (tx) => {
+    await db.transaction(async (tx) => {
       const reminder = await tx.insert(reminders).values(data).returning({ id: reminders.id });
       if (logId) {
         await tx.update(logs).set({ reminderId: reminder[0].id }).where(eq(logs.id, logId));

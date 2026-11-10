@@ -29,7 +29,14 @@ export function DataTable<T>({ data, onEdit, columns, yearKey, nameKey }: Props<
             <TableCell></TableCell>
             {data.map((item) => (
               <TableCell key={item[yearKey] as number} align="center">
-                <Stack direction="row" alignItems="center" justifyContent="center" gap={1}>
+                <Stack
+                  direction="row"
+                  sx={{
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: 1,
+                  }}
+                >
                   {item[yearKey] as number}
                   {onEdit ? (
                     <IconButton

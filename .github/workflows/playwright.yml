@@ -1,30 +1,99 @@
-name: Playwright Tests
+name: CRM CI
 on:
   push:
     branches: [main]
   pull_request:
     branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+defaults:
+  run:
+    shell: bash
+
+env:
+  TZ: UTC
+
 jobs:
-  test:
-    timeout-minutes: 60
-    runs-on: ubuntu-latest
+  smoke:
+    name: TypeScript, tooling and smoke tests
+    timeout-minutes: 20
+    runs-on: ubuntu-24.04
     env:
-      TEST_USER: ${{ secrets.TEST_USER }}
-      TEST_USER_PASSWORD: ${{ secrets.TEST_USER_PASSWORD }}
+      SMOKE_POSTGRES_IMAGE: postgres:17
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - name: Check out source
+        uses: actions/checkout@v4
         with:
-          node-version: lts/*
+          persist-credentials: false
+      - name: Set up pinned pnpm
+        uses: pnpm/action-setup@v4
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
       - name: Install dependencies
-        run: npm install -g pnpm && pnpm install
-      - name: Install Playwright Browsers
-        run: pnpm exec playwright install --with-deps
-      - name: Run Playwright tests
-        run: pnpm exec playwright test
-      - uses: actions/upload-artifact@v4
+        run: pnpm install --frozen-lockfile
+      - name: Check TypeScript
+        run: pnpm typecheck
+      - name: Test development dependency optimizer
+        run: pnpm test:tooling
+      - name: Install Chromium
+        run: pnpm exec playwright install --with-deps chromium
+      - name: Run seeded route smoke tests
+        # Testcontainers builds Dockerfile.db, applies migrations and synthetic
+        # seed data, and tears down its own database. Never uses a real backup.
+        run: pnpm test:smoke
+      - name: Upload browser reports and server/database logs
+        uses: actions/upload-artifact@v4
         if: ${{ !cancelled() }}
         with:
-          name: playwright-report
-          path: playwright-report/
-          retention-days: 30
+          name: smoke-test-results
+          path: |
+            playwright-report/
+            test-results/
+          if-no-files-found: ignore
+          retention-days: 14
+
+  docker:
+    name: Production Docker image
+    timeout-minutes: 20
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Build production image
+        # Dockerfile runs type checks, production compilation and dependency
+        # pruning. Build locally only: no publishing, deployment or credentials.
+        run: |
+          mkdir -p build-logs
+          docker build --pull --platform linux/amd64 --progress plain --tag crm-system:ci . 2>&1 | tee build-logs/docker-build.log
+      - name: Check production native dependencies
+        run: |
+          docker run --rm --entrypoint node crm-system:ci --input-type=module -e '
+            const { hash, verify } = await import("@node-rs/argon2");
+            await import("googleapis");
+            await import("@infisical/sdk");
+            const password = "synthetic-ci-runtime-probe";
+            if (!await verify(await hash(password), password)) {
+              throw new Error("Argon2 verification failed");
+            }
+            console.log("Production runtime checks passed:", process.version, process.arch);
+          ' 2>&1 | tee build-logs/docker-runtime.log
+      - name: Upload Docker build and runtime logs
+        uses: actions/upload-artifact@v4
+        if: ${{ !cancelled() }}
+        with:
+          name: docker-build-logs
+          path: build-logs/
+          if-no-files-found: ignore
+          retention-days: 14

@@ -1,13 +1,14 @@
 import ViewWeek from '@mui/icons-material/ViewWeek';
 import { Checkbox, FormControlLabel, FormGroup, IconButton, Popover, Tooltip, Typography } from '@mui/material';
-import { Table } from '@tanstack/react-table';
 import { useState } from 'react';
 
-interface Props<T> {
+import { Table } from '~/utils/table';
+
+interface Props<T extends object> {
   table: Table<T>;
 }
 
-export function ColumnVisibility<T>({ table }: Props<T>) {
+export function ColumnVisibility<T extends object>({ table }: Props<T>) {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   return (
     <>
@@ -35,7 +36,12 @@ export function ColumnVisibility<T>({ table }: Props<T>) {
         anchorEl={anchorEl}
         slotProps={{ paper: { sx: { px: 2, py: 1.5 } } }}
       >
-        <Typography component="p" fontWeight="bold">
+        <Typography
+          component="p"
+          sx={{
+            fontWeight: 'bold',
+          }}
+        >
           Toggle columns
         </Typography>
         <FormGroup>

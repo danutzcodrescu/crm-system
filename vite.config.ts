@@ -1,3 +1,5 @@
+import { resolve } from 'node:path';
+
 import { vitePlugin as remix } from '@remix-run/dev';
 import { sentryVitePlugin } from '@sentry/vite-plugin';
 import { defineConfig } from 'vite';
@@ -6,13 +8,36 @@ import tsconfigPaths from 'vite-tsconfig-paths';
 import pkg from './package.json';
 
 export default defineConfig(({ isSsrBuild }) => ({
+  // Each smoke server owns both ports; never connect to another dev server's HMR socket.
+  ...(process.env.NODE_ENV === 'test' && process.env.CRM_SMOKE_TEST === '1'
+    ? { server: { hmr: { port: Number(process.env.CRM_SMOKE_HMR_PORT) } } }
+    : {}),
   ssr: {
     noExternal: process.env.NODE_ENV === 'production' ? [/^@mui\//] : [/^@mui\/x-.{1,}/],
   },
   optimizeDeps: {
-    exclude: ['@node-rs/argon2', '@node-rs/bcrypt'],
+    // Infisical uses Node-only AWS credential providers. Never browser-prebundle
+    // it when development dependency discovery encounters server-side imports.
+    exclude: ['@node-rs/argon2', '@node-rs/bcrypt', '@infisical/sdk'],
+    ...(process.env.NODE_ENV === 'test' && process.env.CRM_SMOKE_TEST === '1'
+      ? { entries: ['app/root.tsx', 'app/entry.client.tsx', 'app/views/**/*.tsx', 'app/components/**/*.tsx'] }
+      : {}),
   },
   plugins: [
+    // Test-only replacement at the external secret boundary; auth, SQL and routes stay real.
+    ...(process.env.NODE_ENV === 'test' && process.env.CRM_SMOKE_TEST === '1'
+      ? [
+          {
+            name: 'smoke-secrets',
+            enforce: 'pre' as const,
+            resolveId(source: string) {
+              if (/(?:^|\/)infisical\.server(?:\.ts)?$/.test(source)) {
+                return resolve('e2e/support/secrets.server.ts');
+              }
+            },
+          },
+        ]
+      : []),
     remix({
       buildDirectory: 'dist',
       future: {

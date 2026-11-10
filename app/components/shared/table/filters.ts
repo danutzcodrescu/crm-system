@@ -1,6 +1,7 @@
 import { TZDate } from '@date-fns/tz';
-import { FilterFn, Row } from '@tanstack/react-table';
 import { isAfter, isBefore } from 'date-fns';
+
+import { FilterFn, Row } from '~/utils/table';
 
 type TData = Record<string, unknown> & { id: string };
 

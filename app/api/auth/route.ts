@@ -4,7 +4,7 @@ import { isLoggedIn, logout } from '~/utils/server/auth.server';
 import { logger } from '~/utils/server/logger.server';
 
 export async function action({ request }: ActionFunctionArgs) {
-  if (!isLoggedIn(request)) {
+  if (!(await isLoggedIn(request))) {
     return redirect('/signin');
   }
   if (request.method === 'DELETE') {

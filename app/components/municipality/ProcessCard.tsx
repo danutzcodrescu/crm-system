@@ -23,10 +23,21 @@ export function ProcessCard({ initialConsultation, agreement, invoicing }: Props
 
         <Stack spacing={2} sx={{ mt: 2 }}>
           <Box>
-            <Typography gutterBottom fontWeight="bold">
+            <Typography
+              gutterBottom
+              sx={{
+                fontWeight: 'bold',
+              }}
+            >
               Initial consultation
             </Typography>
-            <Stack direction="row" spacing={2} alignItems="center">
+            <Stack
+              direction="row"
+              spacing={2}
+              sx={{
+                alignItems: 'center',
+              }}
+            >
               <Typography>Sent</Typography>
               {initialConsultation.documentSent || initialConsultation.dateSigned ? (
                 <CheckBox sx={{ color: (theme) => theme.palette.success.main }} />
@@ -59,10 +70,21 @@ export function ProcessCard({ initialConsultation, agreement, invoicing }: Props
           </Box>
           <Divider />
           <Box>
-            <Typography gutterBottom fontWeight="bold">
+            <Typography
+              gutterBottom
+              sx={{
+                fontWeight: 'bold',
+              }}
+            >
               Agreement
             </Typography>
-            <Stack direction="row" spacing={2} alignItems="center">
+            <Stack
+              direction="row"
+              spacing={2}
+              sx={{
+                alignItems: 'center',
+              }}
+            >
               <Typography>Sent</Typography>
 
               {agreement.newAgreementDateSent ? (
@@ -100,12 +122,31 @@ export function ProcessCard({ initialConsultation, agreement, invoicing }: Props
           </Box>
           <Divider />
           <Box>
-            <Typography gutterBottom fontWeight="bold">
+            <Typography
+              gutterBottom
+              sx={{
+                fontWeight: 'bold',
+              }}
+            >
               Payment info
             </Typography>
-            <Stack direction="row" spacing={2} alignItems="center" flexWrap="wrap">
+            <Stack
+              direction="row"
+              spacing={2}
+              sx={{
+                alignItems: 'center',
+                flexWrap: 'wrap',
+              }}
+            >
               {invoicing.map((data) => (
-                <Stack key={data.year} direction="row" spacing={2} alignItems="center">
+                <Stack
+                  key={data.year}
+                  direction="row"
+                  spacing={2}
+                  sx={{
+                    alignItems: 'center',
+                  }}
+                >
                   <Typography>Sent for {data.year}</Typography>
                   {data.invoiceInfoSent || data.invoiceDate ? (
                     <CheckBox sx={{ color: (theme) => theme.palette.success.main }} />

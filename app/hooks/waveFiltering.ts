@@ -1,5 +1,6 @@
-import { ColumnFiltersState, Row } from '@tanstack/react-table';
 import { useCallback, useState } from 'react';
+
+import { ColumnFiltersState, Row } from '~/utils/table';
 
 const defaultFilterList = [
   { label: 'Blank', value: '' },
@@ -62,7 +63,7 @@ export function useWorkingWaveFiltering() {
   return { waveFilterList, filterItems };
 }
 
-export function filterWaveUnderCategory<T>(row: Row<T>, columnId: string, filterValue: string[]) {
+export function filterWaveUnderCategory<T extends object>(row: Row<T>, columnId: string, filterValue: string[]) {
   if (filterValue.length === 0) return true;
   // @ts-expect-error it works , type is not correct
   const value = row.original[columnId] as string;

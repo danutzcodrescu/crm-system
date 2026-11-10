@@ -1,9 +1,10 @@
 import FilterAlt from '@mui/icons-material/FilterAlt';
 import { Checkbox, FormControlLabel, Popover, Stack, Typography } from '@mui/material';
-import { Column } from '@tanstack/react-table';
 import { useCallback, useState } from 'react';
 
-export function FilterColumnSelect<T>({ column }: { column: Column<T, unknown> }) {
+import { Column } from '~/utils/table';
+
+export function FilterColumnSelect<T extends object>({ column }: { column: Column<T, unknown> }) {
   const [filterButton, setFilterButton] = useState<SVGAElement | null>(null);
   const columnFilterValue = column.getFilterValue() as unknown[];
 
@@ -22,7 +23,13 @@ export function FilterColumnSelect<T>({ column }: { column: Column<T, unknown> }
 
   return (
     <>
-      <Stack direction="row" gap={1} onClick={(e) => e.stopPropagation()}>
+      <Stack
+        direction="row"
+        onClick={(e) => e.stopPropagation()}
+        sx={{
+          gap: 1,
+        }}
+      >
         <FilterAlt
           sx={{ cursor: 'pointer' }}
           onClick={(e) => {
@@ -36,10 +43,21 @@ export function FilterColumnSelect<T>({ column }: { column: Column<T, unknown> }
         onClose={handleClose}
         anchorEl={filterButton}
       >
-        <Typography component="p" fontWeight="bold" gutterBottom>
+        <Typography
+          component="p"
+          gutterBottom
+          sx={{
+            fontWeight: 'bold',
+          }}
+        >
           Filter by {column.columnDef.meta?.filterOptionsLabel}
         </Typography>
-        <Stack direction="column" gap={1}>
+        <Stack
+          direction="column"
+          sx={{
+            gap: 1,
+          }}
+        >
           {column.columnDef.meta?.filterOptions?.map((option, index) => (
             <FormControlLabel
               key={(option.value as string | number | boolean).toString() + index}

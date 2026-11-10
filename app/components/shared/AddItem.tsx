@@ -32,7 +32,11 @@ export function AddItem({ title, fields, renderAddButton, fetcher }: Props) {
         <fetcher.Form method="post">
           <DialogTitle>{title}</DialogTitle>
           <DialogContent>
-            <Stack gap={1}>
+            <Stack
+              sx={{
+                gap: 1,
+              }}
+            >
               {fields.map((field) =>
                 field.render ? (
                   <Fragment key={field.name}>{field.render()}</Fragment>

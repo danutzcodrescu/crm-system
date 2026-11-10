@@ -9,6 +9,7 @@ dist
 .env.production
 scripts/
 e2e/
+tests/
 crm system/
 .vscode
 .github
@@ -23,3 +24,11 @@ Dockerfile
 .gitignore
 .npmrc
 db/
+test-results/
+playwright-report/
+blob-report/
+playwright/
+.env.*
+**/*.sql.gz
+**/*.dump
+build-logs/

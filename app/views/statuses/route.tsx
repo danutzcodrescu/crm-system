@@ -130,7 +130,11 @@ export default function StatusPage() {
         {((data as unknown as { statuses: Status[] }).statuses || []).map((status) => (
           <Stack
             key={status?.id}
+            direction="row"
             sx={{
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              gap: 1.5,
               boxShadow: (theme) => theme.shadows[15],
               border: '1px solid',
               borderColor: (theme) => theme.palette.grey[400],
@@ -138,10 +142,6 @@ export default function StatusPage() {
               padding: 1.5,
               backgroundColor: (theme) => theme.palette.background.paper,
             }}
-            direction="row"
-            alignItems="center"
-            justifyContent="space-between"
-            gap={1.5}
           >
             <Typography variant="h6" sx={{ flex: 1 }}>
               {status.name}

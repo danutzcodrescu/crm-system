@@ -1,10 +1,8 @@
- 
 import Edit from '@mui/icons-material/Edit';
 import Preview from '@mui/icons-material/Preview';
 import { Box, IconButton, Stack, Tooltip } from '@mui/material';
 import { Link } from '@remix-run/react';
 import { ReactNode } from 'react';
-
 
 type Props = {
   name: string;
@@ -17,7 +15,12 @@ type Props = {
 
 export function TableActionsCell({ name, id, additionalElement, isEditable, link, onEdit }: Props) {
   return (
-    <Stack direction="row" gap={0.5}>
+    <Stack
+      direction="row"
+      sx={{
+        gap: 0.5,
+      }}
+    >
       {additionalElement || <Box sx={{ width: 40, height: 40 }}></Box>}
       {isEditable ? (
         <Tooltip title={`Edit ${name}`}>

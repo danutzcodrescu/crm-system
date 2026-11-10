@@ -129,8 +129,13 @@ export function MunicipalityTitle({ municipality, fetcher, users }: Props) {
         <Typography
           variant="h5"
           component="h1"
-          fontWeight="bold"
-          sx={{ flex: 1, display: 'flex', gap: 1, alignItems: 'center' }}
+          sx={{
+            fontWeight: 'bold',
+            flex: 1,
+            display: 'flex',
+            gap: 1,
+            alignItems: 'center',
+          }}
         >
           {municipality.name} <Chip color="primary" label={municipality.computedStatus} />
           <Box component="span" sx={{ fontSize: '0.75em', fontWeight: 'normal' }}>

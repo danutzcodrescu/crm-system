@@ -1,6 +1,6 @@
 import ArrowDownward from '@mui/icons-material/ArrowDownward';
 import ArrowUpward from '@mui/icons-material/ArrowUpward';
-import ErrorOutline from '@mui/icons-material/ErrorOutline';
+import ErrorOutline from '@mui/icons-material/ErrorOutlined';
 import SwapVert from '@mui/icons-material/SwapVert';
 import {
   Box,
@@ -19,43 +19,27 @@ import {
   Typography,
 } from '@mui/material';
 import { useDeepCompareEffect } from '@react-hookz/web';
+import { useEffect, useRef, useState } from 'react';
+
 import {
   Column,
   ColumnDef,
   ColumnFiltersState,
   ColumnSort,
-  FilterFn,
   flexRender,
   getCoreRowModel,
   getFilteredRowModel,
   getPaginationRowModel,
   getSortedRowModel,
   Row,
-  RowData,
   useReactTable,
-} from '@tanstack/react-table';
-import { useEffect, useRef, useState } from 'react';
+} from '~/utils/table';
 
 import { ColumnVisibility } from './ColumnVisibility';
 import { Filter } from './Filter';
 import { booleanFilterFn, dateFilterFn } from './filters';
 
-declare module '@tanstack/react-table' {
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  interface ColumnMeta<TData extends RowData, TValue> {
-    filterOptions?: { label: string; value: unknown }[];
-    filterOptionsLabel?: string;
-    filterByDate?: true;
-    defaultHidden?: boolean;
-  }
-
-  interface FilterFns {
-    boolean: FilterFn<unknown>;
-    dateRange: FilterFn<unknown>;
-  }
-}
-
-interface Props<T> {
+interface Props<T extends object> {
   columns: ColumnDef<T>[];
   data: T[];
   warningMessage?: string;
@@ -68,10 +52,10 @@ interface Props<T> {
   onFilter?: (rows: Row<T>[], filters: ColumnFiltersState) => void;
 }
 
-function cellPinning<T>(column: Column<T>): BoxProps['sx'] {
+function cellPinning<T extends object>(column: Column<T>): BoxProps['sx'] {
   const isPinned = column.getIsPinned();
-  const isLastLeftPinnedColumn = isPinned === 'left' && column.getIsLastColumn('left');
-  const isFirstRightPinnedColumn = isPinned === 'right' && column.getIsFirstColumn('right');
+  const isLastLeftPinnedColumn = isPinned === 'start' && column.getIsLastColumn('start');
+  const isFirstRightPinnedColumn = isPinned === 'end' && column.getIsFirstColumn('end');
 
   return {
     boxShadow: isLastLeftPinnedColumn
@@ -79,8 +63,8 @@ function cellPinning<T>(column: Column<T>): BoxProps['sx'] {
       : isFirstRightPinnedColumn
         ? '4px 0 4px -4px gray inset'
         : undefined,
-    left: isPinned === 'left' ? `${column.getStart('left')}px` : undefined,
-    right: isPinned === 'right' ? `${column.getAfter('right')}px` : undefined,
+    insetInlineStart: isPinned === 'start' ? `${column.getStart('start')}px` : undefined,
+    insetInlineEnd: isPinned === 'end' ? `${column.getAfter('end')}px` : undefined,
     position: isPinned ? 'sticky' : 'relative',
     backgroundColor: (theme) => theme.palette.background.paper,
     width: column.getSize(),
@@ -131,6 +115,7 @@ export function PaginatedTable<T extends { id: string; warning?: boolean }>({
     onColumnVisibilityChange: setColumnVisibility,
     initialState: {
       pagination: {
+        pageIndex: 0,
         pageSize: defaultPageSize ?? 50,
       },
       sorting: [
@@ -152,7 +137,8 @@ export function PaginatedTable<T extends { id: string; warning?: boolean }>({
       columnFilters,
       columnVisibility,
       columnPinning: {
-        left: ['companyName'],
+        start: ['companyName'],
+        end: [],
       },
     },
     filterFns: {
@@ -183,9 +169,11 @@ export function PaginatedTable<T extends { id: string; warning?: boolean }>({
     >
       <Stack
         direction="row"
-        gap={3}
-        alignItems="center"
-        {...(hideHeader ? { sx: { display: 'none' } } : { marginBottom: 2 })}
+        sx={{
+          gap: 3,
+          alignItems: 'center',
+          ...(hideHeader ? { display: 'none' } : { mb: 2 }),
+        }}
       >
         <ColumnVisibility table={table} />
         <Typography component="p">Rows: {table.getFilteredRowModel().rows.length}</Typography>
@@ -218,11 +206,25 @@ export function PaginatedTable<T extends { id: string; warning?: boolean }>({
                         zIndex: header.column.getIsPinned() ? 30 : 20,
                       }}
                     >
-                      <Stack width="100%" direction="row" alignItems="center" gap={1}>
+                      <Stack
+                        direction="row"
+                        sx={{
+                          width: '100%',
+                          alignItems: 'center',
+                          gap: 1,
+                        }}
+                      >
                         <Box component="span" sx={{ flex: 1 }}>
                           {flexRender(header.column.columnDef.header, header.getContext())}
                         </Box>
-                        <Stack component={'span'} gap={1} direction="row" alignItems="center">
+                        <Stack
+                          component={'span'}
+                          direction="row"
+                          sx={{
+                            gap: 1,
+                            alignItems: 'center',
+                          }}
+                        >
                           {header.column.getCanFilter() ? <Filter column={header.column} /> : null}
                           {header.column.getCanSort() ? (
                             <IconButton
@@ -264,7 +266,13 @@ export function PaginatedTable<T extends { id: string; warning?: boolean }>({
                           ...cellPinning(cell.column),
                         }}
                       >
-                        <Stack direction="row" gap={1} alignItems="center">
+                        <Stack
+                          direction="row"
+                          sx={{
+                            gap: 1,
+                            alignItems: 'center',
+                          }}
+                        >
                           {index === 0 && row.original?.warning ? (
                             <Tooltip title={warningMessage}>
                               <ErrorOutline sx={{ fontSize: '0.75rem' }} />

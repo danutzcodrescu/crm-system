@@ -1,16 +1,16 @@
 import { lt } from 'drizzle-orm';
-import { schedule } from 'node-cron';
+import { createTask } from 'node-cron';
 
 import { logger } from '~/utils/server/logger.server.js';
 import { db } from '~/utils/server/repositories/db.server.js';
 import { sessions } from '~/utils/server/schema.server.js';
 
-export const cleanExpiredSessions = schedule(
+export const cleanExpiredSessions = createTask(
   '00 04 * * * *',
   async () => {
     logger.info('Cleaning expired sessions');
     const result = await db.delete(sessions).where(lt(sessions.expiresAt, new Date())).returning();
     logger.info(`Deleted ${result.length} expired sessions`);
   },
-  { scheduled: false, timezone: 'UTC' },
+  { timezone: 'UTC' },
 );

@@ -2,13 +2,13 @@ import Edit from '@mui/icons-material/Edit';
 import PersonAdd from '@mui/icons-material/PersonAdd';
 import { Box, IconButton, Link, Stack, Tooltip, Typography } from '@mui/material';
 import { FetcherWithComponents } from '@remix-run/react';
-import { ColumnDef } from '@tanstack/react-table';
 import { useCallback, useMemo } from 'react';
 import { ClientOnly } from 'remix-utils/client-only';
 
 import { useEditFields } from '~/hooks/editFields';
 import { formatDate } from '~/utils/client/dates';
 import { ResponsibleData } from '~/utils/server/repositories/responsibles.server';
+import { ColumnDef } from '~/utils/table';
 
 import { DeleteButton } from '../shared/DeleteButton';
 import { EditDialog } from '../shared/EditDialog.client';
@@ -202,7 +202,14 @@ export function ResponsiblesTable({ data, companyId, fetcher, infoVerified }: Pr
 
   return (
     <>
-      <Stack direction="row" gap={1} alignItems="center" justifyContent="space-between">
+      <Stack
+        direction="row"
+        sx={{
+          gap: 1,
+          alignItems: 'center',
+          justifyContent: 'space-between',
+        }}
+      >
         <Typography variant="h6" component="h2" sx={{ fontWeight: 'bold', flex: 1 }} gutterBottom>
           Responsibles
         </Typography>
@@ -220,7 +227,14 @@ export function ResponsiblesTable({ data, companyId, fetcher, infoVerified }: Pr
           data={data}
         />
       </Box>
-      <Stack direction="row" gap={1} alignItems="center" sx={{ mt: 2 }}>
+      <Stack
+        direction="row"
+        sx={{
+          gap: 1,
+          alignItems: 'center',
+          mt: 2,
+        }}
+      >
         <Typography variant="body2" component="p">
           Last verification date:{' '}
           <Box component="span" sx={{ fontWeight: 'bold' }}>

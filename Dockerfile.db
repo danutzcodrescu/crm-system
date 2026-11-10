@@ -1,11 +1,17 @@
-FROM postgres:17
+ARG POSTGRES_IMAGE=postgres:17
+FROM ${POSTGRES_IMAGE}
 
-RUN apt-get update && apt-get install -y locales
-RUN localedef -i sv_SE -c -f UTF-8 -A /usr/share/locale/locale.alias sv_SE.UTF-8
-RUN localedef -i en_US -c -f UTF-8 -A /usr/share/locale/locale.alias en_US.UTF-8
+RUN apt-get update && apt-get install -y --no-install-recommends locales \
+    && localedef -i sv_SE -c -f UTF-8 -A /usr/share/locale/locale.alias sv_SE.UTF-8 \
+    && localedef -i en_US -c -f UTF-8 -A /usr/share/locale/locale.alias en_US.UTF-8 \
+    && rm -rf /var/lib/apt/lists/*
 
 # set general locale to english
-ENV LANG en_US.utf8
+ENV LANG=en_US.utf8
 # set locale for sorting and string comparison to swedish
-ENV LC_COLLATE sv_SE.utf8
-ENV LC_CTYPE sv_SE.utf8
+ENV LC_COLLATE=sv_SE.utf8
+ENV LC_CTYPE=sv_SE.utf8
+
+# Explicit initdb options keep English messages and Swedish sorting even when
+# another image/environment defines LC_ALL. Only used for a NEW database cluster.
+ENV POSTGRES_INITDB_ARGS="--locale=en_US.utf8 --lc-collate=sv_SE.utf8 --lc-ctype=sv_SE.utf8"

@@ -4,7 +4,6 @@ import PostAdd from '@mui/icons-material/PostAdd';
 import { IconButton, Link, Stack, Tooltip, Typography } from '@mui/material';
 import { json, LoaderFunctionArgs, MetaFunction, redirect } from '@remix-run/node';
 import { Link as RLink, useFetcher, useLoaderData } from '@remix-run/react';
-import { ColumnDef } from '@tanstack/react-table';
 import { isAfter } from 'date-fns';
 import { useCallback, useMemo } from 'react';
 import { ClientOnly } from 'remix-utils/client-only';
@@ -18,6 +17,7 @@ import { formatDate } from '~/utils/client/dates';
 import { isLoggedIn } from '~/utils/server/auth.server';
 import { getCompanies } from '~/utils/server/repositories/companies.server';
 import { getRecentLogs, LogsWithCompanyDetails } from '~/utils/server/repositories/notes-log.server';
+import { ColumnDef } from '~/utils/table';
 
 export const meta: MetaFunction = () => {
   return [
@@ -108,7 +108,13 @@ export default function Logs() {
             return '';
           }
           return (
-            <Stack direction="row" gap={1} alignItems="center">
+            <Stack
+              direction="row"
+              sx={{
+                gap: 1,
+                alignItems: 'center',
+              }}
+            >
               <Alarm color={isAfter(new Date(getValue() as string), new Date()) ? 'primary' : 'error'} />
               <Tooltip title={row.original.reminderDescription}>
                 <Typography variant="body2" component="span">

@@ -7,8 +7,12 @@ This is a CRM (Customer Relationship Management) system built with Remix, Expres
 - [Application (`app/`) Documentation](docs/app.md)
 - [Commands (`cmd/`) Documentation](docs/cmd.md)
 - [Database (`db/`) Documentation](docs/db.md)
+- [Upgrade smoke tests and isolated database](docs/smoke-tests.md)
+- [Runtime/dependency upgrade, Docker build and database notes](docs/runtime-upgrade.md)
 
 ## Development
+
+Use Node **26.13.0** (`nvm install && nvm use`) and pnpm **10.18.3**.
 
 Run the dev server:
 
@@ -42,8 +46,8 @@ The following scripts are available in `package.json`:
 - `build-express`: Compiles the Express server code and aliases paths.
 - `dev`: Starts the development server using `tsx` and loads environment variables from `.env.local`.
 - `lint`: Runs ESLint for code linting.
-- `start`: Starts the production server using Node with experimental specifier resolution.
-- `start-local`: Starts the production server using Node with experimental specifier resolution and loads environment variables from `.env.local`.
+- `start`: Starts the compiled production server using Node.
+- `start-local`: Starts the compiled production server using Node and loads environment variables from `.env.local`.
 - `typecheck`: Runs type checking for both Remix and server code concurrently.
 - `typecheck-remix`: Runs TypeScript type checking for the Remix application.
 - `typecheck:server`: Runs TypeScript type checking for the server code without emitting files.

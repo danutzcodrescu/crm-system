@@ -45,14 +45,32 @@ export default function Reminders({ reminders, remindersCount }: RemindersProps)
   return (
     <Card sx={{ bgcolor: 'background.paper', flexBasis: '100%' }}>
       <CardContent>
-        <Stack direction="row" justifyContent="space-between" alignItems="center" mb={2}>
+        <Stack
+          direction="row"
+          sx={{
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            mb: 2,
+          }}
+        >
           <Typography variant="h6" gutterBottom sx={{ color: 'text.primary', fontWeight: 'bold', flex: 1 }}>
             Reminders
           </Typography>
-          <Stack direction="row" gap={1} alignItems="center">
+          <Stack
+            direction="row"
+            sx={{
+              gap: 1,
+              alignItems: 'center',
+            }}
+          >
             <Typography variant="body2" sx={{ color: 'text.secondary' }}>
               All due reminders:{' '}
-              <Box component="span" fontWeight="bold">
+              <Box
+                component="span"
+                sx={{
+                  fontWeight: 'bold',
+                }}
+              >
                 {remindersCount}
               </Box>
             </Typography>
@@ -63,7 +81,15 @@ export default function Reminders({ reminders, remindersCount }: RemindersProps)
             ) : null}
           </Stack>
         </Stack>
-        {data.length === 0 ? <Typography color="text.secondary">No reminders</Typography> : null}
+        {data.length === 0 ? (
+          <Typography
+            sx={{
+              color: 'text.secondary',
+            }}
+          >
+            No reminders
+          </Typography>
+        ) : null}
         {data.length > 0 ? (
           <Box
             sx={{
@@ -77,7 +103,13 @@ export default function Reminders({ reminders, remindersCount }: RemindersProps)
                 <Link component={RLink} to={`/municipalities/${reminder.companyId}`} prefetch="intent">
                   {reminder.companyName}
                 </Link>
-                <Stack direction="row" gap={1} alignItems="center">
+                <Stack
+                  direction="row"
+                  sx={{
+                    gap: 1,
+                    alignItems: 'center',
+                  }}
+                >
                   <Alarm color={isAfter(new Date(reminder.date), new Date()) ? 'primary' : 'error'} />
                   <Tooltip title={reminder.description}>
                     <Typography variant="body2" component="span">

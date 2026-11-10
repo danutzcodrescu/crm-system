@@ -78,13 +78,17 @@ export const theme = createTheme({
         variant: 'contained',
       },
       styleOverrides: {
-        containedSecondary: {
-          backgroundColor: '#21395E',
-          color: '#A7D7FF',
-          '&:hover': {
-            backgroundColor: '#131C2A',
-            color: '#A7D7FF',
-          },
+        root: {
+          variants: [
+            {
+              props: { variant: 'contained', color: 'secondary' },
+              style: {
+                backgroundColor: '#21395E',
+                color: '#A7D7FF',
+                '&:hover': { backgroundColor: '#131C2A', color: '#A7D7FF' },
+              },
+            },
+          ],
         },
       },
     },

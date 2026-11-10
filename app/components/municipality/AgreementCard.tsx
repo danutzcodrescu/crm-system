@@ -195,7 +195,13 @@ export function AgreementCard({ data, fetcher }: AgreementCardProps) {
                 <TableCell>Agreement link</TableCell>
                 <TableCell>
                   {data.oldAgreementLink ? (
-                    <Stack direction="row" alignItems="center" gap={0.5}>
+                    <Stack
+                      direction="row"
+                      sx={{
+                        alignItems: 'center',
+                        gap: 0.5,
+                      }}
+                    >
                       <Link
                         href={data.oldAgreementLink}
                         target="_blank"

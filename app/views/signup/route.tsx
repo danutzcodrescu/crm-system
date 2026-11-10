@@ -68,15 +68,22 @@ export default function SignUpPage() {
           <CardHeader
             title="Sign up to crm"
             subheader="Welcome back! Please sign in to continue"
-            titleTypographyProps={{
-              sx: { textAlign: 'center', fontSize: '1.25rem', fontWeight: 'bold', marginBottom: 1.5 },
+            slotProps={{
+              title: {
+                sx: { textAlign: 'center', fontSize: '1.25rem', fontWeight: 'bold', marginBottom: 1.5 },
+              },
+
+              subheader: { sx: { textAlign: 'center', fontSize: '0.875rem', fontWeight: 400 } },
             }}
-            subheaderTypographyProps={{ sx: { textAlign: 'center', fontSize: '0.875rem', fontWeight: 400 } }}
           ></CardHeader>
           <CardContent>
             <Form method="post">
               <HoneypotInputs label="Please leave this field blank" />
-              <Stack gap={1.5}>
+              <Stack
+                sx={{
+                  gap: 1.5,
+                }}
+              >
                 <TextField size="small" name="username" label="Username" error={!!data?.error} />
                 <TextField
                   size="small"

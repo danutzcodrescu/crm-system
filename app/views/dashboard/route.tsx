@@ -38,7 +38,7 @@ interface LoaderResponse {
 }
 
 export async function loader({ request }: LoaderFunctionArgs) {
-  if (!isLoggedIn(request)) {
+  if (!(await isLoggedIn(request))) {
     return redirect('/signin');
   }
   const currentYear = new Date().getFullYear();
@@ -122,7 +122,13 @@ export default function Dashboard() {
             </Typography>
             <Typography sx={{ color: 'text.primary' }}>
               Signed:{' '}
-              <Box component="span" fontWeight="bold" color="text.primary">
+              <Box
+                component="span"
+                sx={{
+                  fontWeight: 'bold',
+                  color: 'text.primary',
+                }}
+              >
                 {data.initialConsultation}
               </Box>
             </Typography>
@@ -136,19 +142,34 @@ export default function Dashboard() {
             </Typography>
             <Typography sx={{ color: 'text.primary', mb: 1 }}>
               Total signed:{' '}
-              <Box component="span" fontWeight="bold">
+              <Box
+                component="span"
+                sx={{
+                  fontWeight: 'bold',
+                }}
+              >
                 {data.agreement.old + data.agreement.new}
               </Box>
             </Typography>
             <Typography sx={{ color: 'text.primary', mb: 1 }}>
               Old agreement:{' '}
-              <Box component="span" fontWeight="bold">
+              <Box
+                component="span"
+                sx={{
+                  fontWeight: 'bold',
+                }}
+              >
                 {data.agreement.old}
               </Box>
             </Typography>
             <Typography sx={{ color: 'text.primary' }}>
               New agreement:{' '}
-              <Box component="span" fontWeight="bold">
+              <Box
+                component="span"
+                sx={{
+                  fontWeight: 'bold',
+                }}
+              >
                 {data.agreement.new}
               </Box>
             </Typography>
@@ -195,7 +216,13 @@ export default function Dashboard() {
             </Box>
           </CardContent>
         </Card>
-        <Stack direction="row" spacing={3} width="100%">
+        <Stack
+          direction="row"
+          spacing={3}
+          sx={{
+            width: '100%',
+          }}
+        >
           <Card sx={{ flex: 1, bgcolor: 'background.paper' }}>
             <CardContent>
               <Typography variant="h6" gutterBottom sx={{ color: 'text.primary', fontWeight: 'bold', mb: 2 }}>
@@ -286,14 +313,24 @@ export default function Dashboard() {
             </CardContent>
           </Card>
         </Stack>
-        <Stack spacing={3} width="100%" direction="row">
+        <Stack
+          spacing={3}
+          direction="row"
+          sx={{
+            width: '100%',
+          }}
+        >
           <Card sx={{ bgcolor: 'background.paper', flex: 1 }}>
             <CardContent>
               <Typography variant="h6" gutterBottom sx={{ color: 'text.primary', fontWeight: 'bold' }}>
                 Municipalities with Recurring Consultations in {new Date().getFullYear()}
               </Typography>
               {data.recurringConsultations.length === 0 ? (
-                <Typography color="text.secondary">
+                <Typography
+                  sx={{
+                    color: 'text.secondary',
+                  }}
+                >
                   No municipalities found with recurring consultations in {new Date().getFullYear()}
                 </Typography>
               ) : (
@@ -316,7 +353,13 @@ export default function Dashboard() {
                 Upcoming Meetings
               </Typography>
               {data.upcomingMeetings.length === 0 ? (
-                <Typography color="text.secondary">No upcoming meetings scheduled</Typography>
+                <Typography
+                  sx={{
+                    color: 'text.secondary',
+                  }}
+                >
+                  No upcoming meetings scheduled
+                </Typography>
               ) : (
                 <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(5, 3fr)' }}>
                   {data.upcomingMeetings.map((meeting, index) => (

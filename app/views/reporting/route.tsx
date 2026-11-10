@@ -10,7 +10,6 @@ import {
   useLocation,
   useNavigate,
 } from '@remix-run/react';
-import { ColumnDef } from '@tanstack/react-table';
 import { getYear } from 'date-fns';
 import { useCallback, useMemo } from 'react';
 import { ClientOnly } from 'remix-utils/client-only';
@@ -31,6 +30,7 @@ import {
 } from '~/utils/server/repositories/reporting.server';
 import { getAllYears } from '~/utils/server/repositories/years.server';
 import { useIds } from '~/utils/store';
+import { ColumnDef } from '~/utils/table';
 
 interface LoaderResponse {
   yearsData: number[];
@@ -45,7 +45,7 @@ export const meta: MetaFunction = () => {
 };
 
 export async function action({ request }: ActionFunctionArgs) {
-  if (!isLoggedIn(request)) {
+  if (!(await isLoggedIn(request))) {
     return redirect('/signin');
   }
   if (request.method === 'PATCH') {
@@ -80,7 +80,7 @@ export async function action({ request }: ActionFunctionArgs) {
 }
 
 export async function loader({ request }: LoaderFunctionArgs) {
-  if (!isLoggedIn(request)) {
+  if (!(await isLoggedIn(request))) {
     return redirect('/signin');
   }
   const year = new URL(request.url).searchParams.get('year');
@@ -289,7 +289,13 @@ export default function Reporting() {
     <PageContainer
       title="Reporting"
       additionalTitleElement={
-        <Stack direction="row" alignItems="center" gap={1}>
+        <Stack
+          direction="row"
+          sx={{
+            alignItems: 'center',
+            gap: 1,
+          }}
+        >
           <SendEmail />
           <ClientOnly>
             {() => (

@@ -1,8 +1,9 @@
 import FilterAlt from '@mui/icons-material/FilterAlt';
 import { Popover, Stack, Typography } from '@mui/material';
 import { DatePicker } from '@mui/x-date-pickers';
-import { Column } from '@tanstack/react-table';
 import { useEffect, useReducer } from 'react';
+
+import { Column } from '~/utils/table';
 
 interface State {
   filterButton: SVGAElement | null;
@@ -10,11 +11,11 @@ interface State {
   endDate: Date | null;
 }
 
-interface Props<T> {
+interface Props<T extends object> {
   column: Column<T, unknown>;
 }
 
-export function FilterColumnDatePicker<T>({ column }: Props<T>) {
+export function FilterColumnDatePicker<T extends object>({ column }: Props<T>) {
   const [state, setState] = useReducer((oldState: State, newState: Partial<State>) => ({ ...oldState, ...newState }), {
     filterButton: null,
     startDate: (column.getFilterValue() as undefined | [Date, Date])?.at(0) || null,
@@ -34,7 +35,13 @@ export function FilterColumnDatePicker<T>({ column }: Props<T>) {
 
   return (
     <>
-      <Stack direction="row" gap={1} onClick={(e) => e.stopPropagation()}>
+      <Stack
+        direction="row"
+        onClick={(e) => e.stopPropagation()}
+        sx={{
+          gap: 1,
+        }}
+      >
         <FilterAlt
           sx={{ cursor: 'pointer' }}
           onClick={(e) => {
@@ -48,10 +55,22 @@ export function FilterColumnDatePicker<T>({ column }: Props<T>) {
         onClose={() => setState({ filterButton: null })}
         anchorEl={state.filterButton}
       >
-        <Typography component="p" fontWeight="bold" gutterBottom>
+        <Typography
+          component="p"
+          gutterBottom
+          sx={{
+            fontWeight: 'bold',
+          }}
+        >
           Filter by {column.columnDef.meta?.filterOptionsLabel}
         </Typography>
-        <Stack direction="row" gap={1} alignContent="center">
+        <Stack
+          direction="row"
+          sx={{
+            gap: 1,
+            alignContent: 'center',
+          }}
+        >
           <DatePicker
             label="Start date"
             defaultValue={state.startDate}

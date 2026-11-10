@@ -3,7 +3,6 @@ import CheckBox from '@mui/icons-material/CheckBox';
 import { FormControl, InputLabel, Link, MenuItem, Select, Stack, Typography } from '@mui/material';
 import { json, LoaderFunctionArgs, MetaFunction, redirect } from '@remix-run/node';
 import { Link as RLink, ShouldRevalidateFunctionArgs, useLoaderData, useLocation, useNavigate } from '@remix-run/react';
-import { ColumnDef } from '@tanstack/react-table';
 import { getYear } from 'date-fns';
 import { useMemo } from 'react';
 
@@ -14,6 +13,7 @@ import { isLoggedIn } from '~/utils/server/auth.server';
 import { CompensationData, getCompensationByYear } from '~/utils/server/repositories/compensation.server';
 import { getAllYears } from '~/utils/server/repositories/years.server';
 import { useIds } from '~/utils/store';
+import { ColumnDef } from '~/utils/table';
 
 export const meta: MetaFunction = () => {
   return [
@@ -28,7 +28,7 @@ interface LoaderResponse {
 }
 
 export async function loader({ request }: LoaderFunctionArgs) {
-  if (!isLoggedIn(request)) {
+  if (!(await isLoggedIn(request))) {
     return redirect('/signin');
   }
   const year = new URL(request.url).searchParams.get('year');
@@ -166,7 +166,13 @@ export default function Compensation() {
     <PageContainer
       title="Compensation"
       additionalTitleElement={
-        <Stack direction="row" alignItems="center" gap={1}>
+        <Stack
+          direction="row"
+          sx={{
+            alignItems: 'center',
+            gap: 1,
+          }}
+        >
           <SendEmail />
           <FormControl>
             <InputLabel id="years-selector">Select the year</InputLabel>

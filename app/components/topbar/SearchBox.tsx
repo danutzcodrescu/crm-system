@@ -4,6 +4,8 @@ import { useCallback, useState } from 'react';
 
 import { loader } from '~/api/municipalities/layout';
 
+type Company = { id: string; name: string; code: string };
+
 export function SearchBox() {
   const [open, setOpen] = useState(false);
   const fetcher = useFetcher<typeof loader>();
@@ -22,7 +24,7 @@ export function SearchBox() {
   }, []);
 
   return (
-    <Autocomplete
+    <Autocomplete<Company, false, true, false>
       sx={{ width: 300 }}
       size="small"
       onClose={handleClose}
@@ -30,8 +32,7 @@ export function SearchBox() {
       onOpen={handleOpen}
       isOptionEqualToValue={(option, value) => option?.id === value?.id}
       getOptionLabel={(option) => `${option?.name} (${option?.code})`}
-      // @ts-expect-error it works
-      options={fetcher.data?.message || []}
+      options={Array.isArray(fetcher.data?.message) ? fetcher.data.message : []}
       loading={fetcher.state === 'loading'}
       filterOptions={(options, { inputValue }) =>
         options.filter(
@@ -54,15 +55,18 @@ export function SearchBox() {
           placeholder="Search for a municipality"
           sx={{ backgroundColor: (theme) => theme.palette.background.paper, borderRadius: 1 }}
           slotProps={{
+            ...params.slotProps,
+
             htmlInput: {
-              ...params.inputProps,
+              ...params.slotProps.htmlInput,
             },
+
             input: {
-              ...params.InputProps,
+              ...params.slotProps.input,
               endAdornment: (
                 <>
                   {fetcher.state === 'loading' ? <CircularProgress color="inherit" size={20} /> : null}
-                  {params.InputProps.endAdornment}
+                  {params.slotProps.input.endAdornment}
                 </>
               ),
             },

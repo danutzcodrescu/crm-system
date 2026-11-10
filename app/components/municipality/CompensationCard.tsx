@@ -12,7 +12,12 @@ export function CompensationCard({ data }: Props) {
   return (
     <Card>
       <CardContent>
-        <Stack direction="column" gap={2}>
+        <Stack
+          direction="column"
+          sx={{
+            gap: 2,
+          }}
+        >
           <Box sx={{ mb: 4 }}>
             <Typography variant="h6" component="h2" gutterBottom>
               Compensation Information:

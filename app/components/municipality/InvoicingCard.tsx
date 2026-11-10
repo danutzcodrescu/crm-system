@@ -96,7 +96,12 @@ export function InvoicingCard({ data, fetcher }: Props) {
     <>
       <Card>
         <CardContent>
-          <Stack direction="column" gap={2}>
+          <Stack
+            direction="column"
+            sx={{
+              gap: 2,
+            }}
+          >
             <Box>
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
                 <Typography variant="h6" component="h2" gutterBottom sx={{ flex: 1 }}>
@@ -123,7 +128,13 @@ export function InvoicingCard({ data, fetcher }: Props) {
 
                   return (
                     <TabPanel key={year} value={year.toString()}>
-                      <Stack spacing={10} direction="row" alignItems="flex-start">
+                      <Stack
+                        spacing={10}
+                        direction="row"
+                        sx={{
+                          alignItems: 'flex-start',
+                        }}
+                      >
                         <Box>
                           <Stack spacing={1}>
                             <Typography>
