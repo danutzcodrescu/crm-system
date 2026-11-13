@@ -26,17 +26,11 @@ async function main() {
     // Optional: List the images
     await $`docker images | grep crm-system`;
 
-    console.log('tarring the docker image ');
-    await $`docker save ${imageName} > latest.tar`;
-    console.log('✅ docker image saved');
+    const target = `${process.env.REMOTE_USER}@${process.env.REMOTE}`;
 
-    console.log(`🚀 Sending docker image to remote host`);
-    await $`scp latest.tar ${process.env.REMOTE_USER}@${process.env.REMOTE}:${process.env.REMOTE_PATH}/docker.tar`;
-    console.log('✅ docker image sent to remote host');
-
-    console.log('🧼 Removing local docker image ');
-    await $`rm latest.tar`;
-    console.log('✅ docker image removed');
+    console.log('🚀 Compressing and loading image on remote host');
+    await $`docker save ${imageName} | gzip -1 | ssh ${target} 'docker load'`;
+    console.log('✅ Docker image loaded on remote host');
 
     console.log('🧼 Removing local docker images ');
     await $`docker image prune -a -f`;
