@@ -19,12 +19,12 @@ interface Props {
 }
 
 export function AddItem({ title, fields, renderAddButton, fetcher }: Props) {
-  const [isModalOpen, setModalState] = useSubmissionState(fetcher, false);
+  const [isModalOpen, setModalState, onSubmit] = useSubmissionState(fetcher, false);
   return (
     <>
       {renderAddButton({ onClick: () => setModalState(true) })}
       <Dialog maxWidth="xs" fullWidth open={isModalOpen} onClose={() => setModalState(false)}>
-        <fetcher.Form method="post">
+        <fetcher.Form method="post" onSubmit={onSubmit}>
           <DialogTitle>{title}</DialogTitle>
           <DialogContent>
             <Stack

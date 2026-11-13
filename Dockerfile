@@ -1,7 +1,7 @@
 # base node image
 
 # TODO pass sentry data as secrets
-FROM node:lts  AS base
+FROM node:26.13.0 AS base
 ARG SENTRY_DSN
 ARG SENTRY_ORG
 ARG SENTRY_PROJECT
@@ -10,7 +10,7 @@ ARG SENTRY_AUTH_TOKEN
 # set for base and all layer that inherit from it
 
 ENV NODE_ENV=production
-RUN npm install -g pnpm
+RUN npm install -g pnpm@10.18.3
 
 # Install all node_modules, including dev dependencies
 

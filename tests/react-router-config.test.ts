@@ -2,21 +2,26 @@ import assert from 'node:assert/strict';
 import { resolve } from 'node:path';
 import test from 'node:test';
 
-import type { Config } from '@react-router/dev/config';
 import { loadConfigFromFile } from 'vite';
 
+import pkg from '../package.json';
 import routerConfig from '../react-router.config';
 
-test('all stable React Router future flags are enabled for the v8 migration', () => {
-  // Adding a stable flag to the installed router also requires adopting it here.
-  const flags = {
-    v8_middleware: true,
-    v8_splitRouteModules: true,
-    v8_viteEnvironmentApi: true,
-    v8_passThroughRequests: true,
-    v8_trailingSlashAwareDataRequests: true,
-  } satisfies Record<Exclude<keyof NonNullable<Config['future']>, `unstable_${string}`>, true>;
-  assert.deepEqual(routerConfig.future, flags);
+test('React Router 8 keeps SSR, route splitting and the production output directory', () => {
+  assert.equal(routerConfig.ssr, true);
+  assert.equal(routerConfig.splitRouteModules, true);
+  assert.equal(routerConfig.buildDirectory, 'dist');
+  assert.ok(!('future' in routerConfig), 'obsolete v8 future flags must not be restored');
+});
+
+test('React Router runtime, Express adapter and build tooling stay on matching v8 versions', () => {
+  const version = pkg.dependencies['react-router'];
+  assert.match(version, /^\^8\./);
+  assert.equal(pkg.dependencies['@react-router/node'], version);
+  assert.equal(pkg.dependencies['@react-router/express'], version);
+  assert.equal(pkg.devDependencies['@react-router/dev'], version);
+  assert.equal(pkg.dependencies.react, pkg.dependencies['react-dom']);
+  assert.ok(!('react-router-dom' in pkg.dependencies));
 });
 
 test('Vite keeps the ESNext SSR target scoped to the server environment', async () => {

@@ -19,7 +19,7 @@ interface Props {
 export function RecurringConsultation({ years, data, fetcher }: Props) {
   const [value, setValue] = useState(years[0]);
   const isRecurringMandatory = data.some((item) => item.agreementType === 'old');
-  const { setEditableData, fields, setFields } = useEditFields(fetcher);
+  const { setEditableData, fields, setFields, onSubmit } = useEditFields(fetcher);
 
   const handleChange = (_: React.SyntheticEvent, newValue: number) => {
     setValue(newValue);
@@ -204,6 +204,7 @@ export function RecurringConsultation({ years, data, fetcher }: Props) {
       <ClientOnly>
         {() => (
           <EditDialog
+            onSubmit={onSubmit}
             isOpen={!!fields.length}
             handleClose={() => setFields([])}
             fields={fields}

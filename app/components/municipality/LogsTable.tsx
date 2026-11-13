@@ -23,7 +23,7 @@ interface Props {
 }
 
 export function LogsTable({ data, companyId, fetcher }: Props) {
-  const { setEditableData, fields, setFields } = useEditFields(fetcher);
+  const { setEditableData, fields, setFields, onSubmit } = useEditFields(fetcher);
   const columns = useMemo<ColumnDef<LogForCompany>[]>(
     () => [
       {
@@ -284,6 +284,7 @@ export function LogsTable({ data, companyId, fetcher }: Props) {
       <ClientOnly>
         {() => (
           <EditDialog
+            onSubmit={onSubmit}
             isOpen={!!fields.length}
             handleClose={() => setFields([])}
             fields={fields}

@@ -114,7 +114,7 @@ export const meta: MetaFunction = () => {
 export default function StatusPage() {
   const data = useLoaderData<typeof loader>();
   const fetcher = useFetcher<typeof action>();
-  const { setEditableData, fields, setFields } = useEditFields(fetcher);
+  const { setEditableData, fields, setFields, onSubmit } = useEditFields(fetcher);
 
   const deleteStatusHandler = useCallback((id: number) => {
     fetcher.submit({ id }, { method: 'DELETE', action: '/statuses', relative: 'path' });
@@ -179,6 +179,7 @@ export default function StatusPage() {
       <ClientOnly>
         {() => (
           <EditDialog
+            onSubmit={onSubmit}
             isOpen={!!fields.length}
             handleClose={() => setFields([])}
             fields={fields}

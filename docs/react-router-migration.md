@@ -1,5 +1,7 @@
 # React Router 7 migration
 
+Historical notes for the v7 preparation. The completed upgrade is documented in [React Router 8 migration and verification](react-router-8-migration.md).
+
 The application now uses **React Router 7.18.5, Framework Mode**, the documented successor to Remix v2. React 18 and Vite 6 are intentionally retained to separate the framework migration from the React/Vite upgrades.
 
 ## What changed
@@ -69,9 +71,9 @@ Run development and production suites sequentially: generated Playwright trace H
 
 The PDF resource-route follow-up reproduced the misleading combination of a valid PDF/HTTP 200 and a logged routing 404 before the fix. After registering the route and removing the entry-server interception, the updated suite passed **133 development tests (3 production-only skips)** and **136 production-image tests** against a fresh rebuild of the same local Node 26 image. The added server-log assertion verifies that successful PDF generation no longer reports a missing-route error.
 
-## Next: React Router 8
+## React Router 8 preparation checklist (completed)
 
-V8 is already released, but adopting it is deliberately a separate step. Follow the [versioned v7 future-change guide](https://reactrouter.com/7.18.5/upgrading/future), rather than unversioned docs that now describe v8 → v9.
+The following checklist was used for the subsequent upgrade. See the [v7 → v8 guide](https://reactrouter.com/upgrading/v7) and the [completed migration report](react-router-8-migration.md) for current configuration and results.
 
 1. Upgrade React/React DOM and their types to **19.2.7 or newer**. Verify MUI, Emotion, PDF rendering, hydration and Sentry compatibility.
 2. Use Node **22.22+** (the repository's declared Node 26 requirement exceeds this) and upgrade to **Vite 7+**.

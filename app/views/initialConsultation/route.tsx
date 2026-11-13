@@ -91,7 +91,7 @@ export function shouldRevalidate({ formAction }: ShouldRevalidateFunctionArgs) {
 export default function InitialConsultation() {
   const data = useLoaderData<typeof loader>();
   const fetcher = useFetcher();
-  const { fields, setFields } = useEditFields(fetcher);
+  const { fields, setFields, onSubmit } = useEditFields(fetcher);
   const setIds = useIds((state) => state.setIds);
 
   const setEditableData = useCallback(
@@ -303,6 +303,7 @@ export default function InitialConsultation() {
       <ClientOnly>
         {() => (
           <EditDialog
+            onSubmit={onSubmit}
             isOpen={!!fields.length}
             handleClose={() => setFields([])}
             fields={fields}

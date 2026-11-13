@@ -4,10 +4,8 @@ import { CacheProvider } from '@emotion/react';
 import { CssBaseline, ThemeProvider } from '@mui/material';
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
-import { createReadableStreamFromReadable } from '@react-router/node';
 import * as Sentry from '@sentry/react-router';
 import { sv } from 'date-fns/locale';
-import { isbot } from 'isbot';
 import { renderToPipeableStream } from 'react-dom/server';
 import { type EntryContext, type HandleErrorFunction, ServerRouter } from 'react-router';
 
@@ -40,69 +38,17 @@ export const instrumentations = [Sentry.createSentryServerInstrumentation()];
 
 const ABORT_DELAY = 5_000;
 
-async function handleRequest(
-  request: Request,
-  responseStatusCode: number,
-  responseHeaders: Headers,
-  routerContext: EntryContext,
-) {
-  return isbot(request.headers.get('user-agent') || '')
-    ? handleBotRequest(request, responseStatusCode, responseHeaders, routerContext)
-    : handleBrowserRequest(request, responseStatusCode, responseHeaders, routerContext);
-}
-
 export default Sentry.wrapSentryHandleRequest(handleRequest);
 
-function handleBotRequest(
-  request: Request,
-  responseStatusCode: number,
-  responseHeaders: Headers,
-  routerContext: EntryContext,
-) {
-  return new Promise<Response>((resolve, reject) => {
-    let shellRendered = false;
-    const { pipe, abort } = renderToPipeableStream(<ServerRouter context={routerContext} url={request.url} />, {
-      onAllReady() {
-        shellRendered = true;
-        const body = new PassThrough();
-        const stream = createReadableStreamFromReadable(body);
-
-        responseHeaders.set('Content-Type', 'text/html');
-
-        resolve(
-          new Response(stream, {
-            headers: responseHeaders,
-            status: responseStatusCode,
-          }),
-        );
-
-        pipe(Sentry.getMetaTagTransformer(body));
-      },
-      onShellError(error: unknown) {
-        reject(error);
-      },
-      onError(error: unknown) {
-        responseStatusCode = 500;
-        // Log streaming rendering errors from inside the shell.  Don't log
-        // errors encountered during initial shell rendering since they'll
-        // reject and get logged in handleDocumentRequest.
-        if (shellRendered) {
-          logRequestError(error, request, 'render');
-        }
-      },
-    });
-
-    setTimeout(abort, ABORT_DELAY);
-  });
-}
-
-function handleBrowserRequest(
+function handleRequest(
   request: Request,
   responseStatusCode: number,
   responseHeaders: Headers,
   routerContext: EntryContext,
 ) {
   const { cache, injectStyles } = createEmotion();
+  // Bots and browsers must render the same provider tree as entry.client.tsx.
+  // Both already wait for onAllReady; share critical CSS extraction as well.
   // Single Fetch serializes hydration data through Suspense. renderToString
   // cannot finish those boundaries, so collect the completed stream before
   // extracting Emotion's critical CSS, as the existing renderer requires.

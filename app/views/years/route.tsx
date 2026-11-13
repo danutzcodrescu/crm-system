@@ -87,7 +87,7 @@ export async function action({ request }: ActionFunctionArgs) {
 export default function YearsPage() {
   const data = useLoaderData<typeof loader>();
   const fetcher = useFetcher<typeof action>();
-  const { setEditableData, fields, setFields } = useEditFields(fetcher);
+  const { setEditableData, fields, setFields, onSubmit } = useEditFields(fetcher);
 
   const setEditableFields = useCallback((data: FullYearData) => {
     setEditableData([
@@ -248,6 +248,7 @@ export default function YearsPage() {
       <ClientOnly>
         {() => (
           <EditDialog
+            onSubmit={onSubmit}
             isOpen={!!fields.length}
             handleClose={() => setFields([])}
             fields={fields}

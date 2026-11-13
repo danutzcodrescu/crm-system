@@ -31,7 +31,7 @@ interface AgreementCardProps {
 }
 
 export function AgreementCard({ data, fetcher }: AgreementCardProps) {
-  const { fields, setFields } = useEditFields(fetcher);
+  const { fields, setFields, onSubmit } = useEditFields(fetcher);
 
   const handleEdit = () => {
     setFields([
@@ -272,6 +272,7 @@ export function AgreementCard({ data, fetcher }: AgreementCardProps) {
       <ClientOnly>
         {() => (
           <EditDialog
+            onSubmit={onSubmit}
             isOpen={!!fields.length}
             handleClose={() => setFields([])}
             fields={fields}

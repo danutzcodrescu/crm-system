@@ -23,7 +23,7 @@ interface Props {
 }
 
 export function ResponsiblesTable({ data, companyId, fetcher, infoVerified }: Props) {
-  const { setEditableData, fields, setFields } = useEditFields(fetcher);
+  const { setEditableData, fields, setFields, onSubmit } = useEditFields(fetcher);
 
   const columns = useMemo<ColumnDef<ResponsibleData>[]>(
     () => [
@@ -254,6 +254,7 @@ export function ResponsiblesTable({ data, companyId, fetcher, infoVerified }: Pr
       <ClientOnly>
         {() => (
           <EditDialog
+            onSubmit={onSubmit}
             isOpen={!!fields.length}
             handleClose={() => setFields([])}
             fields={fields}

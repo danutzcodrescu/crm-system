@@ -149,8 +149,10 @@ export async function loader({ request, params, url }: LoaderFunctionArgs) {
   });
 }
 
-export const meta: MetaFunction<typeof loader> = ({ data }) => {
-  return [{ title: `CRM System - ${(data?.message as unknown as LoaderResponse)?.municipality?.name} Municipality` }];
+export const meta: MetaFunction<typeof loader> = ({ loaderData }) => {
+  return [
+    { title: `CRM System - ${(loaderData?.message as unknown as LoaderResponse)?.municipality?.name} Municipality` },
+  ];
 };
 
 export default function Municipality() {

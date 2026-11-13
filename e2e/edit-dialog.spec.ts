@@ -93,7 +93,13 @@ test('completion of a cancelled save does not close a newly opened draft', async
 });
 
 test('global create retains a rejected draft and closes on a successful retry', async ({ page }) => {
+  const errors: string[] = [];
+  page.on('pageerror', (error) => errors.push(error.message));
+  page.on('console', (message) => {
+    if (message.type() === 'error') errors.push(message.text());
+  });
   await page.goto('/');
+  await page.waitForLoadState('networkidle');
   await page.getByRole('button', { name: 'Create new', exact: true }).click();
   const item = page.getByRole('menuitem', { name: 'New log', exact: true });
   const optionsLoaded = page.waitForResponse((response) => response.url().includes('/api/municipalities.data'));
@@ -104,6 +110,8 @@ test('global create retains a rejected draft and closes on a successful retry', 
   await dialog.getByRole('combobox', { name: 'Municipality' }).click();
   await page.getByRole('option', { name: /Smoke Åby/ }).click();
   await dialog.locator('[name="description"]').fill('Global create preserved draft');
+  // Check field initialization before the deliberately rejected HTTP request.
+  expect(errors).toEqual([]);
   // MUI's select is controlled and restores its hidden input on render. Clear
   // a required parameter from the outgoing request instead, keeping the actual
   // action/validation response and the visible draft real.

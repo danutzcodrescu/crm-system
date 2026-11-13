@@ -1,5 +1,6 @@
 import { Button, DialogActions, DialogContent, DialogTitle } from '@mui/material';
 import Dialog from '@mui/material/Dialog';
+import type { FormEventHandler } from 'react';
 import { FetcherWithComponents } from 'react-router';
 
 import { EditForm, Field } from '../EditForm';
@@ -11,13 +12,14 @@ interface Props {
   url: string;
   isOpen: boolean;
   handleClose: () => void;
+  onSubmit: FormEventHandler<HTMLFormElement>;
   method?: 'PATCH' | 'POST';
 }
 
-export function EditDialog({ title, fetcher, fields, url, isOpen, method = 'PATCH', handleClose }: Props) {
+export function EditDialog({ title, fetcher, fields, url, isOpen, method = 'PATCH', handleClose, onSubmit }: Props) {
   return (
     <Dialog maxWidth="lg" fullWidth open={isOpen} onClose={handleClose}>
-      <fetcher.Form method={method} action={url}>
+      <fetcher.Form method={method} action={url} onSubmit={onSubmit}>
         <DialogTitle>{title}</DialogTitle>
         <DialogContent sx={{ paddingTop: (theme) => theme.spacing(1) + '!important' }}>
           <EditForm fields={fields} />

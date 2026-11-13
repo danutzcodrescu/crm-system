@@ -32,7 +32,7 @@ interface Props {
 export function InvoicingCard({ data, fetcher }: Props) {
   const years = [...new Set(data.map((item) => item.year))].sort((a, b) => b - a);
   const [value, setValue] = useState(years[0].toString());
-  const { setEditableData, fields, setFields } = useEditFields(fetcher);
+  const { setEditableData, fields, setFields, onSubmit } = useEditFields(fetcher);
 
   const handleChange = (_: React.SyntheticEvent, newValue: string) => {
     setValue(newValue);
@@ -210,6 +210,7 @@ export function InvoicingCard({ data, fetcher }: Props) {
       <ClientOnly>
         {() => (
           <EditDialog
+            onSubmit={onSubmit}
             isOpen={!!fields.length}
             handleClose={() => setFields([])}
             fields={fields}

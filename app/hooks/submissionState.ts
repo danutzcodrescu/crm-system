@@ -4,21 +4,18 @@ import type { FetcherWithComponents } from 'react-router';
 type SubmissionFetcher = Pick<FetcherWithComponents<unknown>, 'state' | 'data'>;
 
 // Dialog state belongs to the editing session, not to a retained fetcher result.
-// Only a new, successful mutation resets it. GETs, failures and stale results
-// leave the draft intact; opening/cancelling starts a new editing session.
+// Record mutations from the form event, not an intermediate fetcher render:
+// concurrent React may discard every submitting/loading render of a fast save.
+// GETs, failures and stale results leave the current editing session intact.
 export function useSubmissionState<T>(fetcher: SubmissionFetcher, initialValue: T) {
   const [state, setState] = useState(() => ({
     value: initialValue,
     initialValue,
-    previousFetcherState: fetcher.state,
     pending: null as { data: unknown } | null,
   }));
 
-  if (fetcher.state !== state.previousFetcherState) {
-    const completed = fetcher.state === 'idle' && state.pending !== null;
+  if (fetcher.state === 'idle' && state.pending !== null && fetcher.data !== state.pending.data) {
     const succeeded =
-      completed &&
-      fetcher.data !== state.pending?.data &&
       typeof fetcher.data === 'object' &&
       fetcher.data !== null &&
       'severity' in fetcher.data &&
@@ -28,8 +25,7 @@ export function useSubmissionState<T>(fetcher: SubmissionFetcher, initialValue: 
     // without an effect-driven render or setting another component's state.
     setState({
       ...state,
-      previousFetcherState: fetcher.state,
-      pending: fetcher.state === 'submitting' ? { data: fetcher.data } : completed ? null : state.pending,
+      pending: null,
       value: succeeded ? state.initialValue : state.value,
     });
   }
@@ -42,5 +38,9 @@ export function useSubmissionState<T>(fetcher: SubmissionFetcher, initialValue: 
     }));
   }, []);
 
-  return [state.value, setValue] as const;
+  const onSubmit = useCallback(() => {
+    setState((current) => ({ ...current, pending: { data: fetcher.data } }));
+  }, [fetcher.data]);
+
+  return [state.value, setValue, onSubmit] as const;
 }

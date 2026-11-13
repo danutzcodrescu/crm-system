@@ -77,6 +77,7 @@ test('logout and layout actions reject anonymous requests', async ({ playwright,
   const anonymous = await playwright.request.newContext({ baseURL, storageState: { cookies: [], origins: [] } });
   try {
     for (const [path, file, method] of [
+      ['/api/auth', 'api/auth/route.ts', 'POST'],
       ['/api/auth', 'api/auth/route.ts', 'DELETE'],
       ['/', 'views/layout.tsx', 'POST'],
       ['/statuses', 'views/statuses/route.tsx', 'POST'],

@@ -63,7 +63,7 @@ interface LoaderResponse {
 export default function Logs() {
   const data = useLoaderData<typeof loader>();
   const fetcher = useFetcher();
-  const { setEditableData, fields, setFields } = useEditFields(fetcher);
+  const { setEditableData, fields, setFields, onSubmit } = useEditFields(fetcher);
   const columns = useMemo<ColumnDef<LogsWithCompanyDetails>[]>(
     () => [
       {
@@ -333,6 +333,7 @@ export default function Logs() {
       <ClientOnly>
         {() => (
           <EditDialog
+            onSubmit={onSubmit}
             isOpen={!!fields.length}
             handleClose={() => setFields([])}
             fields={fields}

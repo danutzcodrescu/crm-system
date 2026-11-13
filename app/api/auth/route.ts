@@ -7,7 +7,8 @@ export async function action({ request }: ActionFunctionArgs) {
   if (!(await isLoggedIn(request))) {
     return redirect('/signin');
   }
-  if (request.method === 'DELETE') {
+  // Native HTML forms use POST; retain DELETE for existing enhanced/API callers.
+  if (request.method === 'POST' || request.method === 'DELETE') {
     try {
       await logout(request);
       return redirect('/signin');

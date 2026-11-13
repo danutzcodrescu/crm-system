@@ -64,7 +64,7 @@ export const meta: MetaFunction<typeof loader> = () => {
 export default function Companies() {
   const data = useLoaderData<typeof loader>();
   const fetcher = useFetcher();
-  const { setEditableData, fields, setFields } = useEditFields(fetcher);
+  const { setEditableData, fields, setFields, onSubmit } = useEditFields(fetcher);
   const setIds = useIds((state) => state.setIds);
   const { filterItems, waveFilterList } = useWorkingWaveFiltering();
   const columns = useMemo<ColumnDef<MunicipalityData>[]>(
@@ -485,6 +485,7 @@ export default function Companies() {
       <ClientOnly>
         {() => (
           <EditDialog
+            onSubmit={onSubmit}
             isOpen={!!fields.length}
             handleClose={() => setFields([])}
             fields={fields}

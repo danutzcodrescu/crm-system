@@ -3,6 +3,8 @@ import { existsSync } from 'node:fs';
 import process from 'node:process';
 
 assert.equal(process.versions.node.split('.')[0], '26', 'production image must run Node 26');
+assert.match((await import('react-router/package.json', { with: { type: 'json' } })).default.version, /^8\./);
+assert.match((await import('react')).version, /^19\./);
 
 const { hash, verify } = await import('@node-rs/argon2');
 const password = 'synthetic-docker-runtime-probe';

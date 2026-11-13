@@ -3,11 +3,6 @@ import type { Config } from '@react-router/dev/config';
 export default {
   buildDirectory: 'dist',
   ssr: true,
-  future: {
-    v8_middleware: true,
-    v8_splitRouteModules: true,
-    v8_viteEnvironmentApi: true,
-    v8_passThroughRequests: true,
-    v8_trailingSlashAwareDataRequests: true,
-  },
+  // The other v8 preparation flags are now the framework defaults.
+  splitRouteModules: true,
 } satisfies Config;

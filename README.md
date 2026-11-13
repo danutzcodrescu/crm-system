@@ -1,6 +1,6 @@
 # CRM System
 
-This is a CRM (Customer Relationship Management) system built with React Router 7 (Framework Mode), Express, and Drizzle ORM.
+This is a CRM (Customer Relationship Management) system built with React Router 8 (Framework Mode), React 19, Express, and Drizzle ORM.
 
 ## Documentation
 
@@ -8,7 +8,8 @@ This is a CRM (Customer Relationship Management) system built with React Router 
 - [Commands (`cmd/`) Documentation](docs/cmd.md)
 - [Database (`db/`) Documentation](docs/db.md)
 - [Upgrade smoke tests and isolated database](docs/smoke-tests.md)
-- [React Router migration and v8 upgrade checklist](docs/react-router-migration.md)
+- [React Router 8 migration and verification](docs/react-router-8-migration.md)
+- [Previous React Router 7 migration](docs/react-router-migration.md)
 
 ## Development
 

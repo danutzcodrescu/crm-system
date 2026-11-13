@@ -72,7 +72,7 @@ export function Topbar({ redirectUrl }: Props) {
             ) : null}
             <GlobalCreate />
 
-            <Form method="delete" action="/api/auth">
+            <Form method="post" action="/api/auth">
               <IconButton type="submit" color="inherit" aria-label="logout" sx={{ ml: 'auto' }}>
                 <ExitToApp />
               </IconButton>

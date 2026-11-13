@@ -16,6 +16,26 @@ test('auth pages hydrate without errors across repeated document requests', asyn
   expect(errors).toEqual([]);
 });
 
+test('bot-classified documents hydrate with the same providers as ordinary browsers', async ({ browser, baseURL }) => {
+  const context = await browser.newContext({ baseURL, userAgent: 'Googlebot/2.1 (+http://www.google.com/bot.html)' });
+  try {
+    const page = await context.newPage();
+    const errors: string[] = [];
+    page.on('pageerror', (error) => errors.push(error.message));
+    page.on('console', (message) => {
+      if (message.type() === 'error') errors.push(message.text());
+    });
+    for (const path of ['/signin', '/signup']) {
+      expect((await page.goto(path))?.status()).toBe(200);
+      await page.waitForLoadState('networkidle');
+      await expect(page.getByLabel('Username')).toBeVisible();
+    }
+    expect(errors).toEqual([]);
+  } finally {
+    await context.close();
+  }
+});
+
 test('real login survives reload, then logout invalidates the session', async ({ page }) => {
   await page.goto('/');
   await expect(page).toHaveURL(/\/signin$/);

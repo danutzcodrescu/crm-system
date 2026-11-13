@@ -20,6 +20,8 @@ test('all reminders are revalidated after an action without another synchronizat
   database,
 }) => {
   await page.goto('/');
+  // SSR makes this JS-only button visible before React attaches its handler.
+  await page.waitForLoadState('networkidle');
   const reminders = page.getByRole('region', { name: 'Reminders', exact: true });
   const older = reminders.getByRole('link', { name: 'Smoke Örebro', exact: true });
   await reminders.getByRole('button', { name: 'Show all reminders', exact: true }).click();
@@ -48,6 +50,7 @@ test('all reminders are revalidated after an action without another synchronizat
 
 test('dashboard toggles between recent and all reminders and refreshes on reopening', async ({ page, database }) => {
   await page.goto('/');
+  await page.waitForLoadState('networkidle');
   const reminders = page.getByRole('region', { name: 'Reminders', exact: true });
   const older = reminders.getByRole('link', { name: 'Smoke Örebro', exact: true });
   await expect(older).toHaveCount(0);
@@ -70,6 +73,7 @@ test('dashboard toggles between recent and all reminders and refreshes on reopen
 
 test('a late all-reminders response cannot replace the selected recent view', async ({ page }) => {
   await page.goto('/');
+  await page.waitForLoadState('networkidle');
   const reminders = page.getByRole('region', { name: 'Reminders', exact: true });
   let release!: () => void;
   const held = new Promise<void>((resolve) => {

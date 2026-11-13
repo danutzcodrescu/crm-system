@@ -96,7 +96,7 @@ export function EditForm({ fields }: Props) {
             key={field.name}
             name={field.name}
             type={field.type}
-            defaultValue={field.defaultValue}
+            defaultValue={field.defaultValue ?? (field.select ? '' : undefined)}
             placeholder={field.placeholder}
             slotProps={{ htmlInput: field.inputProps }}
             label={field.label}

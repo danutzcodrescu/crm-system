@@ -24,7 +24,7 @@ interface InitialConsultationCardProps {
 }
 
 export function InitialConsultationCard({ data, fetcher }: InitialConsultationCardProps) {
-  const { fields, setFields } = useEditFields(fetcher);
+  const { fields, setFields, onSubmit } = useEditFields(fetcher);
 
   const handleEdit = () => {
     setFields([
@@ -144,6 +144,7 @@ export function InitialConsultationCard({ data, fetcher }: InitialConsultationCa
       <ClientOnly>
         {() => (
           <EditDialog
+            onSubmit={onSubmit}
             isOpen={!!fields.length}
             handleClose={() => setFields([])}
             fields={fields}

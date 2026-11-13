@@ -113,7 +113,7 @@ export default function Invoicing() {
   const fetcher = useFetcher();
   const navigate = useNavigate();
   const location = useLocation();
-  const { setEditableData, fields, setFields } = useEditFields(fetcher);
+  const { setEditableData, fields, setFields, onSubmit } = useEditFields(fetcher);
   const setIds = useIds((state) => state.setIds);
   const columns = useMemo<ColumnDef<InvoicingData>[]>(
     () => [
@@ -425,6 +425,7 @@ export default function Invoicing() {
       <ClientOnly>
         {() => (
           <EditDialog
+            onSubmit={onSubmit}
             isOpen={!!fields.length}
             handleClose={() => setFields([])}
             fields={fields}

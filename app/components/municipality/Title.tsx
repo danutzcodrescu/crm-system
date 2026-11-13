@@ -17,7 +17,7 @@ interface Props {
 }
 
 export function MunicipalityTitle({ municipality, fetcher, users }: Props) {
-  const { setEditableData, fields, setFields } = useEditFields(fetcher);
+  const { setEditableData, fields, setFields, onSubmit } = useEditFields(fetcher);
 
   const handleEdit = useCallback(() => {
     setEditableData([
@@ -162,6 +162,7 @@ export function MunicipalityTitle({ municipality, fetcher, users }: Props) {
       <ClientOnly>
         {() => (
           <EditDialog
+            onSubmit={onSubmit}
             isOpen={!!fields.length}
             handleClose={() => setFields([])}
             fields={fields}

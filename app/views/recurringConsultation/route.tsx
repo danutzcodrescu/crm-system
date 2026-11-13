@@ -131,7 +131,7 @@ export default function RecurringConsultation() {
   const navigate = useNavigate();
   const data = useLoaderData<typeof loader>();
   const fetcher = useFetcher();
-  const { setEditableData, fields, setFields } = useEditFields(fetcher);
+  const { setEditableData, fields, setFields, onSubmit } = useEditFields(fetcher);
   const setIds = useIds((state) => state.setIds);
   const setEditableFields = useCallback((data: RecurringConsultationPerMunicipality) => {
     const fields = [
@@ -503,6 +503,7 @@ export default function RecurringConsultation() {
       <ClientOnly>
         {() => (
           <EditDialog
+            onSubmit={onSubmit}
             isOpen={!!fields.length}
             handleClose={() => setFields([])}
             fields={fields}

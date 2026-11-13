@@ -15,7 +15,7 @@ interface Props {
 }
 
 export function ReportingCard({ data, fetcher }: Props) {
-  const { setEditableData, fields, setFields } = useEditFields(fetcher);
+  const { setEditableData, fields, setFields, onSubmit } = useEditFields(fetcher);
 
   const handleEdit = useCallback(
     (year: ReportingData) => {
@@ -82,6 +82,7 @@ export function ReportingCard({ data, fetcher }: Props) {
       <ClientOnly>
         {() => (
           <EditDialog
+            onSubmit={onSubmit}
             isOpen={!!fields.length}
             handleClose={() => setFields([])}
             fields={fields}

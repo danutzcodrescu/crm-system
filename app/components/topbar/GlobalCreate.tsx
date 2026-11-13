@@ -13,7 +13,7 @@ export function GlobalCreate() {
   const [dismissedResult, setDismissedResult] = useState<unknown>();
   const [municipalities, setMunicipalities] = useState<{ id: string; name: string; code: string }[]>([]);
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
-  const { setEditableData, fields, setFields } = useEditFields(fetcher);
+  const { setEditableData, fields, setFields, onSubmit } = useEditFields(fetcher);
   const [municipalityId, setMunicipalityId] = useState<string | null>(null);
   const isAlertOpen =
     fetcher.state === 'idle' && typeof fetcher.data?.message === 'string' && fetcher.data !== dismissedResult;
@@ -141,6 +141,7 @@ export function GlobalCreate() {
       <ClientOnly>
         {() => (
           <EditDialog
+            onSubmit={onSubmit}
             isOpen={!!fields.length}
             handleClose={() => setFields([])}
             fields={fields}
