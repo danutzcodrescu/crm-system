@@ -1,16 +1,22 @@
 import { renderToStream } from '@react-pdf/renderer';
-import { LoaderFunctionArgs, redirect } from 'react-router';
+import { redirect } from 'react-router';
 
 import { PDF } from '../../components/PDF.server';
 import { isLoggedIn } from './auth.server';
 import { logger } from './logger.server';
-import { CompensationDataPerCompanyPerYear, getCompensationForCompanyByYear } from './repositories/compensation.server';
+import { getCompensationForCompanyByYear } from './repositories/compensation.server';
 
-export async function handlePDFRequest(request: Request, headers: Headers) {
-  // get the data for the PDF
-  const response = (await loader({ request })) as CompensationDataPerCompanyPerYear;
-  // if it's a response return it, this means we redirected
-  if (response instanceof Response) return response;
+export async function handlePDFRequest(request: Request, municipalityId: string, year: number) {
+  if (!(await isLoggedIn(request))) return redirect('/signin');
+
+  const [error, response] = await getCompensationForCompanyByYear(municipalityId, year);
+  if (error) {
+    logger.error(`PDF generation error: ${error}`);
+    return redirect('/');
+  }
+  if (!response) throw new Response('Not Found', { status: 404 });
+
+  const headers = new Headers();
   // set the correct content-type
   headers.set('Content-Type', 'application/pdf');
   const filename = `${response.companyName} ersättning ${response.year}.pdf`;
@@ -37,19 +43,4 @@ export async function handlePDFRequest(request: Request, headers: Headers) {
   });
   // return the response
   return new Response(new Uint8Array(body), { status: 200, headers });
-}
-
-export async function loader({ request }: Pick<LoaderFunctionArgs, 'request'>) {
-  const isAuthenticated = await isLoggedIn(request);
-  if (!isAuthenticated) return redirect('/signin');
-  const pathname = new URL(request.url).pathname;
-  const segments = pathname.split('/').slice(1);
-  const [error, data] = await getCompensationForCompanyByYear(segments[1], parseInt(segments[2].replace('.pdf', '')));
-
-  if (error) {
-    logger.error(`PDF generation error: ${error}`);
-    return redirect('/');
-  }
-
-  return data;
 }

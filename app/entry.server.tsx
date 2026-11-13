@@ -13,7 +13,6 @@ import { type EntryContext, type HandleErrorFunction, ServerRouter } from 'react
 
 import { createEmotion } from './emotion/emotion-server';
 import { logger } from './utils/server/logger.server';
-import { handlePDFRequest } from './utils/server/pdf.server';
 import { theme } from './utils/theme';
 
 export const handleError: HandleErrorFunction = (error, { request }) => {
@@ -47,10 +46,6 @@ async function handleRequest(
   responseHeaders: Headers,
   routerContext: EntryContext,
 ) {
-  if (new URL(request.url).pathname.endsWith('.pdf')) {
-    return handlePDFRequest(request, responseHeaders);
-  }
-
   return isbot(request.headers.get('user-agent') || '')
     ? handleBotRequest(request, responseStatusCode, responseHeaders, routerContext)
     : handleBrowserRequest(request, responseStatusCode, responseHeaders, routerContext);

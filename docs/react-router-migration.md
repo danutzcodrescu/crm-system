@@ -10,7 +10,7 @@ The application now uses **React Router 7.18.5, Framework Mode**, the documented
 - Loaders/actions use `data` (aliased as `routeData` to avoid conflicts with query results). Single Fetch preserves `Date` values rather than converting them to JSON strings; the shared date formatter accepts both.
 - Browser SSR collects a completed React stream before extracting Emotion critical CSS. Do not revert it to `renderToString`: that cannot complete Single Fetch's Suspense hydration boundaries.
 - Spreadsheet imports use a shared bounded multipart parser, retain their worksheet/column mappings, and keep the existing 500 MB file allowance. One file, ten parts and a total request-size limit are also enforced. Parsing XLSX still requires buffering the workbook.
-- The existing live PDF generation handler remains in `entry.server.tsx`, using the real database and `@react-pdf/renderer`. It is not a static download or a mocked renderer. Download headers now encode Swedish filenames with RFC 5987 `filename*`, alongside an ASCII fallback.
+- Live PDF generation uses a registered resource route in `app/api/municipalities/compensation-pdf.ts`, backed by the real database and `@react-pdf/renderer`. It is not a static download or a mocked renderer. Download headers encode Swedish filenames with RFC 5987 `filename*`, alongside an ASCII fallback. The old `entry.server.tsx` PDF interception returned a successful PDF only after the router logged a missing-route 404; that interception is removed.
 - Sentry uses `@sentry/react-router` 11.11.0, matching the existing SDK baseline, with startup preloading, client `onError`, server error handling and server route instrumentation. No credentials or reporting destination changed. Source-map uploading still uses the existing Vite plugin.
 
 No database migration or deployment was performed. The seven-day dependency release-age policy is unchanged. Existing already-locked Sentry/minimatch versions needed temporary exclusions during lockfile resolution; those exclusions are not retained.
@@ -48,7 +48,7 @@ All five stable v8 migration flags supported by React Router 7.18.5 are enabled 
 - `v8_middleware`: use the middleware-capable request context. The Express server has no custom `getLoadContext` or application context values to migrate.
 - `v8_splitRouteModules`: automatically split eligible client route exports without requiring every route to be splittable.
 - `v8_viteEnvironmentApi`: scope the ESNext server target to `environments.ssr.build`; the custom Express development server loads its virtual build through the SSR environment's module runner.
-- `v8_passThroughRequests`: pass raw requests to handlers. Gmail's OAuth return path now uses the normalized loader `url`, not a raw pathname that could contain `.data`. Existing query-only URL reads remain valid; PDF generation runs on document requests in `entry.server.tsx`.
+- `v8_passThroughRequests`: pass raw requests to handlers. Gmail's OAuth return path now uses the normalized loader `url`, not a raw pathname that could contain `.data`. Existing query-only URL reads remain valid; PDF generation uses explicit resource-route parameters rather than parsing the raw request pathname.
 - `v8_trailingSlashAwareDataRequests`: use `/_.data` for root data requests and `/path/_.data` for trailing-slash paths. The smoke URL helper and dedicated authenticated/anonymous transport checks cover these formats.
 
 The optional `unstable_optimizeDeps` and `unstable_previewServerPrerendering` flags remain disabled. They are experimental, not prerequisites for v8; this SSR application does not configure prerendering.
@@ -66,6 +66,8 @@ The Vite smoke server now uses `NODE_ENV=development` plus the explicit `CRM_SMO
 The image was retained locally, not published or deployed. Production-mode tests used disposable seeded PostgreSQL and synthetic secrets at the external Infisical boundary; credentialed Gmail/Infisical operations and Sentry delivery remain unverified.
 
 Run development and production suites sequentially: generated Playwright trace HTML from a parallel production run can trigger Vite page reloads and interrupt development UI interactions.
+
+The PDF resource-route follow-up reproduced the misleading combination of a valid PDF/HTTP 200 and a logged routing 404 before the fix. After registering the route and removing the entry-server interception, the updated suite passed **133 development tests (3 production-only skips)** and **136 production-image tests** against a fresh rebuild of the same local Node 26 image. The added server-log assertion verifies that successful PDF generation no longer reports a missing-route error.
 
 ## Next: React Router 8
 

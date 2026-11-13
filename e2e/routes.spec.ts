@@ -13,6 +13,8 @@ test('every route registration has an explicit smoke scenario', async () => {
     'views/login/route.tsx',
     'views/signup/route.tsx',
     'api/auth/route.ts',
+    // Binary response and authentication are exercised in pdf.spec.ts.
+    'api/municipalities/compensation-pdf.ts',
     // Both layouts are rendered and authenticated in page scenarios.
     'views/layout.tsx',
     'views/municipalities/layout.tsx',
