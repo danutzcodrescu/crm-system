@@ -1,10 +1,19 @@
 import Cancel from '@mui/icons-material/Cancel';
 import CheckBox from '@mui/icons-material/CheckBox';
 import { FormControl, InputLabel, Link, MenuItem, Select, Stack, Typography } from '@mui/material';
-import { json, LoaderFunctionArgs, MetaFunction, redirect } from '@remix-run/node';
-import { Link as RLink, ShouldRevalidateFunctionArgs, useLoaderData, useLocation, useNavigate } from '@remix-run/react';
 import { getYear } from 'date-fns';
 import { useMemo } from 'react';
+import {
+  data as routeData,
+  Link as RLink,
+  LoaderFunctionArgs,
+  MetaFunction,
+  redirect,
+  ShouldRevalidateFunctionArgs,
+  useLoaderData,
+  useLocation,
+  useNavigate,
+} from 'react-router';
 
 import { PageContainer } from '~/components/shared/PageContainer';
 import { SendEmail } from '~/components/shared/SendEmail';
@@ -37,9 +46,9 @@ export async function loader({ request }: LoaderFunctionArgs) {
   }
   const [compensationData, yearsData] = await Promise.all([getCompensationByYear(parseInt(year)), getAllYears(2023)]);
   if (compensationData[0] || yearsData[0]) {
-    return json({ error: compensationData[0] || yearsData[0] }, { status: 500 });
+    return routeData({ error: compensationData[0] || yearsData[0] }, { status: 500 });
   }
-  return json({ compensationData: compensationData[1], yearsData: yearsData[1] });
+  return routeData({ compensationData: compensationData[1], yearsData: yearsData[1] });
 }
 
 export function shouldRevalidate({ formAction }: ShouldRevalidateFunctionArgs) {

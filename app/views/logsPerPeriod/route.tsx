@@ -2,10 +2,17 @@ import AddAlarm from '@mui/icons-material/AddAlarm';
 import Alarm from '@mui/icons-material/Alarm';
 import PostAdd from '@mui/icons-material/PostAdd';
 import { IconButton, Link, Stack, Tooltip, Typography } from '@mui/material';
-import { json, LoaderFunctionArgs, MetaFunction, redirect } from '@remix-run/node';
-import { Link as RLink, useFetcher, useLoaderData } from '@remix-run/react';
 import { isAfter } from 'date-fns';
 import { useCallback, useMemo } from 'react';
+import {
+  data as routeData,
+  Link as RLink,
+  LoaderFunctionArgs,
+  MetaFunction,
+  redirect,
+  useFetcher,
+  useLoaderData,
+} from 'react-router';
 import { ClientOnly } from 'remix-utils/client-only';
 
 import { EditDialog } from '~/components/shared/EditDialog.client';
@@ -36,10 +43,10 @@ export async function loader({ request }: LoaderFunctionArgs) {
   const [logs, companies] = await Promise.all([getRecentLogs(), getCompanies()]);
 
   if (logs[0] || companies[0]) {
-    return json({ message: 'Could not fetch logs', severity: 'error' }, { status: 500 });
+    return routeData({ message: 'Could not fetch logs', severity: 'error' }, { status: 500 });
   }
 
-  return json({ message: { logs: logs[1], companies: companies[1] }, severity: 'success' });
+  return routeData({ message: { logs: logs[1], companies: companies[1] }, severity: 'success' });
 }
 
 interface LoaderResponse {

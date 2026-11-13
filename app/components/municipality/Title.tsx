@@ -1,7 +1,7 @@
 import EditIcon from '@mui/icons-material/Edit';
 import { Box, Chip, IconButton, Tooltip, Typography } from '@mui/material';
-import { FetcherWithComponents } from '@remix-run/react';
 import { useCallback } from 'react';
+import { FetcherWithComponents } from 'react-router';
 import { ClientOnly } from 'remix-utils/client-only';
 
 import { useEditFields } from '~/hooks/editFields';

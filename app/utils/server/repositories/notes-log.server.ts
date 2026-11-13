@@ -40,7 +40,7 @@ export async function updateLog(
 ): Promise<string | null> {
   try {
     logger.info(`Updating log ${id}`);
-    db.transaction(async (tx) => {
+    await db.transaction(async (tx) => {
       let reminderId: string | undefined;
       if (!reminder?.reminderId && reminder?.reminderDueDate) {
         const result = await tx

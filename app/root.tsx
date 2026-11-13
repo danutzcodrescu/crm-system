@@ -4,9 +4,8 @@ import '@fontsource/roboto/500.css';
 import '@fontsource/roboto/700.css';
 
 import { withEmotionCache } from '@emotion/react';
-import { Links, Meta, Outlet, Scripts, ScrollRestoration, useRouteError } from '@remix-run/react';
-import { captureRemixErrorBoundaryError } from '@sentry/remix';
 import { PropsWithChildren } from 'react';
+import { Links, Meta, Outlet, Scripts, ScrollRestoration } from 'react-router';
 
 import { useInjectStyles } from './emotion/emotion-client';
 
@@ -31,9 +30,7 @@ export const Layout = withEmotionCache(({ children }: PropsWithChildren, cache) 
 });
 
 export const ErrorBoundary = () => {
-  const error = useRouteError();
-  console.log(error);
-  captureRemixErrorBoundaryError(error);
+  // Errors are reported by entry.client's onError and entry.server's handleError.
   return <div>Something went wrong</div>;
 };
 

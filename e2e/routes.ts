@@ -183,5 +183,8 @@ export const editablePages = pages.filter(({ path }) =>
 );
 
 export function dataUrl(path: string, file: string) {
-  return `${path}${path.includes('?') ? '&' : '?'}_data=${file.replace(/\.tsx?$/, '')}`;
+  const url = new URL(path, 'http://smoke.invalid');
+  url.pathname = url.pathname === '/' ? '/_root.data' : `${url.pathname.replace(/\/$/, '')}.data`;
+  url.searchParams.set('_routes', file.replace(/\.tsx?$/, ''));
+  return `${url.pathname}${url.search}`;
 }

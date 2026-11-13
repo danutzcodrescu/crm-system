@@ -1,6 +1,6 @@
 # CRM System
 
-This is a CRM (Customer Relationship Management) system built with Remix, Express, and Drizzle ORM.
+This is a CRM (Customer Relationship Management) system built with React Router 7 (Framework Mode), Express, and Drizzle ORM.
 
 ## Documentation
 
@@ -8,7 +8,7 @@ This is a CRM (Customer Relationship Management) system built with Remix, Expres
 - [Commands (`cmd/`) Documentation](docs/cmd.md)
 - [Database (`db/`) Documentation](docs/db.md)
 - [Upgrade smoke tests and isolated database](docs/smoke-tests.md)
-- [Runtime/dependency upgrade, Docker build and database notes](docs/runtime-upgrade.md)
+- [React Router migration and v8 upgrade checklist](docs/react-router-migration.md)
 
 ## Development
 
@@ -41,15 +41,15 @@ Now you'll need to pick a host to deploy it to.
 The following scripts are available in `package.json`:
 
 - `package`: Cleans the `dist` directory, runs type checking, and builds the application.
-- `build`: Runs `build-remix` and `build-express`.
-- `build-remix`: Builds the Remix application using Vite.
+- `build`: Runs `build:router` and `build-express`.
+- `build:router`: Builds the React Router application using Vite.
 - `build-express`: Compiles the Express server code and aliases paths.
 - `dev`: Starts the development server using `tsx` and loads environment variables from `.env.local`.
 - `lint`: Runs ESLint for code linting.
 - `start`: Starts the compiled production server using Node.
 - `start-local`: Starts the compiled production server using Node and loads environment variables from `.env.local`.
-- `typecheck`: Runs type checking for both Remix and server code concurrently.
-- `typecheck-remix`: Runs TypeScript type checking for the Remix application.
+- `typecheck`: Runs type checking for both application and server code concurrently.
+- `typecheck:app`: Generates React Router route types and checks the application with TypeScript.
 - `typecheck:server`: Runs TypeScript type checking for the server code without emitting files.
 - `db:push`: Pushes the database schema changes using Drizzle Kit and loads environment variables from `.env.local`.
 - `db:generate`: Generates database migration files using Drizzle Kit and loads environment variables from `.env.local`.

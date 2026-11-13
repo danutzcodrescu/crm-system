@@ -1,7 +1,7 @@
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 import { Box, IconButton, Tooltip } from '@mui/material';
-import { FetcherWithComponents } from '@remix-run/react';
 import { ChangeEvent, useCallback } from 'react';
+import { FetcherWithComponents } from 'react-router';
 
 interface UploadButtonProps {
   title: string;

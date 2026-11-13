@@ -1,13 +1,13 @@
 import Alarm from '@mui/icons-material/Alarm';
-import { Box, Button, Card, CardContent, Link, Stack, Tooltip, Typography } from '@mui/material';
-import { Link as RLink, useFetcher } from '@remix-run/react';
+import { Alert, Box, Button, Card, CardContent, Link, Stack, Tooltip, Typography } from '@mui/material';
 import { isAfter } from 'date-fns';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { Fragment } from 'react/jsx-runtime';
+import { Link as RLink, useFetcher } from 'react-router';
 
-import { loader } from '~/api/reminders/route';
+import type { loader } from '~/api/reminders/route';
 import { formatDate } from '~/utils/client/dates';
-import { ReminderData } from '~/utils/server/repositories/reminders.server';
+import type { ReminderData } from '~/utils/server/repositories/reminders.server';
 
 interface RemindersProps {
   reminders: ReminderData[];
@@ -16,34 +16,24 @@ interface RemindersProps {
 
 export default function Reminders({ reminders, remindersCount }: RemindersProps) {
   const [showAll, setShowAll] = useState(false);
-  const [data, setData] = useState<ReminderData[]>(reminders);
   const fetcher = useFetcher<typeof loader>();
+  const allReminders = typeof fetcher.data?.message === 'object' ? fetcher.data.message.reminders : undefined;
+  const data = showAll ? (allReminders ?? reminders) : reminders;
+  const isLoading = showAll && fetcher.state !== 'idle';
+  const error =
+    showAll && fetcher.state === 'idle' && typeof fetcher.data?.message === 'string' ? fetcher.data.message : null;
 
-  useEffect(() => {
+  const toggleReminders = () => {
     if (!showAll) {
-      setData(reminders);
-    } else {
-      fetcher.submit(null, {
-        method: 'GET',
-        action: '/api/reminders',
-      });
+      // Loaded fetchers are automatically revalidated by React Router after
+      // actions. No effect is needed to mirror their results into local state.
+      fetcher.load('/api/reminders');
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [showAll, reminders]);
-
-  useEffect(() => {
-    if (fetcher.data && typeof fetcher.data.message === 'object' && 'reminders' in fetcher.data.message) {
-      setData(
-        fetcher.data.message.reminders.map((reminder) => ({
-          ...reminder,
-          date: new Date(reminder.date),
-        })) as ReminderData[],
-      );
-    }
-  }, [fetcher.data]);
+    setShowAll(!showAll);
+  };
 
   return (
-    <Card sx={{ bgcolor: 'background.paper', flexBasis: '100%' }}>
+    <Card component="section" aria-label="Reminders" sx={{ bgcolor: 'background.paper', flexBasis: '100%' }}>
       <CardContent>
         <Stack
           direction="row"
@@ -75,12 +65,16 @@ export default function Reminders({ reminders, remindersCount }: RemindersProps)
               </Box>
             </Typography>
             {remindersCount > 0 ? (
-              <Button onClick={() => setShowAll((prev) => !prev)}>
-                {showAll ? 'Show only recent reminders' : 'Show all reminders'}
-              </Button>
+              <Button onClick={toggleReminders}>{showAll ? 'Show only recent reminders' : 'Show all reminders'}</Button>
             ) : null}
           </Stack>
         </Stack>
+        {isLoading ? <Typography role="status">Loading reminders…</Typography> : null}
+        {error ? (
+          <Alert severity="error" action={<Button onClick={() => fetcher.load('/api/reminders')}>Retry</Button>}>
+            {error}
+          </Alert>
+        ) : null}
         {data.length === 0 ? (
           <Typography
             sx={{
@@ -113,7 +107,7 @@ export default function Reminders({ reminders, remindersCount }: RemindersProps)
                   <Alarm color={isAfter(new Date(reminder.date), new Date()) ? 'primary' : 'error'} />
                   <Tooltip title={reminder.description}>
                     <Typography variant="body2" component="span">
-                      {formatDate(typeof reminder.date === 'string' ? reminder.date : reminder.date.toISOString())}
+                      {formatDate(reminder.date)}
                     </Typography>
                   </Tooltip>
                 </Stack>

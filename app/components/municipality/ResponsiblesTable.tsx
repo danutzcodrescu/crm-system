@@ -1,8 +1,8 @@
 import Edit from '@mui/icons-material/Edit';
 import PersonAdd from '@mui/icons-material/PersonAdd';
 import { Box, IconButton, Link, Stack, Tooltip, Typography } from '@mui/material';
-import { FetcherWithComponents } from '@remix-run/react';
 import { useCallback, useMemo } from 'react';
+import { FetcherWithComponents } from 'react-router';
 import { ClientOnly } from 'remix-utils/client-only';
 
 import { useEditFields } from '~/hooks/editFields';

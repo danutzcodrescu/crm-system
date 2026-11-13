@@ -3,17 +3,26 @@ import Cancel from '@mui/icons-material/Cancel';
 import CheckBox from '@mui/icons-material/CheckBox';
 import LinkIcon from '@mui/icons-material/Link';
 import { IconButton, Link, Stack, Tooltip, Typography } from '@mui/material';
-import { ActionFunctionArgs, json, LoaderFunctionArgs, MetaFunction, redirect } from '@remix-run/node';
-import { Link as RLink, ShouldRevalidateFunctionArgs, useFetcher, useLoaderData } from '@remix-run/react';
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useMemo } from 'react';
+import {
+  ActionFunctionArgs,
+  data as routeData,
+  Link as RLink,
+  LoaderFunctionArgs,
+  MetaFunction,
+  redirect,
+  ShouldRevalidateFunctionArgs,
+  useFetcher,
+  useLoaderData,
+} from 'react-router';
 import { ClientOnly } from 'remix-utils/client-only';
 
-import { Field } from '~/components/EditForm';
 import { EditDialog } from '~/components/shared/EditDialog.client';
 import { PageContainer } from '~/components/shared/PageContainer';
 import { SendEmail } from '~/components/shared/SendEmail';
 import { PaginatedTable } from '~/components/shared/table/PaginatedTable';
 import { TableActionsCell } from '~/components/shared/table/TableActionsCell';
+import { useEditFields } from '~/hooks/editFields';
 import { formatDate } from '~/utils/client/dates';
 import { isLoggedIn } from '~/utils/server/auth.server';
 import { AgreementData, editAgreementRecord, getAgreementData } from '~/utils/server/repositories/agreement.server';
@@ -36,7 +45,7 @@ export async function action({ request }: ActionFunctionArgs) {
     const id = body.get('id');
     const typeOfAgreement = body.get('typeOfAgreement');
     if (!id || !typeOfAgreement) {
-      return json(
+      return routeData(
         { message: 'Missing required fields: id or type of agreement', severity: 'error', timeStamp: new Date() },
         { status: 400 },
       );
@@ -62,15 +71,15 @@ export async function action({ request }: ActionFunctionArgs) {
     });
 
     if (error) {
-      return json(
+      return routeData(
         { message: 'Could not update the record', severity: 'error', timeStamp: new Date() },
         { status: 500 },
       );
     }
-    return json({ message: 'Record updated successfully', severity: 'success', timeStamp: new Date() });
+    return routeData({ message: 'Record updated successfully', severity: 'success', timeStamp: new Date() });
   }
 
-  return json({ status: 405 });
+  return routeData({ status: 405 });
 }
 
 export async function loader({ request }: LoaderFunctionArgs) {
@@ -79,9 +88,9 @@ export async function loader({ request }: LoaderFunctionArgs) {
   }
   const [error, data] = await getAgreementData();
   if (error) {
-    return json({ error }, { status: 500 });
+    return routeData({ error }, { status: 500 });
   }
-  return json(data);
+  return routeData(data);
 }
 
 export function shouldRevalidate({ formAction }: ShouldRevalidateFunctionArgs) {
@@ -91,104 +100,107 @@ export function shouldRevalidate({ formAction }: ShouldRevalidateFunctionArgs) {
 
 export default function Agreement() {
   const data = useLoaderData<typeof loader>();
-  const [fields, setFields] = useState<Field[]>([]);
   const fetcher = useFetcher();
+  const { fields, setFields } = useEditFields(fetcher);
   const setIds = useIds((state) => state.setIds);
 
-  const setEditableData = useCallback((data: AgreementData) => {
-    setFields([
-      {
-        label: 'id',
-        name: 'id',
-        type: 'text',
-        defaultValue: data.id,
-        hidden: true,
-      },
-      {
-        label: 'Type of agreement',
-        name: 'typeOfAgreement',
-        type: 'text',
-        select: true,
-        defaultValue: data.typeOfAgreement,
-        watchable: true,
-        options: [
-          { label: 'New agreement', value: 'new' },
-          { label: 'Old agreement', value: 'old' },
-        ],
-      },
-      {
-        label: 'Old agreement sent',
-        name: 'oldAgreementSent',
-        type: 'text',
-        select: true,
-        defaultValue: data.oldAgreementSent,
-        condition: ['typeOfAgreement', 'old'],
-        options: [
-          { label: 'Sent', value: 'true' },
-          { label: 'Not sent', value: 'false' },
-        ],
-      },
+  const setEditableData = useCallback(
+    (data: AgreementData) => {
+      setFields([
+        {
+          label: 'id',
+          name: 'id',
+          type: 'text',
+          defaultValue: data.id,
+          hidden: true,
+        },
+        {
+          label: 'Type of agreement',
+          name: 'typeOfAgreement',
+          type: 'text',
+          select: true,
+          defaultValue: data.typeOfAgreement,
+          watchable: true,
+          options: [
+            { label: 'New agreement', value: 'new' },
+            { label: 'Old agreement', value: 'old' },
+          ],
+        },
+        {
+          label: 'Old agreement sent',
+          name: 'oldAgreementSent',
+          type: 'text',
+          select: true,
+          defaultValue: data.oldAgreementSent,
+          condition: ['typeOfAgreement', 'old'],
+          options: [
+            { label: 'Sent', value: 'true' },
+            { label: 'Not sent', value: 'false' },
+          ],
+        },
 
-      {
-        label: 'Old agreement signed',
-        name: 'oldAgreementSigned',
-        type: 'date',
-        defaultValue: data.oldAgreementSigned as unknown as string,
-        condition: ['typeOfAgreement', 'old'],
-      },
-      {
-        label: 'Old agreement shared with NPA',
-        name: 'oldAgreementShared',
-        type: 'date',
-        defaultValue: data.oldAgreementShared as unknown as string,
-        condition: ['typeOfAgreement', 'old'],
-      },
-      {
-        label: 'Link to signed document',
-        name: 'oldAgreementLink',
-        type: 'link',
-        defaultValue: data.oldAgreementLink || undefined,
-        condition: ['typeOfAgreement', 'old'],
-      },
-      {
-        label: 'Link to appendix',
-        name: 'oldAgreementAppendix',
-        type: 'link',
-        defaultValue: data.oldAgreementAppendix || undefined,
-        condition: ['typeOfAgreement', 'old'],
-      },
+        {
+          label: 'Old agreement signed',
+          name: 'oldAgreementSigned',
+          type: 'date',
+          defaultValue: data.oldAgreementSigned as unknown as string,
+          condition: ['typeOfAgreement', 'old'],
+        },
+        {
+          label: 'Old agreement shared with NPA',
+          name: 'oldAgreementShared',
+          type: 'date',
+          defaultValue: data.oldAgreementShared as unknown as string,
+          condition: ['typeOfAgreement', 'old'],
+        },
+        {
+          label: 'Link to signed document',
+          name: 'oldAgreementLink',
+          type: 'link',
+          defaultValue: data.oldAgreementLink || undefined,
+          condition: ['typeOfAgreement', 'old'],
+        },
+        {
+          label: 'Link to appendix',
+          name: 'oldAgreementAppendix',
+          type: 'link',
+          defaultValue: data.oldAgreementAppendix || undefined,
+          condition: ['typeOfAgreement', 'old'],
+        },
 
-      {
-        label: 'Time for sending new agreement',
-        name: 'newAgreementDateSent',
-        type: 'date',
-        defaultValue: data.newAgreementDateSent as unknown as string,
-        condition: ['typeOfAgreement', 'new'],
-      },
+        {
+          label: 'Time for sending new agreement',
+          name: 'newAgreementDateSent',
+          type: 'date',
+          defaultValue: data.newAgreementDateSent as unknown as string,
+          condition: ['typeOfAgreement', 'new'],
+        },
 
-      {
-        label: 'New agreement signed',
-        name: 'newAgreementSigned',
-        type: 'date',
-        defaultValue: data.newAgreementSigned as unknown as string,
-        condition: ['typeOfAgreement', 'new'],
-      },
-      {
-        label: 'New agreement shared with NPA',
-        name: 'newAgreementShared',
-        type: 'date',
-        defaultValue: data.newAgreementShared as unknown as string,
-        condition: ['typeOfAgreement', 'new'],
-      },
-      {
-        label: 'Link to signed document',
-        name: 'newAgreementLink',
-        type: 'link',
-        defaultValue: data.newAgreementLink || undefined,
-        condition: ['typeOfAgreement', 'new'],
-      },
-    ]);
-  }, []);
+        {
+          label: 'New agreement signed',
+          name: 'newAgreementSigned',
+          type: 'date',
+          defaultValue: data.newAgreementSigned as unknown as string,
+          condition: ['typeOfAgreement', 'new'],
+        },
+        {
+          label: 'New agreement shared with NPA',
+          name: 'newAgreementShared',
+          type: 'date',
+          defaultValue: data.newAgreementShared as unknown as string,
+          condition: ['typeOfAgreement', 'new'],
+        },
+        {
+          label: 'Link to signed document',
+          name: 'newAgreementLink',
+          type: 'link',
+          defaultValue: data.newAgreementLink || undefined,
+          condition: ['typeOfAgreement', 'new'],
+        },
+      ]);
+    },
+    [setFields],
+  );
 
   const columns = useMemo<ColumnDef<AgreementData>[]>(
     () => [
@@ -474,7 +486,7 @@ export default function Agreement() {
               id={row.original.id as string}
               isEditable
               onEdit={() => setEditableData(row.original)}
-              link={`/communes/${row.original.companyId}`}
+              link={`/municipalities/${row.original.companyId}`}
             />
           );
         },
@@ -483,13 +495,6 @@ export default function Agreement() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [data],
   );
-
-  useEffect(() => {
-    if (fetcher.state === 'idle' && fields.length) {
-      setFields([]);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [fetcher.state]);
 
   return (
     <PageContainer

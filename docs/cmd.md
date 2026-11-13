@@ -13,14 +13,14 @@ cmd/
 ## Key Files
 
 - [`cmd/cron.ts`](cmd/cron.ts): This file defines a cron job using the `node-cron` library. The `cleanExpiredSessions` function is scheduled to run daily at 04:00 UTC. It uses Drizzle ORM to delete expired sessions from the database.
-- [`cmd/server.ts`](cmd/server.ts): This file is the main entry point for the Express server. It sets up the server, integrates with Remix for handling requests, configures middleware for compression and logging (`pino-http`), serves static assets, and starts the server listening on a specified port. It also starts the `cleanExpiredSessions` cron job.
+- [`cmd/server.ts`](cmd/server.ts): The Express server entry point uses `@react-router/express` for SSR requests, configures compression and request logging, serves static assets, and starts `cleanExpiredSessions`. In development it loads `virtual:react-router/server-build` through Vite; production uses `dist/server/index.js`. Startup scripts preload `instrumentation.server.mjs` for Sentry.
 
 ## Technologies Used
 
 The `cmd/` directory utilizes the following technologies:
 
 - **Express**: A fast, unopinionated, minimalist web framework for Node.js, used to build the server.
-- **Remix**: Integrated to handle server-side rendering and routing.
+- **React Router**: Integrated to handle server-side rendering and routing.
 - **node-cron**: A library for scheduling tasks (cron jobs) in Node.js.
 - **Drizzle ORM**: Used for interacting with the database in the cron job.
 - **pino-http**: A high-speed HTTP logger for Node.js.

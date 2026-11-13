@@ -1,4 +1,5 @@
 import { companyId, expect, test, year } from './fixtures';
+import { redirectLocation } from './route-data';
 import { dataUrl, pages } from './routes';
 
 test('global search loads the API and navigates to municipality details', async ({ page }) => {
@@ -13,18 +14,20 @@ test('global search loads the API and navigates to municipality details', async 
 test('table filtering finds Swedish names and handles no matches', async ({ page }) => {
   await page.goto('/initial-consultation');
   await page.waitForLoadState('networkidle');
-  // This filter icon currently has no accessible name; scope it to its column.
-  await page.getByRole('columnheader', { name: 'Municipality' }).getByTestId('FilterAltIcon').click();
+  // MUI drops its development-only icon test IDs in production. This unlabeled
+  // filter is the first SVG in the column's controls, before the sort button.
+  const filterToggle = page.getByRole('columnheader', { name: 'Municipality' }).locator('svg').first();
+  await filterToggle.click();
   const filter = page.getByPlaceholder('Filter by Municipality', { exact: true });
   await filter.fill('Åby');
   await filter.press('Enter');
   await expect(page.getByRole('link', { name: 'Smoke Åby', exact: true })).toBeVisible();
   await expect(page.getByRole('link', { name: 'Smoke Örebro', exact: true })).not.toBeVisible();
-  await page.getByRole('columnheader', { name: 'Municipality' }).getByTestId('FilterAltIcon').click();
+  await filterToggle.click();
   await filter.fill('no-such-municipality');
   await filter.press('Enter');
   await expect(page.getByRole('link', { name: 'Smoke Åby', exact: true })).not.toBeVisible();
-  await page.getByRole('columnheader', { name: 'Municipality' }).getByTestId('FilterAltIcon').click();
+  await filterToggle.click();
   await filter.fill('');
   await filter.press('Enter');
   await expect(page.getByRole('link', { name: 'Smoke Åby', exact: true })).toBeVisible();
@@ -80,7 +83,7 @@ test('logout and layout actions reject anonymous requests', async ({ playwright,
       ['/statuses', 'views/statuses/route.tsx', 'DELETE'],
     ]) {
       const response = await anonymous.fetch(dataUrl(path, file), { method, form: {}, maxRedirects: 0 });
-      expect(response.headers()['x-remix-redirect'] || response.headers().location).toBe('/signin');
+      expect(await redirectLocation(response)).toBe('/signin');
     }
   } finally {
     await anonymous.dispose();

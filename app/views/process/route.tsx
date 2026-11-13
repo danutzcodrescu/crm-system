@@ -1,10 +1,16 @@
 import CheckBox from '@mui/icons-material/CheckBox';
 import List from '@mui/icons-material/List';
 import { Link } from '@mui/material';
-import { json, LoaderFunctionArgs, MetaFunction, redirect } from '@remix-run/node';
-import { Link as RLink, useLoaderData } from '@remix-run/react';
 import { range } from 'lodash-es';
 import { useMemo } from 'react';
+import {
+  data as routeData,
+  Link as RLink,
+  LoaderFunctionArgs,
+  MetaFunction,
+  redirect,
+  useLoaderData,
+} from 'react-router';
 
 import { PageContainer } from '~/components/shared/PageContainer';
 import { SendEmail } from '~/components/shared/SendEmail';
@@ -23,10 +29,10 @@ export async function loader({ request }: LoaderFunctionArgs) {
   const [error, data] = await getProcessDataForMunicipalities();
 
   if (error) {
-    return json({ error: 'Could not fetch municipalities process data' }, { status: 500 });
+    return routeData({ error: 'Could not fetch municipalities process data' }, { status: 500 });
   }
 
-  return json({ data });
+  return routeData({ data });
 }
 
 export const meta: MetaFunction = () => {

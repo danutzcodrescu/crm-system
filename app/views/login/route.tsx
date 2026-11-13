@@ -1,6 +1,13 @@
 import { Box, Button, Card, CardContent, CardHeader, Stack, TextField } from '@mui/material';
-import { ActionFunctionArgs, json, redirect } from '@remix-run/node';
-import { Form, MetaFunction, useActionData, useLoaderData } from '@remix-run/react';
+import {
+  ActionFunctionArgs,
+  data as routeData,
+  Form,
+  MetaFunction,
+  redirect,
+  useActionData,
+  useLoaderData,
+} from 'react-router';
 import { HoneypotInputs, HoneypotProvider } from 'remix-utils/honeypot/react';
 import { SpamError } from 'remix-utils/honeypot/server';
 
@@ -8,7 +15,7 @@ import { login } from '~/utils/server/auth.server';
 import { honeypot } from '~/utils/server/honeypot.server';
 
 export const loader = async () => {
-  return json({ honeypotInputProps: await honeypot.getInputProps() });
+  return routeData({ honeypotInputProps: await honeypot.getInputProps() });
 };
 
 export const meta: MetaFunction = () => {
@@ -21,7 +28,7 @@ export const action = async ({ request }: ActionFunctionArgs) => {
     await honeypot.check(formData);
   } catch (error) {
     if (error instanceof SpamError) {
-      throw json({ error: 'You seem to spam' }, { status: 451 });
+      throw routeData({ error: 'You seem to spam' }, { status: 451 });
     }
   }
 
@@ -29,13 +36,13 @@ export const action = async ({ request }: ActionFunctionArgs) => {
   const password = formData.get('password');
 
   if (!username || !password) {
-    return json({ error: 'Username or password field cannot be empty' }, { status: 400 });
+    return routeData({ error: 'Username or password field cannot be empty' }, { status: 400 });
   }
 
   const [error, cookie] = await login(username as string, password as string, request);
 
   if (error) {
-    return json(
+    return routeData(
       { error: error.startsWith('Username/password ') ? error : 'There was an issue when trying to login' },
       { status: 500 },
     );

@@ -1,4 +1,4 @@
-import { ActionFunctionArgs, json, redirect } from '@remix-run/node';
+import { ActionFunctionArgs, data as routeData, redirect } from 'react-router';
 
 import { isLoggedIn } from '~/utils/server/auth.server';
 import { createReminder } from '~/utils/server/repositories/reminders.server';
@@ -11,7 +11,7 @@ export async function action({ request, params }: ActionFunctionArgs) {
     const data = await request.formData();
     const id = params.companyId;
     if (!id) {
-      return json(
+      return routeData(
         { message: 'Missing required parameters', severity: 'error', timeStamp: Date.now() },
         { status: 400 },
       );
@@ -25,11 +25,14 @@ export async function action({ request, params }: ActionFunctionArgs) {
       data.get('logId') as string,
     );
     if (error) {
-      return json({ message: 'Could not create reminder', severity: 'error', timeStamp: Date.now() }, { status: 500 });
+      return routeData(
+        { message: 'Could not create reminder', severity: 'error', timeStamp: Date.now() },
+        { status: 500 },
+      );
     }
 
-    return json({ message: 'Reminder created successfully', severity: 'success', timeStamp: Date.now() });
+    return routeData({ message: 'Reminder created successfully', severity: 'success', timeStamp: Date.now() });
   }
 
-  return json({ status: 405 });
+  return routeData({ status: 405 });
 }

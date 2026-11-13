@@ -2,6 +2,7 @@
 import { utils, write } from 'xlsx';
 
 import { companyId, expect, logId, test, year } from './fixtures';
+import { readRouteData } from './route-data';
 import { dataUrl, pages } from './routes';
 
 const edits = [
@@ -102,7 +103,7 @@ test('recurring consultation form persists the completion flag', async ({ page, 
 test('log create, edit and delete actually persist', async ({ request, database }) => {
   const url = dataUrl(`/api/logs/${companyId}`, 'api/notes-log/companyLog.ts');
   const created = await request.post(url, { form: { description: 'Smoke CRUD log', date: `${year}-03-04` } });
-  expect((await created.json()).severity).toBe('success');
+  expect((await readRouteData(created)).severity).toBe('success');
   const {
     rows: [log],
   } = await database.query('SELECT id FROM logs WHERE description = $1', ['Smoke CRUD log']);
@@ -110,15 +111,15 @@ test('log create, edit and delete actually persist', async ({ request, database 
   const logUrl = dataUrl(`/api/logs/${companyId}/${log.id}`, 'api/notes-log/log.ts');
   expect(
     (
-      await (
-        await request.patch(logUrl, { form: { description: 'Smoke CRUD log edited', date: `${year}-03-05` } })
-      ).json()
+      await readRouteData(
+        await request.patch(logUrl, { form: { description: 'Smoke CRUD log edited', date: `${year}-03-05` } }),
+      )
     ).severity,
   ).toBe('success');
   expect((await database.query('SELECT description FROM logs WHERE id = $1', [log.id])).rows[0].description).toBe(
     'Smoke CRUD log edited',
   );
-  expect((await (await request.delete(logUrl)).json()).severity).toBe('success');
+  expect((await readRouteData(await request.delete(logUrl))).severity).toBe('success');
   expect((await database.query('SELECT id FROM logs WHERE id = $1', [log.id])).rowCount).toBe(0);
 });
 
@@ -132,7 +133,7 @@ test('global log action creates a log with a linked reminder', async ({ request,
       reminderDescription: 'Smoke linked reminder',
     },
   });
-  expect((await response.json()).severity).toBe('success');
+  expect((await readRouteData(response)).severity).toBe('success');
   const result = await database.query(
     'SELECT r.description FROM logs l JOIN reminders r ON l.reminder_id = r.id WHERE l.description = $1',
     ['Smoke global log'],
@@ -144,7 +145,7 @@ test('contacts can be created globally, updated and deleted', async ({ request, 
   const response = await request.post(dataUrl('/api/responsibles', 'api/responsibles/responsibles.tsx'), {
     form: { companyId, name: 'Smoke CRUD contact', email: 'crud@example.invalid', phoneNumber: '123', title: 'Tester' },
   });
-  expect((await response.json()).severity).toBe('success');
+  expect((await readRouteData(response)).severity).toBe('success');
   const {
     rows: [contact],
   } = await database.query('SELECT id FROM responsibles WHERE email = $1', ['crud@example.invalid']);
@@ -154,7 +155,7 @@ test('contacts can be created globally, updated and deleted', async ({ request, 
   );
   expect(
     (
-      await (
+      await readRouteData(
         await request.patch(url, {
           form: {
             name: 'Smoke CRUD edited',
@@ -163,14 +164,14 @@ test('contacts can be created globally, updated and deleted', async ({ request, 
             mobileNumber: '789',
             title: 'Updated',
           },
-        })
-      ).json()
+        }),
+      )
     ).severity,
   ).toBe('success');
   expect(
     (await database.query('SELECT mobile_number FROM responsibles WHERE id = $1', [contact.id])).rows[0].mobile_number,
   ).toBe('789');
-  expect((await (await request.delete(url)).json()).severity).toBe('success');
+  expect((await readRouteData(await request.delete(url))).severity).toBe('success');
   expect((await database.query('SELECT id FROM responsibles WHERE id = $1', [contact.id])).rowCount).toBe(0);
 });
 
@@ -208,7 +209,7 @@ for (const kind of ['reporting', 'general-information', 'invoicing', 'responsibl
       },
     });
     expect(response.status(), await response.text()).toBe(200);
-    expect((await response.json()).severity).toBe('success');
+    expect((await readRouteData(response)).severity).toBe('success');
     const checks: Record<string, [string, string]> = {
       reporting: [
         `SELECT cigarette_butts::text AS value FROM reporting WHERE company_id = $1 AND year = ${year}`,
@@ -239,7 +240,7 @@ test('reminder action links a real reminder to its log', async ({ request, datab
       form: { description: 'Smoke persisted reminder', date: `${year}-12-15`, logId },
     },
   );
-  expect((await response.json()).severity).toBe('success');
+  expect((await readRouteData(response)).severity).toBe('success');
   expect(
     (
       await database.query(
@@ -257,24 +258,26 @@ test('municipality update and delete persist', async ({ request, database }) => 
     "INSERT INTO companies (name, code, email, status_id) VALUES ('Smoke disposable', '9999', 'disposable@example.invalid', 1) RETURNING id",
   );
   const url = dataUrl(`/api/municipalities/${company.id}`, 'api/municipalities/route.ts');
-  expect((await (await request.patch(url, { form: { name: 'Smoke disposable updated' } })).json()).severity).toBe(
+  expect((await readRouteData(await request.patch(url, { form: { name: 'Smoke disposable updated' } }))).severity).toBe(
     'success',
   );
   expect((await database.query('SELECT name FROM companies WHERE id = $1', [company.id])).rows[0].name).toBe(
     'Smoke disposable updated',
   );
-  expect((await (await request.delete(url)).json()).severity).toBe('success');
+  expect((await readRouteData(await request.delete(url))).severity).toBe('success');
   expect((await database.query('SELECT id FROM companies WHERE id = $1', [company.id])).rowCount).toBe(0);
 });
 
 test('status create and delete persist', async ({ request, database }) => {
   const url = dataUrl('/statuses', 'views/statuses/route.tsx');
-  expect((await (await request.post(url, { form: { statusName: 'Smoke disposable status' } })).json()).severity).toBe(
-    'success',
-  );
+  expect(
+    (await readRouteData(await request.post(url, { form: { statusName: 'Smoke disposable status' } }))).severity,
+  ).toBe('success');
   const {
     rows: [status],
   } = await database.query('SELECT id FROM statuses WHERE name = $1', ['Smoke disposable status']);
-  expect((await (await request.delete(url, { form: { id: String(status.id) } })).json()).severity).toBe('success');
+  expect((await readRouteData(await request.delete(url, { form: { id: String(status.id) } }))).severity).toBe(
+    'success',
+  );
   expect((await database.query('SELECT id FROM statuses WHERE id = $1', [status.id])).rowCount).toBe(0);
 });

@@ -130,6 +130,7 @@ dist
 
 /.cache
 /build
+/.react-router/
 /test-results/
 /playwright-report/
 /blob-report/

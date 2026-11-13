@@ -1,6 +1,14 @@
 import { Box } from '@mui/material';
-import { ActionFunctionArgs, json, LoaderFunctionArgs, MetaFunction, redirect } from '@remix-run/node';
-import { Outlet, ShouldRevalidateFunctionArgs, useLoaderData } from '@remix-run/react';
+import {
+  ActionFunctionArgs,
+  data as routeData,
+  LoaderFunctionArgs,
+  MetaFunction,
+  Outlet,
+  redirect,
+  ShouldRevalidateFunctionArgs,
+  useLoaderData,
+} from 'react-router';
 
 import { Topbar } from '~/components/Topbar';
 import { isLoggedIn, logout } from '~/utils/server/auth.server';
@@ -11,10 +19,10 @@ export async function loader({ request }: LoaderFunctionArgs) {
   if (!isAuthenticated) return redirect('/signin');
   if (!isTokenSet) {
     const token = await getRedirectUrlIfThereIsNoToken(request);
-    return json({ redirectUrl: token });
+    return routeData({ redirectUrl: token });
   }
   setImmediate(() => clearRefreshToken());
-  return json({ redirectUrl: undefined });
+  return routeData({ redirectUrl: undefined });
 }
 
 export async function action({ request }: ActionFunctionArgs) {

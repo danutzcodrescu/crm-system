@@ -1,10 +1,20 @@
 import Cancel from '@mui/icons-material/Cancel';
 import CheckBox from '@mui/icons-material/CheckBox';
 import { FormControl, InputLabel, Link, MenuItem, Select } from '@mui/material';
-import { ActionFunctionArgs, json, LoaderFunctionArgs, MetaFunction, redirect } from '@remix-run/node';
-import { Link as RLink, useFetcher, useLoaderData, useLocation, useNavigate } from '@remix-run/react';
 import { getYear } from 'date-fns';
 import { useCallback, useMemo } from 'react';
+import {
+  ActionFunctionArgs,
+  data as routeData,
+  Link as RLink,
+  LoaderFunctionArgs,
+  MetaFunction,
+  redirect,
+  useFetcher,
+  useLoaderData,
+  useLocation,
+  useNavigate,
+} from 'react-router';
 import { ClientOnly } from 'remix-utils/client-only';
 
 import { EditDialog } from '~/components/shared/EditDialog.client';
@@ -44,9 +54,9 @@ export async function loader({ request }: LoaderFunctionArgs) {
   }
   const [recurringData, yearsData] = await Promise.all([getGeneralInformationData(parseInt(year)), getAllYears(2022)]);
   if (recurringData[0] || yearsData[0]) {
-    return json({ error: recurringData[0] || yearsData[0] }, { status: 500 });
+    return routeData({ error: recurringData[0] || yearsData[0] }, { status: 500 });
   }
-  return json({ generalInformation: recurringData[1], yearsData: yearsData[1] });
+  return routeData({ generalInformation: recurringData[1], yearsData: yearsData[1] });
 }
 
 export async function action({ request }: ActionFunctionArgs) {
@@ -59,7 +69,7 @@ export async function action({ request }: ActionFunctionArgs) {
     const year = body.get('year');
 
     if (!id || !year) {
-      return json(
+      return routeData(
         { message: 'Missing required parameters', severity: 'error', timeStamp: new Date() },
         { status: 400 },
       );
@@ -75,14 +85,14 @@ export async function action({ request }: ActionFunctionArgs) {
     });
 
     if (error) {
-      return json(
+      return routeData(
         { message: 'Could not update the record', severity: 'error', timeStamp: new Date() },
         { status: 500 },
       );
     }
-    return json({ message: 'Record updated successfully', severity: 'success', timeStamp: new Date() });
+    return routeData({ message: 'Record updated successfully', severity: 'success', timeStamp: new Date() });
   }
-  return json({ status: 405 });
+  return routeData({ status: 405 });
 }
 
 export default function Reporting() {

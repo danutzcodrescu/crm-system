@@ -1,6 +1,5 @@
 import { Box, Card, CardContent } from '@mui/material';
-import { json, LoaderFunctionArgs, MetaFunction, redirect } from '@remix-run/node';
-import { useFetcher, useLoaderData } from '@remix-run/react';
+import { data as routeData, LoaderFunctionArgs, MetaFunction, redirect, useFetcher, useLoaderData } from 'react-router';
 
 import { AgreementCard } from '~/components/municipality/AgreementCard';
 import { CompensationCard } from '~/components/municipality/CompensationCard';
@@ -113,7 +112,7 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
     invoicingResp[0] ||
     usersResp[0]
   ) {
-    return json({ message: 'Could not fetch data for company', severity: 'error' }, { status: 500 });
+    return routeData({ message: 'Could not fetch data for company', severity: 'error' }, { status: 500 });
   }
 
   setImmediate(() => clearRefreshToken());
@@ -125,10 +124,10 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
   );
 
   if (recurringConsultationError) {
-    return json({ message: 'Could not fetch recurring consultation data', severity: 'error' }, { status: 500 });
+    return routeData({ message: 'Could not fetch recurring consultation data', severity: 'error' }, { status: 500 });
   }
 
-  return json({
+  return routeData({
     message: {
       users: usersResp[1],
       logs: logsResp[1],

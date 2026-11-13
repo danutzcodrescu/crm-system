@@ -11,7 +11,7 @@ pnpm test:tooling
 pnpm test:smoke
 ```
 
-Each run **builds `Dockerfile.db`**, using its default `postgres:17` base (latest 17.x patch when pulled). It starts that custom image on a random port, executes the real `db/*.sql` migrations in filename order, then automatically executes **`e2e/seed.sql`** through `/docker-entrypoint-initdb.d/9999_seed.sql`. It launches the actual Express/Remix application on another free port. The app process and test database are removed at teardown, including failed runs; the built image/layers are cached locally. Existing Compose volumes and databases are not touched. Never run the legacy `db:seed` script for these tests: it imports private spreadsheets and deletes existing data.
+Each run **builds `Dockerfile.db`**, using its default `postgres:17` base (latest 17.x patch when pulled). It starts that custom image on a random port, executes the real `db/*.sql` migrations in filename order, then automatically executes **`e2e/seed.sql`** through `/docker-entrypoint-initdb.d/9999_seed.sql`. It launches the actual Express/React Router application on another free port. The app process and test database are removed at teardown, including failed runs; the built image/layers are cached locally. Existing Compose volumes and databases are not touched. Never run the legacy `db:seed` script for these tests: it imports private spreadsheets and deletes existing data.
 
 Explicitly select the PostgreSQL 17 base without changing the development/production containers:
 
@@ -21,7 +21,31 @@ SMOKE_POSTGRES_IMAGE=postgres:17 pnpm test:smoke
 
 The override changes only the Dockerfile's base image; it does **not** bypass the custom locale setup. A database scenario verifies `datcollate`, `datctype` and Swedish ordering (`Zulu`, `Åby`, `Älmhult`, `Örebro`).
 
-CI runs type checks, the production build and the smoke suite on Node 26.13.0 / PostgreSQL 17 without repository secrets. This tests a **freshly initialized** database, not an existing data-volume update. Browser scenarios run in Vite middleware mode; building the production Docker image is a separate check, not a claim that browser tests run against that image. Production-only runtime/secrets and credentialed integrations still need deployment checks. See [the upgrade notes](runtime-upgrade.md).
+CI runs type checks, the production build and the smoke suite on Node 26.13.0 / PostgreSQL 17 without repository secrets. This tests a **freshly initialized** database, not an existing data-volume update. Browser scenarios normally run in Vite middleware mode; the optional Docker mode below runs the same scenarios against an existing compiled production image. CI's Docker build job remains a separate check. Credentialed integrations still need deployment checks.
+
+## Production image on Node 26
+
+Build a local image from the existing Dockerfile, with only the base temporarily pinned to Node 26.13.0 (the Dockerfile itself is not edited):
+
+```sh
+docker build --tag crm-system:router7-node26 --file - --progress=plain . \
+  < <(sed 's/^FROM node:lts  AS base$/FROM node:26.13.0 AS base/' Dockerfile)
+docker run --rm -i --entrypoint node crm-system:router7-node26 --input-type=module \
+  < e2e/support/docker-runtime-probe.mjs
+CRM_SMOKE_IMAGE=crm-system:router7-node26 pnpm test:smoke
+```
+
+The standalone runtime probe verifies Node 26, native Argon2 hashing/verification, real imports of Google APIs/Infisical/PDF/React Router/Sentry/XLSX, compiled artifacts, and the absence of development dependencies and test loaders. It runs without the secrets replacement.
+
+`e2e/docker-setup.ts` then starts that image with its normal production command and verifies that its runtime is Node 26. It connects only to a new disposable PostgreSQL container on an isolated test network. It does not rebuild or replace the application's compiled bundles. The production image has development dependencies pruned, and tests exercise SSR, hydration, authentication, APIs, PDF generation and all four XLSX imports against that image.
+
+The only external replacement is a Node loader copied into the **test container**, redirecting the Infisical SDK to synthetic secret values. Both loader files live in `e2e/support/`, which is excluded from production images. No developer environment files or real credentials are passed to the container, and production `Secure`/`HttpOnly` session cookies remain enabled. Browsers and Playwright allow Secure cookies on the trustworthy loopback URL used for these local tests.
+
+Docker-only cases additionally verify session cookie attributes, fingerprinted asset caching and the absence of the Express identification header. These cases are skipped in the default Vite smoke run. App/database logs default to `playwright/.cache/docker-smoke/`; override with `SMOKE_LOG_DIR`. The test containers and network are removed at teardown; the image is retained locally. This does not test credentialed Infisical/Gmail connectivity or production Sentry delivery.
+
+To match the deployment script's architecture, add `--platform linux/amd64` to the build, use a distinct image tag such as `crm-system:router7-node26-amd64`, and set `CRM_SMOKE_PLATFORM=linux/amd64` alongside `CRM_SMOKE_IMAGE` when running the suite. Add `--platform linux/amd64` to the standalone runtime probe's `docker run` too. On Apple Silicon this runs under Docker's amd64 emulation.
+
+Production testing exposed two development-only selector assumptions, not application failures: MUI removes its icon `data-testid` attributes in production, and React Router emits the entry URL as a module-preload link instead of `script[src]`. The shared filtering test and production asset test now use selectors that work with the compiled UI, without altering the application bundle or weakening their assertions.
 
 ## GitHub Actions
 
@@ -36,14 +60,17 @@ No repository secrets, customer SQL backups, Compose database or external accoun
 
 ## Coverage
 
-- Inventory guard compares scenarios against every route registration in `vite.config.ts`; adding a route without a scenario fails the suite.
+- Inventory guard compares scenarios against every route registration in `app/routes.ts`; adding a route without a scenario fails the suite.
 - All 14 authenticated pages: dashboard, initial consultation, agreement, recurring consultation, reporting, general information, compensation, invoicing, municipalities list/detail, logs, statuses, years, process. Assertions cover real rendered headings/data, tables where applicable, browser errors, server errors, and a hydrated menu interaction.
 - Signin, signup, logout, reload/session persistence, invalid credentials, password mismatch, and unknown-route 404; Express `/health`.
-- All API registrations, including dynamic company/contact/log/attachment URLs, authenticated response contracts and anonymous access checks. Direct Remix `_data` loader/action requests are tested, not just full-page redirects: parent-layout authentication cannot protect those by itself.
+- All API registrations, including dynamic company/contact/log/attachment URLs, authenticated response contracts and anonymous access checks. Direct React Router `.data`/`_routes` loader/action requests are tested, not just full-page redirects: parent-layout authentication cannot protect those by itself. `e2e/route-data.ts` isolates decoding of the framework's internal transport.
 - Browser edits with database readback and reopen checks for consultation, agreement, reporting, general information, invoicing, statuses and years; recurring-consultation completion submission.
+- Dialog lifecycle regression checks: retain drafts after rejected actions, retry successfully, reopen with retained fetcher results, cancel without saving, and prevent an older pending save from closing a newly opened draft. Global creation uses the same success-only lifecycle.
 - Real multipart XLSX imports for all four import endpoints, plus invalid uploads, and SQL persistence checks.
+- The live compensation PDF generation route (`/municipalities/:municipalityId/:year.pdf`): PDF signature, end marker, download headers and anonymous-access guard, using real seeded compensation data and the actual renderer.
 - Contact/log CRUD, linked reminders, municipality update/delete and status create/delete. All destructive operations are confined to the disposable test database.
 - Global search, table filtering/no-match/reset, default-year redirects and year selection, empty municipality sections, and a narrow-viewport rendering/menu pass for every authenticated page.
+- Dashboard reminders: toggle recent/all, refresh on reopening, retain the selected recent view when an older request finishes, and automatically revalidate the full list after an action.
 
 See [exploratory findings](smoke-exploration.md) for bugs discovered and remaining limitations.
 

@@ -1,4 +1,4 @@
-import { json, LoaderFunctionArgs, redirect } from '@remix-run/node';
+import { data as routeData, LoaderFunctionArgs, redirect } from 'react-router';
 
 import { isLoggedIn } from '~/utils/server/auth.server';
 import {
@@ -18,7 +18,7 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
   const mimeType = searchParams.get('mimeType');
   const filename = searchParams.get('filename');
   if (!mimeType || !filename) {
-    return json({ message: 'MimeType is required', severity: 'error' }, { status: 400 });
+    return routeData({ message: 'MimeType is required', severity: 'error' }, { status: 400 });
   }
   const messageId = params.messageId as string;
   const attachmentId = params.attachmentId as string;
@@ -26,7 +26,7 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
   const [error, data] = await getAttachment(attachmentId, messageId);
   setImmediate(() => clearRefreshToken());
   if (error) {
-    return json({ message: 'Could not fetch emails', severity: 'error' }, { status: 500 });
+    return routeData({ message: 'Could not fetch emails', severity: 'error' }, { status: 500 });
   }
 
   const decodedData = Buffer.from((data as string).replace(/-/g, '+').replace(/_/g, '/'), 'base64');

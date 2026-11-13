@@ -1,4 +1,4 @@
-import { ActionFunctionArgs, json, redirect } from '@remix-run/node';
+import { ActionFunctionArgs, data as routeData, redirect } from 'react-router';
 
 import { isLoggedIn, logout } from '~/utils/server/auth.server';
 import { logger } from '~/utils/server/logger.server';
@@ -13,7 +13,7 @@ export async function action({ request }: ActionFunctionArgs) {
       return redirect('/signin');
     } catch (e) {
       logger.error(e);
-      return json({ message: 'Could not logout', severity: 'error', timeStamp: Date.now() }, { status: 500 });
+      return routeData({ message: 'Could not logout', severity: 'error', timeStamp: Date.now() }, { status: 500 });
     }
   }
 }

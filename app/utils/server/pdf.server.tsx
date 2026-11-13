@@ -1,5 +1,5 @@
 import { renderToStream } from '@react-pdf/renderer';
-import { LoaderFunctionArgs, redirect } from '@remix-run/node';
+import { LoaderFunctionArgs, redirect } from 'react-router';
 
 import { PDF } from '../../components/PDF.server';
 import { isLoggedIn } from './auth.server';
@@ -8,14 +8,19 @@ import { CompensationDataPerCompanyPerYear, getCompensationForCompanyByYear } fr
 
 export async function handlePDFRequest(request: Request, headers: Headers) {
   // get the data for the PDF
-  const response = (await loader({ request, context: {}, params: {} })) as CompensationDataPerCompanyPerYear;
+  const response = (await loader({ request })) as CompensationDataPerCompanyPerYear;
   // if it's a response return it, this means we redirected
   if (response instanceof Response) return response;
   // set the correct content-type
   headers.set('Content-Type', 'application/pdf');
+  const filename = `${response.companyName} ersättning ${response.year}.pdf`;
+  const encodedFilename = encodeURIComponent(filename).replace(
+    /[!'()*]/g,
+    (character) => `%${character.charCodeAt(0).toString(16).toUpperCase()}`,
+  );
   headers.set(
     'Content-Disposition',
-    `${process.env.NODE_ENV === 'development' ? 'inline' : 'attachment'}; filename="${response.companyName} ersättning ${response.year}.pdf"`,
+    `${process.env.NODE_ENV === 'development' ? 'inline' : 'attachment'}; filename="compensation-${response.year}.pdf"; filename*=UTF-8''${encodedFilename}`,
   );
   // render the PDF to a stream
   const stream = await renderToStream(<PDF {...response} />);
@@ -34,7 +39,7 @@ export async function handlePDFRequest(request: Request, headers: Headers) {
   return new Response(new Uint8Array(body), { status: 200, headers });
 }
 
-export async function loader({ request }: LoaderFunctionArgs) {
+export async function loader({ request }: Pick<LoaderFunctionArgs, 'request'>) {
   const isAuthenticated = await isLoggedIn(request);
   if (!isAuthenticated) return redirect('/signin');
   const pathname = new URL(request.url).pathname;

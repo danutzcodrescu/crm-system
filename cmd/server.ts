@@ -1,8 +1,9 @@
-import { createRequestHandler } from '@remix-run/express';
+import { createRequestHandler } from '@react-router/express';
 import compression from 'compression';
 import express from 'express';
 import { join } from 'path';
 import { pinoHttp } from 'pino-http';
+import type { ServerBuild } from 'react-router';
 
 import { cleanExpiredSessions } from './cron.js';
 // import helmet from 'helmet';
@@ -16,12 +17,12 @@ const viteDevServer =
         }),
       );
 
-const remixHandler = createRequestHandler({
-  // @ts-ignore server packing
+// Resolved relative to the emitted dist/cmd/server.js, not this source file.
+const productionBuildPath = '../server/index.js';
+const routerHandler = createRequestHandler({
   build: viteDevServer
-    ? () => viteDevServer.ssrLoadModule('virtual:remix/server-build')
-    : // @ts-ignore server packing
-      await import('../server/index.js'),
+    ? () => viteDevServer.ssrLoadModule('virtual:react-router/server-build') as Promise<ServerBuild>
+    : await import(productionBuildPath),
 });
 
 cleanExpiredSessions.start();
@@ -65,7 +66,7 @@ app.get('/health', (req, res) => {
 });
 
 // handle SSR requests
-app.all('*', remixHandler);
+app.all('*', routerHandler);
 
 const port = process.env.PORT || 4200;
 app.listen(port, async () => {

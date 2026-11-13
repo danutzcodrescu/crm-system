@@ -1,6 +1,12 @@
 import { Box, Card, CardContent, Link, Stack, Typography } from '@mui/material';
-import { json, LoaderFunctionArgs, MetaFunction, redirect } from '@remix-run/node';
-import { Link as RLink, useLoaderData } from '@remix-run/react';
+import {
+  data as routeData,
+  Link as RLink,
+  LoaderFunctionArgs,
+  MetaFunction,
+  redirect,
+  useLoaderData,
+} from 'react-router';
 
 import Reminders from '~/components/dashboard/Reminders';
 import { PageContainer } from '~/components/shared/PageContainer';
@@ -75,7 +81,7 @@ export async function loader({ request }: LoaderFunctionArgs) {
     reminders[0] ||
     remindersCount[0]
   ) {
-    return json(
+    return routeData(
       {
         error:
           initialConsultation[0] ||
@@ -92,7 +98,7 @@ export async function loader({ request }: LoaderFunctionArgs) {
     );
   }
 
-  return json({
+  return routeData({
     initialConsultation: initialConsultation[1]?.[0].initialConsultationSigned,
     agreement: {
       old: agreement[1]?.[0].inOldAgreement,

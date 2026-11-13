@@ -1,7 +1,7 @@
 import { Box, Card, CardContent, Skeleton, Typography } from '@mui/material';
 import { useIntersectionObserver } from '@react-hookz/web';
-import { useFetcher, useParams } from '@remix-run/react';
 import { useEffect, useRef, useState } from 'react';
+import { useFetcher, useParams } from 'react-router';
 
 import { EmailApiResponse, loader } from '~/api/emails/route';
 import { Thread } from '~/utils/server/services/gmail.server';

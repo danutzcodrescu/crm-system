@@ -1,7 +1,7 @@
 import AddCircle from '@mui/icons-material/AddCircle';
 import { Alert, AlertColor, IconButton, Link, Menu, MenuItem, Snackbar, Tooltip } from '@mui/material';
-import { Link as RLink, useFetcher } from '@remix-run/react';
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useState } from 'react';
+import { Link as RLink, useFetcher } from 'react-router';
 import { ClientOnly } from 'remix-utils/client-only';
 
 import { useEditFields } from '~/hooks/editFields';
@@ -10,11 +10,19 @@ import { EditDialog } from '../shared/EditDialog.client';
 
 export function GlobalCreate() {
   const fetcher = useFetcher();
-  const [isAlertOpen, setAlertStatus] = useState(false);
+  const [dismissedResult, setDismissedResult] = useState<unknown>();
   const [municipalities, setMunicipalities] = useState<{ id: string; name: string; code: string }[]>([]);
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const { setEditableData, fields, setFields } = useEditFields(fetcher);
-  const municipalityId = useRef<string | null>(null);
+  const [municipalityId, setMunicipalityId] = useState<string | null>(null);
+  const isAlertOpen =
+    fetcher.state === 'idle' && typeof fetcher.data?.message === 'string' && fetcher.data !== dismissedResult;
+  const dismissAlert = () => setDismissedResult(fetcher.data);
+
+  // Retain the options when the same fetcher later holds a mutation result.
+  if (Array.isArray(fetcher.data?.message) && municipalities !== fetcher.data.message) {
+    setMunicipalities(fetcher.data.message);
+  }
 
   const fetchData = useCallback(() => {
     if (!municipalities.length) {
@@ -22,20 +30,6 @@ export function GlobalCreate() {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [municipalities]);
-
-  useEffect(() => {
-    // @ts-expect-error it works
-    if (!municipalities.length && fetcher.data?.message && Array.isArray(fetcher.data.message)) {
-      // @ts-expect-error it works
-      setMunicipalities(fetcher.data.message);
-      // @ts-expect-error it works
-    } else if (fetcher?.data?.message && typeof fetcher.data?.message === 'string') {
-      setAlertStatus(true);
-      setEditableData([]);
-    }
-    // @ts-expect-error it works
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [fetcher?.data?.message, municipalities]);
 
   const setNewLogFields = useCallback(() => {
     setEditableData([
@@ -119,8 +113,9 @@ export function GlobalCreate() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [municipalities]);
 
-  if (fetcher?.formData?.get('companyId')) {
-    municipalityId.current = fetcher.formData.get('companyId') as string;
+  const submittedMunicipalityId = fetcher.formData?.get('companyId');
+  if (typeof submittedMunicipalityId === 'string' && submittedMunicipalityId !== municipalityId) {
+    setMunicipalityId(submittedMunicipalityId);
   }
   return (
     <>
@@ -159,17 +154,20 @@ export function GlobalCreate() {
       <Snackbar
         open={isAlertOpen}
         autoHideDuration={5000}
-        onClose={() => setAlertStatus(false)}
+        onClose={dismissAlert}
         anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
       >
-        {/* @ts-expect-error type issue */}
-        <Alert severity={fetcher?.data?.severity as AlertColor} onClose={() => setAlertStatus(false)}>
-          {/* @ts-expect-error type issue */}
-          {fetcher?.data?.message}. Click&nbsp;
-          <Link component={RLink} prefetch="intent" to={`/municipalities/${municipalityId.current}`}>
-            here
-          </Link>{' '}
-          to see more details.
+        <Alert severity={fetcher?.data?.severity as AlertColor} onClose={dismissAlert}>
+          {typeof fetcher.data?.message === 'string' ? fetcher.data.message : null}
+          {fetcher.data?.severity === 'success' && municipalityId ? (
+            <>
+              . Click&nbsp;
+              <Link component={RLink} prefetch="intent" to={`/municipalities/${municipalityId}`}>
+                here
+              </Link>{' '}
+              to see more details.
+            </>
+          ) : null}
         </Alert>
       </Snackbar>
     </>

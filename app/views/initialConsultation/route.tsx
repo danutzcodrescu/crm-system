@@ -2,17 +2,26 @@ import Cancel from '@mui/icons-material/Cancel';
 import CheckBox from '@mui/icons-material/CheckBox';
 import LinkIcon from '@mui/icons-material/Link';
 import { IconButton, Link, Tooltip, Typography } from '@mui/material';
-import { ActionFunctionArgs, json, LoaderFunctionArgs, MetaFunction, redirect } from '@remix-run/node';
-import { Link as RLink, ShouldRevalidateFunctionArgs, useFetcher, useLoaderData } from '@remix-run/react';
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useMemo } from 'react';
+import {
+  ActionFunctionArgs,
+  data as routeData,
+  Link as RLink,
+  LoaderFunctionArgs,
+  MetaFunction,
+  redirect,
+  ShouldRevalidateFunctionArgs,
+  useFetcher,
+  useLoaderData,
+} from 'react-router';
 import { ClientOnly } from 'remix-utils/client-only';
 
-import { Field } from '~/components/EditForm';
 import { EditDialog } from '~/components/shared/EditDialog.client';
 import { PageContainer } from '~/components/shared/PageContainer';
 import { SendEmail } from '~/components/shared/SendEmail';
 import { PaginatedTable } from '~/components/shared/table/PaginatedTable';
 import { TableActionsCell } from '~/components/shared/table/TableActionsCell';
+import { useEditFields } from '~/hooks/editFields';
 import { formatDate } from '~/utils/client/dates';
 import { isLoggedIn } from '~/utils/server/auth.server';
 import {
@@ -38,7 +47,7 @@ export async function action({ request }: ActionFunctionArgs) {
     const body = await request.formData();
     const id = body.get('id');
     if (!id) {
-      return json({ message: 'Id is required', severity: 'error', timeStamp: new Date() }, { status: 400 });
+      return routeData({ message: 'Id is required', severity: 'error', timeStamp: new Date() }, { status: 400 });
     }
     const [error] = await editInitialConsultationRecord({
       id: id as string,
@@ -52,15 +61,15 @@ export async function action({ request }: ActionFunctionArgs) {
     });
 
     if (error) {
-      return json(
+      return routeData(
         { message: 'Could not update the record', severity: 'error', timeStamp: new Date() },
         { status: 500 },
       );
     }
-    return json({ message: 'Record updated successfully', severity: 'success', timeStamp: new Date() });
+    return routeData({ message: 'Record updated successfully', severity: 'success', timeStamp: new Date() });
   }
 
-  return json({ status: 405 });
+  return routeData({ status: 405 });
 }
 
 export async function loader({ request }: LoaderFunctionArgs) {
@@ -69,9 +78,9 @@ export async function loader({ request }: LoaderFunctionArgs) {
   }
   const [error, data] = await getInitialConsultationData();
   if (error) {
-    return json({ error }, { status: 500 });
+    return routeData({ error }, { status: 500 });
   }
-  return json(data);
+  return routeData(data);
 }
 
 export function shouldRevalidate({ formAction }: ShouldRevalidateFunctionArgs) {
@@ -81,46 +90,49 @@ export function shouldRevalidate({ formAction }: ShouldRevalidateFunctionArgs) {
 
 export default function InitialConsultation() {
   const data = useLoaderData<typeof loader>();
-  const [fields, setFields] = useState<Field[]>([]);
   const fetcher = useFetcher();
+  const { fields, setFields } = useEditFields(fetcher);
   const setIds = useIds((state) => state.setIds);
 
-  const setEditableData = useCallback((data: IInitialConsultation) => {
-    setFields([
-      {
-        label: 'id',
-        name: 'id',
-        type: 'text',
-        defaultValue: data.id,
-        hidden: true,
-      },
-      {
-        label: 'Time for sending initial consultation',
-        name: 'documentDateSent',
-        type: 'date',
-        defaultValue: data.dateSent as unknown as string,
-      },
-      {
-        label: 'Date signed',
-        name: 'dateSigned',
-        type: 'date',
-        defaultValue: data.dateSigned as unknown as string,
-      },
+  const setEditableData = useCallback(
+    (data: IInitialConsultation) => {
+      setFields([
+        {
+          label: 'id',
+          name: 'id',
+          type: 'text',
+          defaultValue: data.id,
+          hidden: true,
+        },
+        {
+          label: 'Time for sending initial consultation',
+          name: 'documentDateSent',
+          type: 'date',
+          defaultValue: data.dateSent as unknown as string,
+        },
+        {
+          label: 'Date signed',
+          name: 'dateSigned',
+          type: 'date',
+          defaultValue: data.dateSigned as unknown as string,
+        },
 
-      {
-        label: 'Date shared with EPA',
-        name: 'dateShared',
-        type: 'date',
-        defaultValue: data.dateShared as unknown as string,
-      },
-      {
-        label: 'Link to signed document',
-        name: 'link',
-        type: 'link',
-        defaultValue: data.link,
-      },
-    ]);
-  }, []);
+        {
+          label: 'Date shared with EPA',
+          name: 'dateShared',
+          type: 'date',
+          defaultValue: data.dateShared as unknown as string,
+        },
+        {
+          label: 'Link to signed document',
+          name: 'link',
+          type: 'link',
+          defaultValue: data.link,
+        },
+      ]);
+    },
+    [setFields],
+  );
 
   const columns = useMemo<ColumnDef<IInitialConsultation>[]>(
     () => [
@@ -265,13 +277,6 @@ export default function InitialConsultation() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [data],
   );
-
-  useEffect(() => {
-    if (fetcher.state === 'idle' && fields.length) {
-      setFields([]);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [fetcher.state]);
 
   return (
     <PageContainer

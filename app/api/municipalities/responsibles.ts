@@ -1,4 +1,4 @@
-import { ActionFunctionArgs, json, redirect } from '@remix-run/node';
+import { ActionFunctionArgs, data as routeData, redirect } from 'react-router';
 
 import { isLoggedIn } from '~/utils/server/auth.server';
 import { createNewResponsible } from '~/utils/server/repositories/responsibles.server';
@@ -11,7 +11,7 @@ export async function action({ request, params }: ActionFunctionArgs) {
   if (request.method === 'POST') {
     const data = await request.formData();
     if (!id) {
-      return json(
+      return routeData(
         { message: 'Missing required parameters', severity: 'error', timeStamp: Date.now() },
         { status: 400 },
       );
@@ -25,11 +25,14 @@ export async function action({ request, params }: ActionFunctionArgs) {
       name: data.get('name') as string,
     });
     if (error) {
-      return json({ message: 'Could not update commune', severity: 'error', timeStamp: Date.now() }, { status: 500 });
+      return routeData(
+        { message: 'Could not update commune', severity: 'error', timeStamp: Date.now() },
+        { status: 500 },
+      );
     }
 
-    return json({ message: 'Responsible created succesfully', severity: 'success', timeStamp: Date.now() });
+    return routeData({ message: 'Responsible created succesfully', severity: 'success', timeStamp: Date.now() });
   }
 
-  return json({ status: 405 });
+  return routeData({ status: 405 });
 }

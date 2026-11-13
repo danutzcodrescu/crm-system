@@ -1,6 +1,6 @@
 import { Box, Card, CardContent, Stack, Typography } from '@mui/material';
-import { FetcherWithComponents } from '@remix-run/react';
 import { useCallback } from 'react';
+import { FetcherWithComponents } from 'react-router';
 import { ClientOnly } from 'remix-utils/client-only';
 
 import { useEditFields } from '~/hooks/editFields';

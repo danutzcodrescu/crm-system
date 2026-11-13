@@ -1,6 +1,8 @@
 import { Button, Dialog, DialogActions, DialogContent, DialogTitle, Stack, TextField } from '@mui/material';
-import { FetcherWithComponents } from '@remix-run/react';
-import { Fragment, ReactNode, useEffect, useState } from 'react';
+import { Fragment, ReactNode } from 'react';
+import { FetcherWithComponents } from 'react-router';
+
+import { useSubmissionState } from '~/hooks/submissionState';
 
 import { Field } from '../EditForm';
 
@@ -17,14 +19,7 @@ interface Props {
 }
 
 export function AddItem({ title, fields, renderAddButton, fetcher }: Props) {
-  const [isModalOpen, setModalState] = useState(false);
-
-  useEffect(() => {
-    if (fetcher.state === 'idle' && isModalOpen) {
-      setModalState(false);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [fetcher.state]);
+  const [isModalOpen, setModalState] = useSubmissionState(fetcher, false);
   return (
     <>
       {renderAddButton({ onClick: () => setModalState(true) })}

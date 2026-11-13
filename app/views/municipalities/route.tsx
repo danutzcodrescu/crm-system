@@ -2,9 +2,17 @@ import Cancel from '@mui/icons-material/Cancel';
 import CheckBox from '@mui/icons-material/CheckBox';
 import PersonAdd from '@mui/icons-material/PersonAdd';
 import { Box, IconButton, Link, Stack, Typography } from '@mui/material';
-import { json, LoaderFunctionArgs, MetaFunction, redirect } from '@remix-run/node';
-import { Link as RLink, ShouldRevalidateFunctionArgs, useFetcher, useLoaderData } from '@remix-run/react';
 import { useCallback, useMemo } from 'react';
+import {
+  data as routeData,
+  Link as RLink,
+  LoaderFunctionArgs,
+  MetaFunction,
+  redirect,
+  ShouldRevalidateFunctionArgs,
+  useFetcher,
+  useLoaderData,
+} from 'react-router';
 import { ClientOnly } from 'remix-utils/client-only';
 
 import { EditDialog } from '~/components/shared/EditDialog.client';
@@ -39,9 +47,9 @@ export async function loader({ request }: LoaderFunctionArgs) {
     getAllUsers(),
   ]);
   if (municipalities[0] || statusData[0] || users[0]) {
-    return json({ message: 'Could not fetch municipalities data', severity: 'error' }, { status: 500 });
+    return routeData({ message: 'Could not fetch municipalities data', severity: 'error' }, { status: 500 });
   }
-  return json({ municipalities: municipalities[1], statuses: statusData[1], users: users[1] });
+  return routeData({ municipalities: municipalities[1], statuses: statusData[1], users: users[1] });
 }
 
 export function shouldRevalidate({ formAction }: ShouldRevalidateFunctionArgs) {

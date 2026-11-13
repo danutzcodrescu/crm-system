@@ -1,17 +1,10 @@
-import {
-  type ActionFunctionArgs,
-  json,
-  redirect,
-  unstable_composeUploadHandlers,
-  unstable_createMemoryUploadHandler,
-  unstable_parseMultipartFormData,
-} from '@remix-run/node';
-import { read, utils } from 'xlsx';
+import { type ActionFunctionArgs, data as routeData, redirect } from 'react-router';
+import { utils } from 'xlsx';
 
 import { isLoggedIn } from '~/utils/server/auth.server';
-import { logger } from '~/utils/server/logger.server';
 import { getCompaniesWithCode } from '~/utils/server/repositories/companies.server';
 import { bulkImportReporting } from '~/utils/server/repositories/reporting.server';
+import { parseSpreadsheetUpload } from '~/utils/server/spreadsheet-upload.server';
 
 interface ReportingData {
   code: string;
@@ -32,45 +25,22 @@ function formatDate(date: string) {
 export async function action({ request }: ActionFunctionArgs) {
   const isAuthenticated = await isLoggedIn(request);
   if (!isAuthenticated) return redirect('/signin');
-  let dt: ReportingData[] = [];
-  const uploadHandler = unstable_composeUploadHandlers(
-    async ({ name, data }) => {
-      if (name !== 'file') {
-        return undefined;
-      }
-      const chunks = [] as Uint8Array[];
-      for await (const x of data) {
-        chunks.push(x);
-      }
-      try {
-        const workbook = read(Buffer.concat(chunks), { type: 'buffer' });
-        dt = utils
-          .sheet_to_json(workbook.Sheets[workbook.SheetNames[0]], {
-            header: ['code', 'reportingDate', 'cigaretteButts', 'motivation'],
-            raw: false,
-            dateNF: 'dd/mm/yyyy',
-            defval: undefined,
-          })
-          .slice(1) as ReportingData[];
-        return 'parsed';
-      } catch (e) {
-        logger.error(e);
-        return 'error';
-      }
-    },
-    unstable_createMemoryUploadHandler({
-      maxPartSize: 500_000_000,
-    }),
-  );
-
-  const formData = await unstable_parseMultipartFormData(request, uploadHandler);
+  const { formData, workbook } = await parseSpreadsheetUpload(request);
   const year = formData.get('year') as string;
-  if (!year || formData.get('file') !== 'parsed') {
-    return json({ message: 'Invalid file', severity: 'error', timeStamp: Date.now() }, { status: 400 });
+  if (!year || !workbook || !workbook.Sheets[workbook.SheetNames[0]]) {
+    return routeData({ message: 'Invalid file', severity: 'error', timeStamp: Date.now() }, { status: 400 });
   }
+  const dt = utils
+    .sheet_to_json(workbook.Sheets[workbook.SheetNames[0]], {
+      header: ['code', 'reportingDate', 'cigaretteButts', 'motivation'],
+      raw: false,
+      dateNF: 'dd/mm/yyyy',
+      defval: undefined,
+    })
+    .slice(1) as ReportingData[];
   const [error, data] = await getCompaniesWithCode();
   if (error) {
-    return json(
+    return routeData(
       { message: 'Could not get the municipalities', severity: 'error', timeStamp: Date.now() },
       { status: 500 },
     );
@@ -88,11 +58,11 @@ export async function action({ request }: ActionFunctionArgs) {
   );
 
   if (err) {
-    return json(
+    return routeData(
       { message: 'Could not import the reporting', severity: 'error', timeStamp: Date.now() },
       { status: 500 },
     );
   }
 
-  return json({ message: 'Reporting data imported successfully', severity: 'success', timeStamp: Date.now() });
+  return routeData({ message: 'Reporting data imported successfully', severity: 'success', timeStamp: Date.now() });
 }

@@ -1,4 +1,4 @@
-import { createCookieSessionStorage } from '@remix-run/node';
+import { createCookieSessionStorage } from 'react-router';
 
 import { maxAge } from './constants.server';
 import { getSecret } from './infisical.server';

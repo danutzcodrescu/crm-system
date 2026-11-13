@@ -1,4 +1,4 @@
-import { ActionFunctionArgs, json, redirect } from '@remix-run/node';
+import { ActionFunctionArgs, data as routeData, redirect } from 'react-router';
 
 import { isLoggedIn } from '~/utils/server/auth.server';
 import { createLog } from '~/utils/server/repositories/notes-log.server';
@@ -16,7 +16,7 @@ export async function action({ request, params }: ActionFunctionArgs) {
     const reminderDescription = formData.get('reminderDescription');
 
     if (!description || !date || !companyId) {
-      return json({ message: 'Missing parameters', severity: 'error', timeStamp: Date.now() }, { status: 400 });
+      return routeData({ message: 'Missing parameters', severity: 'error', timeStamp: Date.now() }, { status: 400 });
     }
 
     const error = await createLog(
@@ -27,8 +27,11 @@ export async function action({ request, params }: ActionFunctionArgs) {
       reminderDescription ? (reminderDescription as string) : undefined,
     );
     if (error) {
-      return json({ message: 'Could not create the log', severity: 'error', timeStamp: Date.now() }, { status: 500 });
+      return routeData(
+        { message: 'Could not create the log', severity: 'error', timeStamp: Date.now() },
+        { status: 500 },
+      );
     }
-    return json({ message: 'Log created successfully', severity: 'success', timeStamp: Date.now() });
+    return routeData({ message: 'Log created successfully', severity: 'success', timeStamp: Date.now() });
   }
 }

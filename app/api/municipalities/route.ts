@@ -1,5 +1,5 @@
-import { ActionFunctionArgs, json, redirect } from '@remix-run/node';
 import { omit } from 'lodash-es';
+import { ActionFunctionArgs, data as routeData, redirect } from 'react-router';
 
 import { isLoggedIn } from '~/utils/server/auth.server';
 import { deleteCompany } from '~/utils/server/repositories/companies.server';
@@ -13,7 +13,7 @@ export async function action({ request, params }: ActionFunctionArgs) {
   if (request.method === 'PATCH') {
     const data = await request.formData();
     if (!id) {
-      return json(
+      return routeData(
         { message: 'Missing required parameters', severity: 'error', timeStamp: Date.now() },
         { status: 400 },
       );
@@ -42,18 +42,24 @@ export async function action({ request, params }: ActionFunctionArgs) {
       ...(omit(obj, ['id', 'companyId']) as any),
     });
     if (error) {
-      return json({ message: 'Could not update commune', severity: 'error', timeStamp: Date.now() }, { status: 500 });
+      return routeData(
+        { message: 'Could not update commune', severity: 'error', timeStamp: Date.now() },
+        { status: 500 },
+      );
     }
 
-    return json({ message: 'Municipality updated successfully', severity: 'success', timeStamp: Date.now() });
+    return routeData({ message: 'Municipality updated successfully', severity: 'success', timeStamp: Date.now() });
   }
 
   if (request.method === 'DELETE') {
     const error = await deleteCompany(id as string);
 
     if (error) {
-      return json({ message: 'Could not delete commune', severity: 'error', timeStamp: Date.now() }, { status: 500 });
+      return routeData(
+        { message: 'Could not delete commune', severity: 'error', timeStamp: Date.now() },
+        { status: 500 },
+      );
     }
-    return json({ message: 'Commune deleted successfully', severity: 'success', timeStamp: Date.now() });
+    return routeData({ message: 'Commune deleted successfully', severity: 'success', timeStamp: Date.now() });
   }
 }

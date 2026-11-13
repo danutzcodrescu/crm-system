@@ -10,7 +10,11 @@ import { setTimeout } from 'node:timers/promises';
 import { PostgreSqlContainer } from '@testcontainers/postgresql';
 import { GenericContainer } from 'testcontainers';
 
+import { setupDockerSmoke } from './docker-setup';
+
 export default async function setup() {
+  if (process.env.CRM_SMOKE_IMAGE) return setupDockerSmoke(process.env.CRM_SMOKE_IMAGE);
+
   const logDirectory = process.env.SMOKE_LOG_DIR || 'test-results';
   await mkdir(logDirectory, { recursive: true });
   const migrations = (await readdir('db')).filter((name) => name.endsWith('.sql')).sort();

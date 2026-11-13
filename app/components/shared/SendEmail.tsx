@@ -1,7 +1,7 @@
 import Email from '@mui/icons-material/Email';
 import { IconButton, Tooltip } from '@mui/material';
-import { useFetcher } from '@remix-run/react';
 import { useCallback, useEffect } from 'react';
+import { useFetcher } from 'react-router';
 
 import { action } from '~/api/responsibles/responsibles';
 import { useIds } from '~/utils/store';

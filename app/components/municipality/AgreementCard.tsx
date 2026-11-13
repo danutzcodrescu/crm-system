@@ -17,12 +17,11 @@ import {
   TableRow,
   Typography,
 } from '@mui/material';
-import type { FetcherWithComponents } from '@remix-run/react';
-import { useEffect, useState } from 'react';
+import type { FetcherWithComponents } from 'react-router';
 import { ClientOnly } from 'remix-utils/client-only';
 
-import { Field } from '~/components/EditForm';
 import { EditDialog } from '~/components/shared/EditDialog.client';
+import { useEditFields } from '~/hooks/editFields';
 import { formatDate } from '~/utils/client/dates';
 import { MunicipalityAgreementData } from '~/utils/server/repositories/agreement.server';
 
@@ -32,14 +31,7 @@ interface AgreementCardProps {
 }
 
 export function AgreementCard({ data, fetcher }: AgreementCardProps) {
-  const [fields, setFields] = useState<Field[]>([]);
-
-  useEffect(() => {
-    if (fetcher.state === 'idle' && fields.length) {
-      setFields([]);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [fetcher.state]);
+  const { fields, setFields } = useEditFields(fetcher);
 
   const handleEdit = () => {
     setFields([

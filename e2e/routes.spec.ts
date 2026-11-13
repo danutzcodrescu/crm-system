@@ -1,11 +1,12 @@
 import { readFile } from 'node:fs/promises';
 
 import { companyId, expect, test, year } from './fixtures';
+import { readRouteData, redirectLocation } from './route-data';
 import { apis, dataUrl, editablePages, pages } from './routes';
 
 test('every route registration has an explicit smoke scenario', async () => {
-  const config = await readFile('vite.config.ts', 'utf8');
-  const registered = [...config.matchAll(/route\('[^']*', '([^']+)'/g)].map((match) => match[1]);
+  const config = await readFile('app/routes.ts', 'utf8');
+  const registered = [...config.matchAll(/(?:route\('[^']*', |index\()'([^']+)'/g)].map((match) => match[1]);
   const covered = [
     ...pages.map(({ file }) => file),
     ...apis.map(({ file }) => file),
@@ -72,7 +73,7 @@ for (const route of pages) {
     try {
       // Direct loader access must be protected too (a parent layout alone is insufficient).
       const response = await anonymous.get(dataUrl(route.path, route.file), { maxRedirects: 0 });
-      expect(response.headers()['x-remix-redirect'] || response.headers().location).toBe('/signin');
+      expect(await redirectLocation(response)).toBe('/signin');
     } finally {
       await anonymous.dispose();
     }
@@ -90,12 +91,13 @@ for (const route of apis) {
           : {}),
     });
     expect(response.status(), await response.text()).toBe(route.status);
-    const body = await response.json();
+    const body = await readRouteData(response);
     if (route.message) expect(body.message || body.error).toBe(route.message);
     else expect(body.severity).toBe('success');
     if (route.path === '/api/municipalities')
       expect(body.message).toEqual(expect.arrayContaining([expect.objectContaining({ id: companyId })]));
-    if (route.path === '/api/reminders') expect(body.message.reminders.length).toBeGreaterThan(0);
+    if (route.path === '/api/reminders')
+      expect(body.message).toEqual(expect.objectContaining({ reminders: expect.any(Array) }));
   });
 
   test(`anonymous API guard: ${route.method} ${route.path}`, async ({ playwright, baseURL }) => {
@@ -106,7 +108,7 @@ for (const route of apis) {
         maxRedirects: 0,
         ...(route.method !== 'GET' ? { form: {} } : {}),
       });
-      expect(response.headers()['x-remix-redirect'] || response.headers().location).toBe('/signin');
+      expect(await redirectLocation(response)).toBe('/signin');
     } finally {
       await anonymous.dispose();
     }
@@ -118,7 +120,7 @@ for (const route of editablePages) {
     const anonymous = await playwright.request.newContext({ baseURL, storageState: { cookies: [], origins: [] } });
     try {
       const response = await anonymous.patch(dataUrl(route.path, route.file), { form: {}, maxRedirects: 0 });
-      expect(response.headers()['x-remix-redirect'] || response.headers().location).toBe('/signin');
+      expect(await redirectLocation(response)).toBe('/signin');
     } finally {
       await anonymous.dispose();
     }

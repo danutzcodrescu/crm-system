@@ -1,4 +1,4 @@
-import { ActionFunctionArgs, json, redirect } from '@remix-run/node';
+import { ActionFunctionArgs, data as routeData, redirect } from 'react-router';
 
 import { isLoggedIn } from '~/utils/server/auth.server';
 import { deleteLog, updateLog } from '~/utils/server/repositories/notes-log.server';
@@ -12,9 +12,12 @@ export async function action({ request, params }: ActionFunctionArgs) {
     const error = await deleteLog(id as string);
 
     if (error) {
-      return json({ message: 'Could not delete the log', severity: 'error', timeStamp: Date.now() }, { status: 500 });
+      return routeData(
+        { message: 'Could not delete the log', severity: 'error', timeStamp: Date.now() },
+        { status: 500 },
+      );
     }
-    return json({ message: 'Log deleted successfully', severity: 'success', timeStamp: Date.now() });
+    return routeData({ message: 'Log deleted successfully', severity: 'success', timeStamp: Date.now() });
   }
 
   if (request.method === 'PATCH') {
@@ -27,7 +30,7 @@ export async function action({ request, params }: ActionFunctionArgs) {
     const reminderId = formData.get('reminderId') as string;
     const reminderStatus = formData.get('reminderStatus') as string;
     if (!date || !description) {
-      return json({ message: 'Missing parameters', severity: 'error', timeStamp: Date.now() }, { status: 400 });
+      return routeData({ message: 'Missing parameters', severity: 'error', timeStamp: Date.now() }, { status: 400 });
     }
     const error = await updateLog(
       id as string,
@@ -50,8 +53,11 @@ export async function action({ request, params }: ActionFunctionArgs) {
           : undefined,
     );
     if (error) {
-      return json({ message: 'Could not update the log', severity: 'error', timeStamp: Date.now() }, { status: 500 });
+      return routeData(
+        { message: 'Could not update the log', severity: 'error', timeStamp: Date.now() },
+        { status: 500 },
+      );
     }
-    return json({ message: 'Log updated successfully', severity: 'success', timeStamp: Date.now() });
+    return routeData({ message: 'Log updated successfully', severity: 'success', timeStamp: Date.now() });
   }
 }

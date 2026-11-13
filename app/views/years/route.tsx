@@ -1,8 +1,15 @@
 import Edit from '@mui/icons-material/Edit';
 import { Box, IconButton, Stack, Typography } from '@mui/material';
-import { ActionFunctionArgs, json, LoaderFunctionArgs, MetaFunction } from '@remix-run/node';
-import { redirect, useFetcher, useLoaderData } from '@remix-run/react';
 import { useCallback } from 'react';
+import {
+  ActionFunctionArgs,
+  data as routeData,
+  LoaderFunctionArgs,
+  MetaFunction,
+  redirect,
+  useFetcher,
+  useLoaderData,
+} from 'react-router';
 import { ClientOnly } from 'remix-utils/client-only';
 
 import { EditDialog } from '~/components/shared/EditDialog.client';
@@ -21,9 +28,9 @@ export async function loader({ request }: LoaderFunctionArgs) {
 
   const [error, years] = await getYearsData();
   if (error) {
-    return json({ message: 'Could not fetch years', severity: 'error', timeStamp: Date.now() }, { status: 500 });
+    return routeData({ message: 'Could not fetch years', severity: 'error', timeStamp: Date.now() }, { status: 500 });
   }
-  return json({ years });
+  return routeData({ years });
 }
 
 export async function action({ request }: ActionFunctionArgs) {
@@ -51,7 +58,7 @@ export async function action({ request }: ActionFunctionArgs) {
       !addition_2 ||
       !addition_3
     ) {
-      return json({ message: 'Missing parameters', severity: 'error', timeStamp: Date.now() }, { status: 400 });
+      return routeData({ message: 'Missing parameters', severity: 'error', timeStamp: Date.now() }, { status: 400 });
     }
 
     const error = await updateYear({
@@ -65,13 +72,16 @@ export async function action({ request }: ActionFunctionArgs) {
       addition_3: parseFloat(addition_3),
     });
     if (error) {
-      return json({ message: 'Cold not update the year', severity: 'error', timeStamp: Date.now() }, { status: 500 });
+      return routeData(
+        { message: 'Cold not update the year', severity: 'error', timeStamp: Date.now() },
+        { status: 500 },
+      );
     }
 
-    return json({ message: 'Year updated successfully.', severity: 'success', timeStamp: Date.now() });
+    return routeData({ message: 'Year updated successfully.', severity: 'success', timeStamp: Date.now() });
   }
 
-  return json({ message: '', severity: 'error', timeStamp: Date.now() }, { status: 405 });
+  return routeData({ message: '', severity: 'error', timeStamp: Date.now() }, { status: 405 });
 }
 
 export default function YearsPage() {

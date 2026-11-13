@@ -1,9 +1,16 @@
 import Delete from '@mui/icons-material/Delete';
 import Edit from '@mui/icons-material/Edit';
 import { Box, IconButton, Stack, Typography } from '@mui/material';
-import { ActionFunctionArgs, json, LoaderFunctionArgs, redirect } from '@remix-run/node';
-import { MetaFunction, useFetcher, useLoaderData } from '@remix-run/react';
 import { useCallback } from 'react';
+import {
+  ActionFunctionArgs,
+  data as routeData,
+  LoaderFunctionArgs,
+  MetaFunction,
+  redirect,
+  useFetcher,
+  useLoaderData,
+} from 'react-router';
 import { ClientOnly } from 'remix-utils/client-only';
 
 import { EditDialog } from '~/components/shared/EditDialog.client';
@@ -24,9 +31,12 @@ export async function loader({ request }: LoaderFunctionArgs) {
 
   const [error, statuses] = await getAllStatuses();
   if (error) {
-    return json({ message: 'Could not fetch statuses', severity: 'error', timeStamp: Date.now() }, { status: 500 });
+    return routeData(
+      { message: 'Could not fetch statuses', severity: 'error', timeStamp: Date.now() },
+      { status: 500 },
+    );
   }
-  return json({ statuses });
+  return routeData({ statuses });
 }
 
 export async function action({ request }: ActionFunctionArgs) {
@@ -37,15 +47,18 @@ export async function action({ request }: ActionFunctionArgs) {
     const id = formData.get('id') as string;
 
     if (!id) {
-      return json({ message: 'Missing parameters', severity: 'error', timeStamp: Date.now() }, { status: 400 });
+      return routeData({ message: 'Missing parameters', severity: 'error', timeStamp: Date.now() }, { status: 400 });
     }
 
     const error = await deleteStatus(parseInt(id));
     if (error) {
-      return json({ message: 'Cold not delete the status', severity: 'error', timeStamp: Date.now() }, { status: 500 });
+      return routeData(
+        { message: 'Cold not delete the status', severity: 'error', timeStamp: Date.now() },
+        { status: 500 },
+      );
     }
 
-    return json({ message: 'Status deleted succesfully.', severity: 'success', timeStamp: Date.now() });
+    return routeData({ message: 'Status deleted succesfully.', severity: 'success', timeStamp: Date.now() });
   }
 
   if (request.method === 'PATCH') {
@@ -54,34 +67,37 @@ export async function action({ request }: ActionFunctionArgs) {
     const name = formData.get('statusName') as string;
 
     if (!id || !name) {
-      return json({ message: 'Missing parameteers', severity: 'error', timeStamp: Date.now() }, { status: 400 });
+      return routeData({ message: 'Missing parameteers', severity: 'error', timeStamp: Date.now() }, { status: 400 });
     }
 
     const error = await updateStatus(parseInt(id), name);
     if (error) {
-      return json(
+      return routeData(
         { message: 'Could not update the status', severity: 'error', timeStamp: Date.now() },
         { status: 500 },
       );
     }
-    return json({ message: 'Status updated succesfully.', severity: 'success', timeStamp: Date.now() });
+    return routeData({ message: 'Status updated succesfully.', severity: 'success', timeStamp: Date.now() });
   }
 
   if (request.method === 'POST') {
     const formData = await request.formData();
     const name = formData.get('statusName') as string;
     if (!name) {
-      return json({ message: 'Missing parameters', severity: 'error', timeStamp: Date.now() }, { status: 400 });
+      return routeData({ message: 'Missing parameters', severity: 'error', timeStamp: Date.now() }, { status: 400 });
     }
 
     const error = await createStatus(name);
     if (error) {
-      return json({ message: 'Could not create status', severity: 'error', timeStamp: Date.now() }, { status: 500 });
+      return routeData(
+        { message: 'Could not create status', severity: 'error', timeStamp: Date.now() },
+        { status: 500 },
+      );
     }
 
-    return json({ message: 'Status created succesfully.', severity: 'success', timeStamp: Date.now() });
+    return routeData({ message: 'Status created succesfully.', severity: 'success', timeStamp: Date.now() });
   }
-  return json({ message: '', severity: 'error' }, { status: 405 });
+  return routeData({ message: '', severity: 'error' }, { status: 405 });
 }
 
 export const meta: MetaFunction = () => {

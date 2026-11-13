@@ -1,6 +1,6 @@
 import { Button, DialogActions, DialogContent, DialogTitle } from '@mui/material';
 import Dialog from '@mui/material/Dialog';
-import { FetcherWithComponents } from '@remix-run/react';
+import { FetcherWithComponents } from 'react-router';
 
 import { EditForm, Field } from '../EditForm';
 

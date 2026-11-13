@@ -10,7 +10,7 @@ ARG SENTRY_AUTH_TOKEN
 # set for base and all layer that inherit from it
 
 ENV NODE_ENV=production
-RUN npm install -g pnpm@10.18.3
+RUN npm install -g pnpm
 
 # Install all node_modules, including dev dependencies
 

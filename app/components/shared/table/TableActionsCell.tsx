@@ -1,8 +1,8 @@
 import Edit from '@mui/icons-material/Edit';
 import Preview from '@mui/icons-material/Preview';
 import { Box, IconButton, Stack, Tooltip } from '@mui/material';
-import { Link } from '@remix-run/react';
 import { ReactNode } from 'react';
+import { Link } from 'react-router';
 
 type Props = {
   name: string;

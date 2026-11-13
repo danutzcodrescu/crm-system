@@ -1,8 +1,8 @@
 import Edit from '@mui/icons-material/Edit';
 import { TabContext, TabList, TabPanel } from '@mui/lab';
 import { Box, Card, CardContent, IconButton, Tab, Typography } from '@mui/material';
-import type { FetcherWithComponents } from '@remix-run/react';
 import { useCallback, useState } from 'react';
+import type { FetcherWithComponents } from 'react-router';
 import { ClientOnly } from 'remix-utils/client-only';
 
 import { EditDialog } from '~/components/shared/EditDialog.client';
