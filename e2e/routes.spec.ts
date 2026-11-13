@@ -26,6 +26,26 @@ test('Express health endpoint', async ({ request }) => {
   expect(await response.text()).toBe('OK');
 });
 
+for (const path of ['/', '/api/reminders', '/api/reminders/']) {
+  const file = path === '/' ? 'views/dashboard/route.tsx' : 'api/reminders/route.tsx';
+  test(`v8 data transport and authentication: ${path}`, async ({ request, playwright, baseURL }) => {
+    const url = dataUrl(path, file);
+    expect(url.split('?')[0]).toBe(path.endsWith('/') ? `${path}_.data` : `${path}.data`);
+    const response = await request.get(url);
+    expect(response.status()).toBe(200);
+    const body = await readRouteData(response);
+    if (path === '/') expect(body).toEqual(expect.objectContaining({ reminders: expect.any(Array) }));
+    else expect(body.message).toEqual(expect.objectContaining({ reminders: expect.any(Array) }));
+
+    const anonymous = await playwright.request.newContext({ baseURL, storageState: { cookies: [], origins: [] } });
+    try {
+      expect(await redirectLocation(await anonymous.get(url, { maxRedirects: 0 }))).toBe('/signin');
+    } finally {
+      await anonymous.dispose();
+    }
+  });
+}
+
 test('database uses the Dockerfile Swedish locale and sorting', async ({ database }) => {
   const {
     rows: [settings],

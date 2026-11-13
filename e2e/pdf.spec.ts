@@ -4,7 +4,7 @@ test('PDF generation route renders a complete compensation PDF', async ({ reques
   const response = await request.get(`/municipalities/${companyId}/${year}.pdf`);
   expect(response.status(), await response.text()).toBe(200);
   expect(response.headers()['content-type']).toContain('application/pdf');
-  expect(response.headers()['content-disposition']).toContain('attachment;');
+  expect(response.headers()['content-disposition']).toContain(process.env.CRM_SMOKE_IMAGE ? 'attachment;' : 'inline;');
   expect(response.headers()['content-disposition']).toContain('Smoke');
   expect(response.headers()['content-disposition']).toContain(`${year}.pdf`);
   const encodedFilename = response.headers()['content-disposition'].split("filename*=UTF-8''")[1];

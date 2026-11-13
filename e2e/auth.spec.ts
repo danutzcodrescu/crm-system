@@ -2,6 +2,20 @@ import { expect, signIn, test } from './fixtures';
 
 test.use({ storageState: { cookies: [], origins: [] } });
 
+test('auth pages hydrate without errors across repeated document requests', async ({ page }) => {
+  const errors: string[] = [];
+  page.on('pageerror', (error) => errors.push(error.message));
+  page.on('console', (message) => {
+    if (message.type() === 'error') errors.push(message.text());
+  });
+  for (const path of ['/signin', '/signup', '/signin', '/signup']) {
+    expect((await page.goto(path))?.status()).toBe(200);
+    await page.waitForLoadState('networkidle');
+    await expect(page.getByLabel('Username')).toBeVisible();
+  }
+  expect(errors).toEqual([]);
+});
+
 test('real login survives reload, then logout invalidates the session', async ({ page }) => {
   await page.goto('/');
   await expect(page).toHaveURL(/\/signin$/);

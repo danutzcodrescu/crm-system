@@ -21,7 +21,12 @@ const viteDevServer =
 const productionBuildPath = '../server/index.js';
 const routerHandler = createRequestHandler({
   build: viteDevServer
-    ? () => viteDevServer.ssrLoadModule('virtual:react-router/server-build') as Promise<ServerBuild>
+    ? async () => {
+        const { isRunnableDevEnvironment } = await import('vite');
+        const environment = viteDevServer.environments.ssr;
+        if (!isRunnableDevEnvironment(environment)) throw new Error('Expected a runnable Vite SSR environment');
+        return environment.runner.import<ServerBuild>('virtual:react-router/server-build');
+      }
     : await import(productionBuildPath),
 });
 

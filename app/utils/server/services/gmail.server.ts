@@ -150,12 +150,12 @@ export function clearRefreshToken() {
   oauth2Client.setCredentials({ refresh_token: undefined });
 }
 
-export async function getRedirectUrlIfThereIsNoToken(request: Request): Promise<string | undefined> {
+export async function getRedirectUrlIfThereIsNoToken(request: Request, url: URL): Promise<string | undefined> {
   try {
     const user = await getUserFromSession(request);
     if (!user) return undefined;
     const data = await db.select({ refreshToken: users.gmailRefreshToken }).from(users).where(eq(users.id, user.id));
-    if (!data.length || !data?.[0]?.refreshToken) return generateAuthUrl(new URL(request.url).pathname);
+    if (!data.length || !data?.[0]?.refreshToken) return generateAuthUrl(url.pathname);
     const token = await decodeWithKey(data[0].refreshToken as string, tokenKey.secretValue);
 
     oauth2Client.setCredentials({ refresh_token: token });

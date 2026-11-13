@@ -16,11 +16,11 @@ export interface EmailApiResponse {
   severity: 'success';
 }
 
-export async function loader({ request }: LoaderFunctionArgs) {
+export async function loader({ request, url }: LoaderFunctionArgs) {
   const isAuthenticated = await isLoggedIn(request);
   if (!isAuthenticated) return redirect('/signin');
   if (!isTokenSet()) {
-    await getRedirectUrlIfThereIsNoToken(request);
+    await getRedirectUrlIfThereIsNoToken(request, url);
   }
   const searchParams = new URL(request.url).searchParams;
   if (!searchParams.has('municipalityId')) {

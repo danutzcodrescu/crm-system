@@ -65,11 +65,11 @@ interface LoaderResponse {
   emailAddress: string;
 }
 
-export async function loader({ request, params }: LoaderFunctionArgs) {
+export async function loader({ request, params, url }: LoaderFunctionArgs) {
   const isAuthenticated = await isLoggedIn(request);
   if (!isAuthenticated) return redirect('/signin');
   if (!isTokenSet()) {
-    await getRedirectUrlIfThereIsNoToken(request);
+    await getRedirectUrlIfThereIsNoToken(request, url);
   }
 
   const id = params.municipalityId as string;

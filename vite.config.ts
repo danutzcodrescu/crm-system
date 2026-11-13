@@ -7,9 +7,9 @@ import tsconfigPaths from 'vite-tsconfig-paths';
 
 import pkg from './package.json';
 
-export default defineConfig(({ isSsrBuild }) => ({
+export default defineConfig({
   // Each smoke server owns both ports; never connect to another dev server's HMR socket.
-  ...(process.env.NODE_ENV === 'test' && process.env.CRM_SMOKE_TEST === '1'
+  ...(process.env.NODE_ENV === 'development' && process.env.CRM_SMOKE_TEST === '1'
     ? { server: { hmr: { port: Number(process.env.CRM_SMOKE_HMR_PORT) } } }
     : {}),
   ssr: {
@@ -19,13 +19,13 @@ export default defineConfig(({ isSsrBuild }) => ({
     // Infisical uses Node-only AWS credential providers. Never browser-prebundle
     // it when development dependency discovery encounters server-side imports.
     exclude: ['@node-rs/argon2', '@node-rs/bcrypt', '@infisical/sdk'],
-    ...(process.env.NODE_ENV === 'test' && process.env.CRM_SMOKE_TEST === '1'
+    ...(process.env.NODE_ENV === 'development' && process.env.CRM_SMOKE_TEST === '1'
       ? { entries: ['app/root.tsx', 'app/entry.client.tsx', 'app/views/**/*.tsx', 'app/components/**/*.tsx'] }
       : {}),
   },
   plugins: [
     // Test-only replacement at the external secret boundary; auth, SQL and routes stay real.
-    ...(process.env.NODE_ENV === 'test' && process.env.CRM_SMOKE_TEST === '1'
+    ...(process.env.NODE_ENV === 'development' && process.env.CRM_SMOKE_TEST === '1'
       ? [
           {
             name: 'smoke-secrets',
@@ -49,5 +49,8 @@ export default defineConfig(({ isSsrBuild }) => ({
       },
     }),
   ],
-  build: { sourcemap: true, ...(isSsrBuild ? { target: 'ESNext' } : {}) },
-}));
+  build: { sourcemap: true },
+  environments: {
+    ssr: { build: { target: 'ESNext' } },
+  },
+});

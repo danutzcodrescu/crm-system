@@ -86,7 +86,9 @@ export default async function setup() {
       env: {
         PATH: process.env.PATH,
         HOME: process.env.HOME,
-        NODE_ENV: 'test',
+        // Match Vite's development client: React Router's critical CSS hydration
+        // is development-only when using the Vite Environment API.
+        NODE_ENV: 'development',
         CRM_SMOKE_TEST: '1',
         CRM_SMOKE_HMR_PORT: String(hmrPort),
         TZ: 'UTC',

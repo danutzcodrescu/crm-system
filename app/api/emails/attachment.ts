@@ -8,11 +8,11 @@ import {
   isTokenSet,
 } from '~/utils/server/services/gmail.server';
 
-export async function loader({ request, params }: LoaderFunctionArgs) {
+export async function loader({ request, params, url }: LoaderFunctionArgs) {
   const isAuthenticated = await isLoggedIn(request);
   if (!isAuthenticated) return redirect('/signin');
   if (!isTokenSet()) {
-    await getRedirectUrlIfThereIsNoToken(request);
+    await getRedirectUrlIfThereIsNoToken(request, url);
   }
   const searchParams = new URL(request.url).searchParams;
   const mimeType = searchParams.get('mimeType');

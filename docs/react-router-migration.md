@@ -41,16 +41,39 @@ Both suites tested the actual compiled production application, including live co
 
 Lint still reports existing React hook/compiler findings; this migration does not disable those rules or refactor unrelated UI state. A production dependency audit is **not clean**: unrelated advisories remain (including Express's `proxy-addr`, Zod, Google API dependencies and Emotion's build-time dependencies). Treat their remediation as a separate dependency-hardening task; moving frameworks alone does not make the application vulnerability-free.
 
+## React Router 8 future flags
+
+All five stable v8 migration flags supported by React Router 7.18.5 are enabled in `react-router.config.ts`:
+
+- `v8_middleware`: use the middleware-capable request context. The Express server has no custom `getLoadContext` or application context values to migrate.
+- `v8_splitRouteModules`: automatically split eligible client route exports without requiring every route to be splittable.
+- `v8_viteEnvironmentApi`: scope the ESNext server target to `environments.ssr.build`; the custom Express development server loads its virtual build through the SSR environment's module runner.
+- `v8_passThroughRequests`: pass raw requests to handlers. Gmail's OAuth return path now uses the normalized loader `url`, not a raw pathname that could contain `.data`. Existing query-only URL reads remain valid; PDF generation runs on document requests in `entry.server.tsx`.
+- `v8_trailingSlashAwareDataRequests`: use `/_.data` for root data requests and `/path/_.data` for trailing-slash paths. The smoke URL helper and dedicated authenticated/anonymous transport checks cover these formats.
+
+The optional `unstable_optimizeDeps` and `unstable_previewServerPrerendering` flags remain disabled. They are experimental, not prerequisites for v8; this SSR application does not configure prerendering.
+
+The Vite smoke server now uses `NODE_ENV=development` plus the explicit `CRM_SMOKE_TEST=1` synthetic-secrets guard. With the Environment API, `NODE_ENV=test` produced server critical CSS links that React Router's development-only client hydration did not expect, causing hydration recovery and lost form input. A repeated signin/signup document-request regression checks browser errors; the synthetic-secrets guard is separately tested to stay disabled in production and ordinary development.
+
+### Future-flag verification (2026-11-13)
+
+- App/server type checks and all **8 tooling tests** passed on the available Node 24.22.1 host. Changed TypeScript files passed ESLint with no errors; repository-wide lint retains **9 existing errors in untouched files**.
+- The hydration regression failed on all three repeated runs before the smoke-environment correction and passed on all three afterward.
+- The final standalone Vite development smoke run passed **132 tests**, with only the **3 production-only tests skipped**. Its PDF assertion checks the existing development `inline` behavior, while Docker mode checks production `attachment` behavior.
+- Fresh local image `crm-system:router7-future-flags-node26` built successfully with **Node 26.13.0, Linux arm64**, including production compilation and type checks. Its standalone native/runtime probe passed without a synthetic SDK loader.
+- The final full production-mode smoke suite passed **135/135 tests** against that image, covering authentication, hydration, CRUD/SQL persistence, all four XLSX imports, live PDF generation, v8 data URLs, session cookie security and immutable asset caching.
+
+The image was retained locally, not published or deployed. Production-mode tests used disposable seeded PostgreSQL and synthetic secrets at the external Infisical boundary; credentialed Gmail/Infisical operations and Sentry delivery remain unverified.
+
+Run development and production suites sequentially: generated Playwright trace HTML from a parallel production run can trigger Vite page reloads and interrupt development UI interactions.
+
 ## Next: React Router 8
 
 V8 is already released, but adopting it is deliberately a separate step. Follow the [versioned v7 future-change guide](https://reactrouter.com/7.18.5/upgrading/future), rather than unversioned docs that now describe v8 → v9.
 
 1. Upgrade React/React DOM and their types to **19.2.7 or newer**. Verify MUI, Emotion, PDF rendering, hydration and Sentry compatibility.
 2. Use Node **22.22+** (the repository's declared Node 26 requirement exceeds this) and upgrade to **Vite 7+**.
-3. Adopt and test the v8 flags incrementally: `v8_middleware`, `v8_splitRouteModules`, `v8_viteEnvironmentApi`, `v8_passThroughRequests`, and `v8_trailingSlashAwareDataRequests`. They are intentionally not enabled together with the Remix migration.
-4. For the Vite Environment API, move the existing `isSsrBuild`-dependent build target into `environments.ssr.build` and verify the custom Express development server and Sentry source-map plugin.
-5. Before enabling pass-through requests, review URL-dependent handlers, especially PDF generation and authentication. Use the normalized loader/action `url` for application routing instead of assuming `request.url` never contains `.data` or internal parameters.
-6. Update `e2e/routes.ts` when enabling trailing-slash-aware requests (root changes from `/_root.data` to `/_.data`) and revalidate the isolated transport decoder against the installed router version.
-7. Re-run type checks, builds, smoke tests, PDF/import checks and the security audit, then upgrade all React Router packages to matching v8 versions.
+3. Keep all five v8 flags enabled and retain the Environment API and normalized-URL adaptations above. Revalidate the custom Express server and Sentry source-map plugin after the Vite upgrade.
+4. Re-run type checks, builds, smoke tests, PDF/import checks and the security audit, then upgrade all React Router packages to matching v8 versions. Revalidate the isolated transport decoder against the upgraded router version.
 
 References: [Remix v2 migration](https://reactrouter.com/upgrading/remix), [v7 future changes](https://reactrouter.com/7.18.5/upgrading/future), [Sentry setup](https://docs.sentry.io/platforms/javascript/guides/react-router/manual-setup/).
