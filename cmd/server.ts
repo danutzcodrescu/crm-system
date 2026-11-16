@@ -35,6 +35,8 @@ const routerHandler = createRequestHandler({
 cleanExpiredSessions.start();
 
 const app = express();
+// Caddy is the single reverse proxy and forwards the original HTTPS protocol.
+app.set('trust proxy', 1);
 
 app.use(compression());
 

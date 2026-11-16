@@ -1,6 +1,6 @@
 {
   "name": "crm",
-  "version": "0.15",
+  "version": "0.15.1",
   "private": true,
   "packageManager": "pnpm@10.18.3",
   "sideEffects": false,
