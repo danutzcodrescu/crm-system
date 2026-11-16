@@ -1,17 +1,27 @@
 import { resolve } from 'node:path';
 
 import { reactRouter } from '@react-router/dev/vite';
-import { sentryVitePlugin } from '@sentry/vite-plugin';
+import { sentryReactRouter } from '@sentry/react-router/vite';
 import { defineConfig } from 'vite';
-import tsconfigPaths from 'vite-tsconfig-paths';
 
-import pkg from './package.json';
+import pkg from './package.json' with { type: 'json' };
 
-export default defineConfig({
-  // Each smoke server owns both ports; never connect to another dev server's HMR socket.
-  ...(process.env.NODE_ENV === 'development' && process.env.CRM_SMOKE_TEST === '1'
-    ? { server: { hmr: { port: Number(process.env.CRM_SMOKE_HMR_PORT) } } }
-    : {}),
+export default defineConfig((config) => ({
+  define: {
+    'import.meta.env.VITE_SENTRY_RELEASE': JSON.stringify(process.env.SENTRY_RELEASE || `crm-system@${pkg.version}`),
+  },
+  resolve: { tsconfigPaths: true },
+  server: {
+    // Playwright trace HTML is output, not an application entry. Watching it
+    // creates a reload/trace-write feedback loop that interrupts hydration.
+    watch: {
+      ignored: ['**/playwright/.cache/**', '**/test-results/**', '**/playwright-report/**', '**/blob-report/**'],
+    },
+    // Each smoke server owns both ports; never use another server's HMR socket.
+    ...(process.env.NODE_ENV === 'development' && process.env.CRM_SMOKE_TEST === '1'
+      ? { hmr: { port: Number(process.env.CRM_SMOKE_HMR_PORT) } }
+      : {}),
+  },
   ssr: {
     noExternal: process.env.NODE_ENV === 'production' ? [/^@mui\//] : [/^@mui\/x-.{1,}/],
   },
@@ -39,18 +49,22 @@ export default defineConfig({
         ]
       : []),
     reactRouter(),
-    tsconfigPaths(),
-    sentryVitePlugin({
-      authToken: process.env.SENTRY_AUTH_TOKEN,
-      org: process.env.SENTRY_ORG,
-      project: process.env.SENTRY_PROJECT,
-      release: {
-        name: `crm-system@${pkg.version}`,
+    sentryReactRouter(
+      {
+        telemetry: false,
+        // Final processing runs after tsc too, covering the custom Express server.
+        sourcemaps: { disable: 'disable-upload' },
+        release: {
+          name: process.env.SENTRY_RELEASE || `crm-system@${pkg.version}`,
+          create: false,
+          finalize: false,
+        },
       },
-    }),
+      config,
+    ),
   ],
-  build: { sourcemap: true },
+  build: { sourcemap: 'hidden' },
   environments: {
     ssr: { build: { target: 'ESNext' } },
   },
-});
+}));

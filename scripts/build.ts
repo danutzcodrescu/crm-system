@@ -1,55 +1,49 @@
+import { readFile } from 'node:fs/promises';
+
 import { $ } from 'zx';
 
-// Enable better error messages
-$.verbose = true;
-
 async function main() {
-  try {
-    // Read and parse package.json
-    const version = await $`cat package.json | jq -r '.version'`;
-
-    if (!version) {
-      throw new Error('No version field found in package.json');
-    }
-
-    console.log(`📦 Building Docker image with version ${version}`);
-
-    // Check if Dockerfile exists
-    await $`test -f Dockerfile`;
-
-    // Build the Docker image
-    const imageName = `crm-system:${version}`.replace('\n', '');
-    await $`docker build --build-arg SENTRY_DSN=${process.env.SENTRY_DSN} --build-arg SENTRY_ORG=${process.env.SENTRY_ORG} --build-arg SENTRY_PROJECT=${process.env.SENTRY_PROJECT} --build-arg SENTRY_AUTH_TOKEN=${process.env.SENTRY_AUTH_TOKEN} --no-cache --platform=linux/amd64 -t ${imageName} .`;
-    // produce for local testing on silicon mac
-    // await $`docker build --build-arg SENTRY_DSN=${process.env.SENTRY_DSN} --build-arg SENTRY_ORG=${process.env.SENTRY_ORG} --build-arg SENTRY_PROJECT=${process.env.SENTRY_PROJECT} --build-arg SENTRY_AUTH_TOKEN=${process.env.SENTRY_AUTH_TOKEN} --no-cache -t ${imageName} .`;
-
-    // Optional: List the images
-    await $`docker images | grep crm-system`;
-
-    const target = `${process.env.REMOTE_USER}@${process.env.REMOTE}`;
-
-    console.log('🚀 Compressing and loading image on remote host');
-    await $`docker save ${imageName} | gzip -1 | ssh ${target} 'docker load'`;
-    console.log('✅ Docker image loaded on remote host');
-
-    console.log('🧼 Removing local docker images ');
-    await $`docker image prune -a -f`;
-    console.log('✅ docker images removed');
-
-    //     await $`ssh ${process.env.REMOTE_USER}@${process.env.REMOTE} << 'EOF'
-    // cd crm
-    // docker-compose down
-    // docker load -i docker.tar
-    // sed -i 's/image: crm-system:[0-9]\+\.[0-9]\+\.[0-9]\+/image: ${imageName}/g' docker-compose.yml
-    // docker-compose up -d
-    // rm -f docker.tar
-    // docker rmi $(docker images --format "{{.ID}}" --filter "reference=crm-system*")
-    // EOF`;
-
-    process.exit(0);
-  } catch (error) {
-    console.error('❌ Error:', error);
+  // This script builds AND transfers the image. Tests stub all external commands.
+  for (const key of ['SENTRY_AUTH_TOKEN', 'SENTRY_DSN', 'SENTRY_ORG', 'SENTRY_PROJECT', 'REMOTE_USER', 'REMOTE']) {
+    if (!process.env[key]?.trim()) throw new Error(`${key} is required`);
   }
+  const { version } = JSON.parse(await readFile(new URL('../package.json', import.meta.url), 'utf8'));
+  const revision = (await $`git rev-parse HEAD`.quiet()).stdout.trim();
+  const release = process.env.SENTRY_RELEASE || `crm-system@${version}+${revision}`;
+  const imageName = `crm-system:${version}`;
+
+  console.log(`Building ${imageName}, Sentry release ${release}`);
+  const buildArgs = [
+    '--secret',
+    'id=SENTRY_AUTH_TOKEN,env=SENTRY_AUTH_TOKEN',
+    '--build-arg',
+    'SENTRY_UPLOAD=true',
+    '--build-arg',
+    `SENTRY_DSN=${process.env.SENTRY_DSN}`,
+    '--build-arg',
+    `SENTRY_ORG=${process.env.SENTRY_ORG}`,
+    '--build-arg',
+    `SENTRY_PROJECT=${process.env.SENTRY_PROJECT}`,
+    '--build-arg',
+    `SENTRY_RELEASE=${release}`,
+    '--build-arg',
+    `SENTRY_ENVIRONMENT=${process.env.SENTRY_ENVIRONMENT || 'production'}`,
+    '--no-cache',
+    '--platform=linux/amd64',
+    '-t',
+    imageName,
+  ];
+  await $`docker build ${buildArgs} .`;
+
+  const target = `${process.env.REMOTE_USER}@${process.env.REMOTE}`;
+  console.log('Compressing and loading image on remote host');
+  await $`docker save ${imageName} | gzip -1 | ssh ${target} 'docker load'`;
+  console.log('Image loaded; restart the production service to deploy it.');
+  // Do not prune unrelated local images as a side effect of building this one.
 }
 
-main();
+main().catch(() => {
+  // Do not dump zx's process/env object: it may contain the build credential.
+  console.error('Production image build/transfer failed; check the build output and required environment variables.');
+  process.exitCode = 1;
+});

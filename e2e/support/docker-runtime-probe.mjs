@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import { existsSync } from 'node:fs';
+import { existsSync, readFileSync, readdirSync } from 'node:fs';
 import process from 'node:process';
 
 assert.equal(process.versions.node.split('.')[0], '26', 'production image must run Node 26');
@@ -25,7 +25,29 @@ for (const name of [
 for (const path of ['dist/server/index.js', 'dist/cmd/server.js', 'dist/client/assets']) {
   assert(existsSync(path), `production artifact is missing: ${path}`);
 }
-for (const name of ['typescript', '@react-router/dev', '@remix-run/react', '@remix-run/node']) {
+const release = JSON.parse(readFileSync('dist/sentry-release.json', 'utf8')).release;
+assert(release && !release.includes('undefined'), 'production release must be baked into the image');
+assert.equal(process.env.SENTRY_AUTH_TOKEN, undefined, 'upload token must not be in the runtime environment');
+for (const file of readdirSync('dist/client', { recursive: true })) {
+  assert(!file.endsWith('.map'), `public source map must not ship: ${file}`);
+}
+for (const file of ['dist/server/index.js', 'dist/cmd/server.js']) {
+  assert.match(readFileSync(file, 'utf8'), /debugId/, `missing Sentry debug ID: ${file}`);
+  const map = JSON.parse(readFileSync(`${file}.map`, 'utf8'));
+  assert(map.debug_id || map.debugId, `missing source-map debug ID: ${file}`);
+  assert(map.sourcesContent?.length, `source content is missing: ${file}`);
+}
+for (const file of ['.env.production', '.env.sentry-build-plugin', '.sentryclirc', 'app', 'tests', 'tooling']) {
+  assert(!existsSync(file), `build-only files must not be in the production image: ${file}`);
+}
+for (const name of [
+  'typescript',
+  'oxlint',
+  '@typescript/native',
+  '@react-router/dev',
+  '@remix-run/react',
+  '@remix-run/node',
+]) {
   let installed = false;
   try {
     import.meta.resolve(name);
@@ -47,5 +69,7 @@ console.log(
     productionArtifacts: 'present',
     devDependencies: 'absent',
     syntheticSecretsLoader: 'absent',
+    sourceMaps: 'private server maps and debug IDs present; public maps absent',
+    release,
   }),
 );

@@ -10,6 +10,7 @@ const client = new pg.Client({
   ssl: false,
 });
 
-export const db = drizzle(client, { logger: true, casing: 'snake_case' });
+// SQL parameters can include passwords, session tokens and customer data.
+export const db = drizzle(client, { logger: process.env.NODE_ENV !== 'production', casing: 'snake_case' });
 
 await client.connect();

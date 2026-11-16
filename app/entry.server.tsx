@@ -80,6 +80,7 @@ function handleRequest(
         onError(error: unknown) {
           responseStatusCode = 500;
           logRequestError(error, request, 'render');
+          Sentry.captureException(error);
         },
       },
     );

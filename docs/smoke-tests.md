@@ -55,7 +55,7 @@ Two independent Ubuntu 24.04 jobs run in parallel:
 - **TypeScript, tooling and smoke tests:** installs the pnpm version from `package.json` and Node from `.nvmrc`, uses the frozen lockfile, runs both TypeScript checks and the Infisical/Vite optimizer regression, installs Chromium, and runs the complete Playwright suite against synthetic data in the custom PostgreSQL 17 image.
 - **Production Docker image:** builds the application's `Dockerfile` for linux/amd64, including its production build/type checks, runs the standalone runtime/native-dependency probe, then runs the full browser suite against the compiled image with an isolated database and synthetic secrets. It does not publish/deploy an image or start a credentialed application server.
 
-No repository secrets, customer SQL backups, Compose database or external account setup are required. Development browser reports and server/database logs are uploaded as `smoke-test-results`; Docker logs and production browser artifacts are uploaded as `docker-build-logs`. Artifacts are retained for 14 days, including failed runs. Lint is not included while the known findings in [the upgrade notes](react-router-8-migration.md#remaining-limitations) remain unresolved.
+No repository secrets, customer SQL backups, Compose database or external account setup are required. Development browser reports and server/database logs are uploaded as `smoke-test-results`; Docker logs and production browser artifacts are uploaded as `docker-build-logs`. Artifacts are retained for 14 days, including failed runs. Lint is not included while the known findings in [the current dependency/Oxlint report](dependency-upgrade-validation.md#lint-policy) remain unresolved.
 
 ## Coverage
 
@@ -73,7 +73,7 @@ No repository secrets, customer SQL backups, Compose database or external accoun
 - Global search, table filtering/no-match/reset, default-year redirects and year selection, empty municipality sections, and a narrow-viewport rendering/menu pass for every authenticated page.
 - Dashboard reminders: toggle recent/all, refresh on reopening, retain the selected recent view when an older request finishes, and automatically revalidate the full list after an action.
 
-See [React Router 8 verification and exploratory findings](react-router-8-migration.md) for results and remaining limitations.
+See [current dependency/Oxlint validation](dependency-upgrade-validation.md) for the latest results, and [React Router 8 verification and exploratory findings](react-router-8-migration.md) for the historical baseline.
 
 The synthetic fixtures include Swedish names, old/new/unsigned agreements, assigned/unassigned users, multiple waves, dates, decimals, contacts, logs, reminders and current/prior/future years. They contain no customer data or Gmail refresh tokens. Serial sequences and the compensation materialized view are initialized too.
 

@@ -29,7 +29,14 @@ test('Vite keeps the ESNext SSR target scoped to the server environment', async 
   assert.ok(loaded);
   assert.equal(loaded.config.environments?.ssr?.build?.target, 'ESNext');
   assert.equal(loaded.config.build?.target, undefined);
-  assert.equal(loaded.config.build?.sourcemap, true);
+  assert.equal(loaded.config.build?.sourcemap, 'hidden');
+  assert.equal(loaded.config.resolve?.tsconfigPaths, true);
+  assert.deepEqual(loaded.config.server?.watch?.ignored, [
+    '**/playwright/.cache/**',
+    '**/test-results/**',
+    '**/playwright-report/**',
+    '**/blob-report/**',
+  ]);
 });
 
 test('synthetic secrets require both development mode and the explicit smoke flag', async () => {

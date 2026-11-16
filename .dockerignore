@@ -7,6 +7,9 @@ dist
 .env.local
 .env.staging
 .env.production
+.env*
+.sentryclirc
+tests/
 scripts/
 e2e/
 tests/

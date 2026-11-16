@@ -76,7 +76,7 @@ export function EmailsCard({ email }: EmailCardProps) {
 
             {fetcher.state === 'idle' && (fetcher.data as EmailApiResponse)?.message?.emails?.length ? (
               <ThreadsList
-                data={(fetcher?.data as EmailApiResponse).message.emails}
+                data={(fetcher.data as EmailApiResponse).message.emails}
                 onClick={(thread) => setThread(thread)}
                 email={email}
               />

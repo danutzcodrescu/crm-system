@@ -2,3 +2,13 @@ minimumReleaseAge: 10080
 onlyBuiltDependencies:
   - esbuild
   - '@sentry/cli'
+overrides:
+  # esbuild <=0.24.2 (GHSA-67mh-4wv8-2f99) is pulled in by the deprecated
+  # @esbuild-kit/core-utils used by drizzle-kit. That package only uses
+  # esbuild's transform/transformSync/version APIs, which are stable in 0.25.
+  'esbuild@<=0.24.2': 0.25.10
+  # Peer dependency of @react-hookz/web; pnpm auto-installs it below the patched
+  # version because the peer range allows it.
+  'js-cookie@<3.0.7': 3.0.8
+  # Peer dependency of @sentry/bundler-plugins (build-time only).
+  'rollup@<4.59.0': 4.68.0

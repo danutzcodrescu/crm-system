@@ -12,9 +12,12 @@ import { theme } from './utils/theme';
 
 Sentry.init({
   dsn: import.meta.env.VITE_SENTRY_DSN,
-  tracesSampleRate: 1,
-  release: `crm-system@${import.meta.env.VITE_REACT_APP_VERSION}`,
-  enabled: import.meta.env.NODE_ENV === 'production',
+  tracesSampleRate: 0.1,
+  release: import.meta.env.VITE_SENTRY_RELEASE,
+  environment: import.meta.env.VITE_SENTRY_ENVIRONMENT || import.meta.env.MODE,
+  enabled: import.meta.env.PROD && Boolean(import.meta.env.VITE_SENTRY_DSN),
+  dataCollection: { userInfo: false, cookies: false, httpHeaders: false, httpBodies: [], urlQueryParams: false },
+  beforeSendLog: () => null,
   integrations: [
     Sentry.reactRouterTracingIntegration(),
     Sentry.replayIntegration({

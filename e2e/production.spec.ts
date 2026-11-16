@@ -26,6 +26,9 @@ test.describe('production Docker image', () => {
     expect(asset.headers()['cache-control']).toContain('immutable');
     expect(asset.headers()['cache-control']).toContain('max-age=31536000');
     expect(asset.headers()['content-type']).toContain('javascript');
+    expect(await asset.text()).not.toContain('sourceMappingURL=');
+    const sourceMap = await page.request.get(`${script}.map`);
+    expect(sourceMap.status()).toBe(404);
   });
 
   test('production health response omits the Express identification header', async ({ request }) => {

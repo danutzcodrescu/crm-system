@@ -61,11 +61,16 @@ test('login rejects empty and incorrect credentials', async ({ page }) => {
 test('signup validates passwords and creates a usable account', async ({ page }) => {
   const username = `smoke_signup_${Date.now()}`;
   await page.goto('/signup');
+  // This scenario tests enhanced validation/retry, not a pre-hydration native
+  // document POST (which correctly returns a fresh form with empty passwords).
+  await page.waitForLoadState('networkidle');
   await page.getByLabel('Username').fill(username);
   await page.getByLabel('Password', { exact: true }).fill('new-smoke-password');
   await page.getByLabel('Confirm Password').fill('mismatch');
   await page.getByRole('button', { name: 'Sign up', exact: true }).click();
   await expect(page.getByText('Passwords do not match').first()).toBeVisible();
+  await expect(page.getByLabel('Username')).toHaveValue(username);
+  await expect(page.getByLabel('Password', { exact: true })).toHaveValue('new-smoke-password');
   await page.getByLabel('Confirm Password').fill('new-smoke-password');
   await page.getByRole('button', { name: 'Sign up', exact: true }).click();
   await expect(page.getByRole('button', { name: 'logout' })).toBeVisible();
