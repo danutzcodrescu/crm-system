@@ -1,5 +1,5 @@
 # syntax=docker/dockerfile:1
-FROM node:26.13.0 AS base
+FROM node:lts-slim AS base
 
 # set for base and all layer that inherit from it
 
