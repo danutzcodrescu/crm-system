@@ -36,6 +36,7 @@ export function ResponsiblesTable({ data, companyId, fetcher, infoVerified }: Pr
       {
         header: 'Updated',
         accessorFn: (row) => (row.updatedAt ? new Date(row.updatedAt) : null),
+        cell: ({ row }) => (row.original.updatedAt ? formatDate(row.original.updatedAt) : 'N/A'),
         id: 'updatedAt',
         enableColumnFilter: false,
         hidden: true,

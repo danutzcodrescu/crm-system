@@ -42,4 +42,5 @@ export default [
     route('process', 'views/process/route.tsx'),
   ]),
   route('gmail-auth-redirect', 'views/gmail/route.tsx'),
+  route('*', 'views/not-found.tsx'),
 ] satisfies RouteConfig;

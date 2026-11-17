@@ -8,8 +8,15 @@ Use Node **26.13.0** (`nvm install && nvm use`), pnpm 10.18.3, and a running Doc
 pnpm install --frozen-lockfile
 pnpm exec playwright install --with-deps chromium
 pnpm test:tooling
+pnpm test:hydration
 pnpm test:smoke
 ```
+
+`pnpm test:hydration` is a database-free Chromium regression for the real
+municipality UI with synthetic loader data. It compares UTC server rendering with
+UTC, Swedish/Stockholm and Los Angeles browser contexts, checking recoverable
+hydration errors and browser console/page errors. It can run while Docker is
+stopped. See [the 0.15.2 investigation](production-0.15.2-validation.md).
 
 Each run **builds `Dockerfile.db`**, using its default `postgres:17` base (latest 17.x patch when pulled). It starts that custom image on a random port, executes the real `db/*.sql` migrations in filename order, then automatically executes **`e2e/seed.sql`** through `/docker-entrypoint-initdb.d/9999_seed.sql`. It launches the actual Express/React Router application on another free port. The app process and test database are removed at teardown, including failed runs; the built image/layers are cached locally. Existing Compose volumes and databases are not touched. Never run the legacy `db:seed` script for these tests: it imports private spreadsheets and deletes existing data.
 

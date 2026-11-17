@@ -18,6 +18,8 @@ test('every route registration has an explicit smoke scenario', async () => {
     // Both layouts are rendered and authenticated in page scenarios.
     'views/layout.tsx',
     'views/municipalities/layout.tsx',
+    // Expected missing routes return 404 without throwing into the error hook.
+    'views/not-found.tsx',
   ];
   expect(registered.sort()).toEqual(covered.sort());
 });
@@ -149,6 +151,15 @@ for (const route of editablePages) {
   });
 }
 
-test('unknown URL returns a real 404', async ({ request }) => {
-  expect((await request.get('/not-a-real-smoke-route')).status()).toBe(404);
-});
+for (const path of ['/not-a-real-smoke-route', '/.git/config', '/apple-touch-icon-precomposed.png']) {
+  test(`unknown URL returns a normal 404: ${path}`, async ({ playwright, baseURL }) => {
+    const anonymous = await playwright.request.newContext({ baseURL, storageState: { cookies: [], origins: [] } });
+    try {
+      const response = await anonymous.get(path, { maxRedirects: 0 });
+      expect(response.status()).toBe(404);
+      expect(await response.text()).toContain('404 Not Found');
+    } finally {
+      await anonymous.dispose();
+    }
+  });
+}

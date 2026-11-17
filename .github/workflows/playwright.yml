@@ -47,6 +47,8 @@ jobs:
         run: pnpm test:tooling
       - name: Install Chromium
         run: pnpm exec playwright install --with-deps chromium
+      - name: Check municipality hydration across browser locales
+        run: pnpm test:hydration
       - name: Run seeded route smoke tests
         # Testcontainers builds Dockerfile.db, applies migrations and synthetic
         # seed data, and tears down its own database. Never uses a real backup.
